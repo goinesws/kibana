@@ -90,7 +90,7 @@ app.getServiceList = async (req, res) => {
 				indexOfTarget + 13
 			);
 		} else {
-			console.log("Object with specified id not found.");
+			//console.log("Object with specified id not found.");
 		}
 		if (total_amount - (indexOfTarget + 1) > 12) has_next_page = true;
 		else has_next_page = false;
@@ -214,8 +214,11 @@ app.createNewService = async (req, res) => {
 			result.output_schema.id = newServiceId;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
-		result.output_schema = null;
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
+		result.output_schema = {};
 
 		res.status(400).send(result);
 		return;
@@ -255,8 +258,11 @@ app.getOwnedService = async (req, res) => {
 			result.output_schema.services = serviceResult;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
-		result.output_schema = null;
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
+		result.output_schema = {};
 
 		res.status(400).send(result);
 		return;
@@ -317,7 +323,10 @@ app.getOwnedServiceDetail = async (req, res) => {
 			return;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
 		result.output_schema = {};
 
 		res.status(400).send(result);
@@ -374,8 +383,11 @@ app.getOwnedServiceOrders = async (req, res) => {
 			return;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
-		result.output_schema = null;
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
+		result.output_schema = {};
 
 		res.status(400).send(result);
 		return;
@@ -429,7 +441,10 @@ app.deactivateService = async (req, res) => {
 			return;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
 		result.output_schema = {};
 
 		res.status(400).send(result);
@@ -484,7 +499,10 @@ app.deleteService = async (req, res) => {
 			return;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
 		result.output_schema = {};
 
 		res.status(400).send(result);
@@ -530,7 +548,10 @@ app.getServiceHistory = async (req, res) => {
 			result.output_schema.service_detail = serviceResult;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
 		result.output_schema = {};
 
 		res.status(400).send(result);

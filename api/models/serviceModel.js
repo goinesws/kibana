@@ -53,7 +53,7 @@ class Service {
 		try {
 			var SP = `select freelancer_id from service where service_id = '${service_id}'`;
 			const result = await db.any(SP);
-			console.log(result[0].freelancer_id);
+			//console.log(result[0].freelancer_id);
 			return result[0].freelancer_id;
 		} catch (error) {
 			throw new Error("Failed to fetch freelancer id");
@@ -285,7 +285,7 @@ class Service {
 		const additionalInfo = data.additional_info;
 		const freelancerId = clientId;
 
-		console.log(clientId);
+		//console.log(clientId);
 
 		// console.log(tags)
 		additionalInfo.forEach((item, index) => {
@@ -346,7 +346,7 @@ class Service {
 				return response.data.data.link;
 			})
 			.catch(function (error) {
-				console.log(error);
+				//console.log(error);
 			});
 
 		return link;

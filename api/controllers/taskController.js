@@ -4,7 +4,7 @@ const Task = require("../models/taskModel.js");
 const User = require("../models/userModel.js");
 
 app.getNewTask = async (req, res) => {
-	console.log(req.params);
+	//console.log(req.params);
 
 	var result = {};
 	result.error_schema = {};
@@ -20,7 +20,7 @@ app.getNewTask = async (req, res) => {
 			error_message: "Tidak ada data yang ditemukan.",
 		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
@@ -32,7 +32,7 @@ app.getNewTask = async (req, res) => {
 };
 
 app.getNewTaskByCategory = async (req, res) => {
-	console.log(req.params);
+	//console.log(req.params);
 
 	var result = {};
 	result.error_schema = {};
@@ -51,7 +51,7 @@ app.getNewTaskByCategory = async (req, res) => {
 			error_message: "Tidak ada data yang ditemukan.",
 		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
@@ -79,7 +79,7 @@ app.getTaskDetails = async (req, res) => {
 			error_message: "Tidak ada data yang ditemukan.",
 		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
@@ -109,7 +109,7 @@ app.getTaskList = async (req, res) => {
 			error_message: "Tidak ada data yang ditemukan.",
 		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	} else {
 		if (req.body.last_id !== "" && req.body.last_id) {
@@ -122,7 +122,7 @@ app.getTaskList = async (req, res) => {
 					indexOfTarget + 9
 				);
 			} else {
-				console.log("Object with specified id not found.");
+				//console.log("Object with specified id not found.");
 			}
 			if (total_amount - (indexOfTarget + 1) > 8) has_next_page = true;
 			else has_next_page = false;
@@ -138,7 +138,7 @@ app.getTaskList = async (req, res) => {
 				error_message: "Tidak ada data yang ditemukan.",
 			};
 			result.output_schema = {};
-			res.send(400).send(result);
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
@@ -174,7 +174,7 @@ app.createTask = async (req, res) => {
 		let taskInstance = new Task();
 		let create_task_result = await taskInstance.createTask(data, userId);
 
-		console.log(create_task_result);
+		//console.log(create_task_result);
 
 		if (create_task_result instanceof Error) {
 			result.error_schema = {
@@ -182,7 +182,7 @@ app.createTask = async (req, res) => {
 				error_message: "Gagal membuat tugas baru.",
 			};
 			result.output_schema = {};
-			res.send(400).send(result);
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = {
@@ -197,7 +197,7 @@ app.createTask = async (req, res) => {
 			error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
 		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	}
 	res.send(result);
@@ -214,7 +214,7 @@ app.getOwnedTask = async (req, res) => {
 	let UserInstance = new User();
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
-	console.log(curr_session);
+	//console.log(curr_session);
 
 	if (curr_session.session_id == x_token) {
 		let taskInstance = new Task();
@@ -229,7 +229,7 @@ app.getOwnedTask = async (req, res) => {
 				error_message: "Gagal Mendapatkan Data.",
 			};
 			result.output_schema = {};
-			res.send(400).send(result);
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = {
@@ -244,7 +244,7 @@ app.getOwnedTask = async (req, res) => {
 			error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
 		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	}
 	res.send(result);
@@ -411,7 +411,7 @@ app.getTaskHistory = async (req, res) => {
 		curr_session.session_data.is_freelancer
 	) {
 		let userId = curr_session.session_data.freelancer_id;
-		console.log(userId);
+		//console.log(userId);
 
 		let taskInstance = new Task();
 		let task_result = await taskInstance.getTaskHistory(userId);

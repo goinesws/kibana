@@ -15,7 +15,7 @@ app.getFreelancerDescription = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let desc = await freelancerInstance.getDesc(userId);
 
-	if (desc == null) {
+	if (desc == null || desc instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -43,9 +43,7 @@ app.getFreelancerEducationHistory = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let edu = await freelancerInstance.getEducationHistory(userId);
 
-	console.log(edu);
-
-	if (edu == null) {
+	if (edu == null || edu instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -73,7 +71,7 @@ app.getFreelancerSkill = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let skills = await freelancerInstance.getSkill(userId);
 
-	if (skills == null) {
+	if (skills == null || skills instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -101,7 +99,7 @@ app.getFreelancerCV = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let CV = await freelancerInstance.getCV(userId);
 
-	if (CV == null) {
+	if (CV == null || CV instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -129,7 +127,7 @@ app.getPortfolio = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let portfolio = await freelancerInstance.getPortfolio(userId);
 
-	if (portfolio == null) {
+	if (portfolio == null || portfolio instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -157,7 +155,7 @@ app.getOwnedService = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let owned_service = await freelancerInstance.getOwnedService(userId);
 
-	if (result == null) {
+	if (owned_service == null || owned_service instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -185,7 +183,7 @@ app.getFreelancerProjectHistory = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let projects = await freelancerInstance.getProjectHistory(userId);
 
-	if (projects == null) {
+	if (projects == null || projects instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -244,7 +242,7 @@ app.editFreelancerDescription = async (req, res) => {
 	} else {
 		result.error_schema = {
 			error_code: "403",
-			error_message: "Anda tidak memiliki akses untuk hal tersebut.",
+			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = {};
 		res.send(result);
@@ -255,9 +253,6 @@ app.editFreelancerDescription = async (req, res) => {
 };
 
 app.editFreelancerSkills = async (req, res) => {
-	// get user_id dari session token
-	// dari user_id merge ama fl get fl_id
-	// dari fl_id
 	let result = {};
 
 	result.error_schema = {};
@@ -273,7 +268,7 @@ app.editFreelancerSkills = async (req, res) => {
 	) {
 		let userId = curr_session.session_data.client_id;
 		let skills = JSON.stringify(req.body.skills);
-		console.log(skills);
+		//console.log(skills);
 		skills = skills.replace("[", "{");
 		skills = skills.replace("]", "}");
 		let freelancerInstance = new Freelancer();
@@ -298,7 +293,7 @@ app.editFreelancerSkills = async (req, res) => {
 	} else {
 		result.error_schema = {
 			error_code: "403",
-			error_message: "Anda tidak memiliki akses untuk hal tersebut.",
+			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = {};
 		res.send(result);
@@ -309,17 +304,12 @@ app.editFreelancerSkills = async (req, res) => {
 };
 
 app.editFreelancerEducation = async (req, res) => {
-	// get userId dari req.session
-	// dari userId get freelancerId
-	// dari freelancerId insert ke education?
-
 	let result = {};
 
 	result.error_schema = {};
 	result.output_schema = {};
 
 	let education = req.body.education_history;
-	// console.log(education);
 
 	let x_token = req.get("X-Token");
 	let UserInstance = new User();
@@ -331,7 +321,6 @@ app.editFreelancerEducation = async (req, res) => {
 	) {
 		let userId = curr_session.session_data.client_id;
 		let freelancerInstance = new Freelancer();
-		console.log(education.length);
 
 		education.map((education) => {
 			let ed_result = freelancerInstance.editFreelancerEducation(
@@ -353,17 +342,17 @@ app.editFreelancerEducation = async (req, res) => {
 
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = {};
+		res.send(result);
+		return;
 	} else {
 		result.error_schema = {
 			error_code: "403",
-			error_message: "Anda tidak memiliki akses untuk hal tersebut.",
+			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = {};
 		res.send(result);
 		return;
 	}
-
-	res.send(result);
 };
 
 app.editFreelancerCV = async (req, res) => {
@@ -376,7 +365,6 @@ app.editFreelancerCV = async (req, res) => {
 	let UserInstance = new User();
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
-	// cek session id ama x-token + cek if freelancer
 	if (
 		curr_session.session_id == x_token &&
 		curr_session.session_data.is_freelancer
@@ -414,11 +402,12 @@ app.editFreelancerCV = async (req, res) => {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
 			result.output_schema = {};
 			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
-			error_message: "Anda tidak memiliki akses untuk hal tersebut.",
+			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = {};
 		res.send(result);
@@ -481,7 +470,7 @@ app.editFreelancerPortfolio = async (req, res) => {
 	} else {
 		result.error_schema = {
 			error_code: "403",
-			error_message: "Anda tidak memiliki akses untuk hal tersebut.",
+			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = {};
 		res.send(result);

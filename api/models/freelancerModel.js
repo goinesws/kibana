@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../../db");
 const Transaction = require("../models/transactionModel");
 const FormData = require("form-data");
+const uuid = require("uuid");
 
 module.exports = class Freelancer {
 	async getFreelancerByTaskID(taskId) {
@@ -50,6 +51,10 @@ module.exports = class Freelancer {
 		try {
 			let result = await db.any(SP);
 
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
+
 			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -71,6 +76,10 @@ module.exports = class Freelancer {
 		try {
 			let result = await db.any(SP);
 
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
+
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -82,6 +91,10 @@ module.exports = class Freelancer {
 
 		try {
 			let result = await db.any(SP);
+
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
 
 			return result[0].skills;
 		} catch (error) {
@@ -97,6 +110,10 @@ module.exports = class Freelancer {
 		try {
 			let result = await db.any(SP);
 
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
+
 			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -110,7 +127,9 @@ module.exports = class Freelancer {
 
 		try {
 			let result = await db.any(SP);
-
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
 			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -118,6 +137,8 @@ module.exports = class Freelancer {
 	}
 
 	async getOwnedService(userId) {
+		// rewrite buat get service dari service model terus di hit dari sini
+
 		let SPGetService = `select s.service_id as id, s.images as image_url, s.name, s.tags, s.price, s.working_time from public.service s 
     join 
     public.freelancer f 
@@ -148,7 +169,7 @@ module.exports = class Freelancer {
 			let resultFreelancer = await db.any(SPGetFreelancer);
 
 			for (var i = 0; i < result.length; i++) {
-				console.log("hi");
+				//console.log("hi");
 				let serviceId = result[i].id;
 
 				let SPGetReviewTotal = `select count(*) from public.review where destination_id = '${serviceId}';`;
@@ -190,7 +211,7 @@ module.exports = class Freelancer {
 	async getFreelancerAverageRating(userId) {
 		let SP = `
     select 
-    avg(r.rating)
+    round(avg(r.rating), 1)
     from 
     public.review r
     join 
@@ -212,7 +233,9 @@ module.exports = class Freelancer {
 
 		try {
 			let result = await db.any(SP);
-
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
 			return result[0].avg;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -242,7 +265,9 @@ module.exports = class Freelancer {
 
 		try {
 			let result = await db.any(SP);
-
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
 			return result[0].count;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -255,10 +280,26 @@ module.exports = class Freelancer {
 		let transactionInstance = new Transaction();
 
 		try {
-			result.average_rating = await this.getFreelancerAverageRating(userId);
-			result.project_amount = await this.getFreelancerTotalProject(userId);
-			result.project_list =
-				await transactionInstance.getFreelancerProjectByUserId(userId);
+			let ar = await this.getFreelancerAverageRating(userId);
+			if (ar instanceof Error) {
+				result.average_rating = null;
+			} else {
+				result.average_rating = ar;
+			}
+			let pa = await this.getFreelancerTotalProject(userId);
+			if (pa instanceof Error) {
+				result.project_amount = null;
+			} else {
+				result.project_amount = pa;
+			}
+			let pl = await transactionInstance.getFreelancerProjectByUserId(userId);
+			if (pl.length < 1 || pl instanceof Error) {
+				result.project_list = null;
+			} else {
+				result.project_list = pl;
+			}
+
+			console.log(result);
 
 			return result;
 		} catch (error) {
@@ -359,7 +400,7 @@ module.exports = class Freelancer {
 				return response.data.data.link;
 			})
 			.catch(function (error) {
-				console.log(error);
+				//console.log(error);
 			});
 
 		return link;
@@ -375,7 +416,7 @@ module.exports = class Freelancer {
 		user_id = '${userId}'
 		or freelancer_id = '${userId}';`;
 
-		console.log(SP);
+		//console.log(SP);
 
 		try {
 			let result = await db.any(SP);
@@ -395,7 +436,7 @@ module.exports = class Freelancer {
 		user_id = '${userId}'
 		or freelancer_id = '${userId}';`;
 
-		console.log(SP);
+		//console.log(SP);
 
 		try {
 			let result = await db.any(SP);
@@ -406,6 +447,7 @@ module.exports = class Freelancer {
 	}
 
 	async createFreelancer(userId, description, cv, portfolio, skills) {
+		const fl_uuid = uuid.v4();
 		let SP = `
 		insert 
 		into
@@ -413,7 +455,7 @@ module.exports = class Freelancer {
 		(freelancer_id, user_id, description, cv, portfolio, skills)
 		values
 		(
-			CONCAT('FL', (select nextval('freelancer_id_sequence'))),
+			'${fl_uuid}',
 			'${userId}',
 			'${description}',
 			'${cv}',
@@ -424,7 +466,7 @@ module.exports = class Freelancer {
 
 		try {
 			let result = await db.any(SP);
-			return result;
+			return fl_uuid;
 		} catch (error) {
 			return new Error("Gagal Insert.");
 		}

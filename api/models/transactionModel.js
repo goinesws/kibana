@@ -6,32 +6,38 @@ const Task = require("../models/taskModel");
 module.exports = class Transaction {
 	async getFreelancerProjectByUserId(userId) {
 		let SP = `
-    select 
-    s.name as project_name,
-    r.rating as star,
-    s.description as description,
-    tr.delivery_date as timestamp
-    from 
-    public.transaction tr
-    join
-    public.service s
-    on
-    tr.project_id = s.service_id
-    join
-    public.freelancer f
-    on
-    f.freelancer_id = s.freelancer_id
-    left join
-    public.review r
-    on
-    r.transaction_id = tr.transaction_id
-    where
-    f.user_id = '${userId}'
-    `;
+        select 
+        s.name as project_name,
+        r.rating as star,
+        s.description as description,
+        TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as timestamp
+        from 
+        public.transaction tr
+        join
+        public.service s
+        on
+        tr.project_id = s.service_id
+        join
+        public.freelancer f
+        on
+        f.freelancer_id = s.freelancer_id
+        left join
+        public.review r
+        on
+        r.transaction_id = tr.transaction_id
+        where
+        f.user_id = '${userId}'
+        `;
 
-		let result = await db.any(SP);
-
-		return result;
+		try {
+			let result = await db.any(SP);
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
+			return result;
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Data.");
+		}
 	}
 
 	async getAllTransactionDetail(transaction_id) {

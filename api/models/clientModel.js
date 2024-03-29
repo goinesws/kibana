@@ -69,7 +69,11 @@ module.exports = class Client {
 
 			result.average_rating = average_rating;
 			result.rating_amount = rating_amount;
-			result.review_list = review;
+			if (review.length < 1) {
+				result.review_list = null;
+			} else {
+				result.review_list = review;
+			}
 
 			return result;
 		} catch (error) {
@@ -81,6 +85,10 @@ module.exports = class Client {
 		let taskInstance = new Task();
 		try {
 			let result = await taskInstance.getTaskByClientId(userId);
+
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
 
 			return result;
 		} catch (error) {
@@ -95,7 +103,7 @@ module.exports = class Client {
 		// bikin freelancer based on data
 
 		let skills = data.skills.toString();
-		console.log(skills);
+		// console.log(skills);
 		let create_result = await freelancerInstance.createFreelancer(
 			userId,
 			data.description,
@@ -110,7 +118,7 @@ module.exports = class Client {
 
 		// bikin education and link it to freelancer
 		data.education_history.forEach(async (ed) => {
-			console.log("Insert ED");
+			//console.log("Insert ED");
 			let education_result = await freelancerInstance.insertFreelancerEducation(
 				userId,
 				ed
@@ -121,6 +129,6 @@ module.exports = class Client {
 			}
 		});
 
-		return 0;
+		return create_result;
 	}
 };

@@ -65,7 +65,10 @@ app.getadditionalInfoBySubcategoryId = async (req, res) => {
 			result.output_schema.additional_info = subcatResult;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
 		result.output_schema = {};
 
 		res.status(400).send(result);

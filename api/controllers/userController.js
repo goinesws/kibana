@@ -3,9 +3,9 @@ const app = express();
 const User = require("../models/userModel");
 const Client = require("../models/clientModel.js");
 const Freelancer = require("../models/freelancerModel.js");
+const BankInformation = require("../models/bankInformationModel.js");
 
-// done refactor
-app.loginFunction = async (req, res) => {
+app.login = async (req, res) => {
 	const username = req.body.username_email;
 	const password = req.body.password;
 
@@ -40,6 +40,7 @@ app.loginFunction = async (req, res) => {
 		});
 
 		console.log("X Token : " + x_token);
+		console.log("Session Data : ");
 		console.log(session_data);
 
 		let write_session_result = await userInstance.setUserSessionData(
@@ -66,8 +67,7 @@ app.loginFunction = async (req, res) => {
 	return;
 };
 
-// done refactor
-app.registerFunction = async (req, res) => {
+app.register = async (req, res) => {
 	const email = req.body.email;
 	const username = req.body.username;
 	const name = req.body.name;
@@ -114,7 +114,7 @@ app.registerFunction = async (req, res) => {
 		});
 
 		let write_session_result = await userInstance.setUserSessionData(
-			login_info.id,
+			register_result.id,
 			x_token,
 			session_data
 		);
@@ -134,31 +134,7 @@ app.registerFunction = async (req, res) => {
 	return;
 };
 
-// pindah ke client controller
-app.registerFreelancerFunction = async (req, res) => {
-	const freelancer = req.body.freelancer;
-	const username = req.body.username;
-
-	const userInstance = new User();
-	output_schema = await userInstance.registerAsFreelancer(freelancer, username);
-
-	result = {};
-
-	if (output_schema == null) {
-		result.error_schema = {
-			error_code: "999",
-			error_message: "Registration Failed.",
-		};
-		result.output_schema = {};
-	} else {
-		result.error_schema = { error_code: "200", error_message: "Success" };
-		result.output_schema = output_schema;
-	}
-
-	res.send(result);
-};
-
-app.logoutFunction = async (req, res) => {
+app.logout = async (req, res) => {
 	let result = {};
 
 	let x_token = req.get("X-Token");
@@ -166,7 +142,7 @@ app.logoutFunction = async (req, res) => {
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
 	if (curr_session.session_id == x_token) {
-		console.log("Logout");
+		//console.log("Logout");
 		req.session.destroy();
 
 		let logout_result = await userInstance.logout(
@@ -215,7 +191,7 @@ app.getOtherProfile = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = null;
+		result.output_schema = {};
 		res.status(400).send(result);
 		return;
 	} else {
@@ -239,11 +215,11 @@ app.getMyProfile = async (req, res) => {
 	const userInstance = new User();
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
-	console.log("X-Token:");
-	console.log(req.get("X-Token"));
-	console.log("Session Data:");
-	console.log(curr_session);
-	console.log("==================");
+	// console.log("X-Token:");
+	// console.log(req.get("X-Token"));
+	// console.log("Session Data:");
+	// console.log(curr_session);
+	// console.log("==================");
 
 	if (x_token == curr_session.session_id) {
 		me = await userInstance.getMyProfile(curr_session.session_data.client_id);
@@ -252,21 +228,24 @@ app.getMyProfile = async (req, res) => {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = null;
-			res.send(400).send(result);
+			result.output_schema = {};
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
 			result.output_schema = me;
+			res.send(result);
+			return;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
-		result.output_schema = null;
-		res.send(400).send(result);
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
+		result.output_schema = {};
+		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
 };
 
 app.getMyBankDetails = async (req, res) => {
@@ -279,41 +258,40 @@ app.getMyBankDetails = async (req, res) => {
 
 	let x_token = req.get("X-Token");
 	const userInstance = new User();
+	const bankInstance = new BankInformation();
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
-	console.log(curr_session);
-
 	if (x_token == curr_session.session_id) {
-		bank = await userInstance.getBankDetails(
+		bank = await bankInstance.getBankDetails(
 			curr_session.session_data.client_id
 		);
-		if (bank == null) {
+		if (bank == null || bank instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = null;
-			res.send(400).send(result);
+			result.output_schema = {};
+
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
 			result.output_schema.bank_detail = bank;
+			res.send(result);
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
-		result.output_schema = null;
-		res.send(400).send(result);
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
+		result.output_schema = {};
+		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
 };
 
 app.editMyProfile = async (req, res) => {
-	// harus get session-id dari req
-	// ini pakai params dari body isiannya
 	let result = {};
-
 	result.error_schema = {};
 	result.output_schema = {};
 
@@ -325,42 +303,63 @@ app.editMyProfile = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 		let images = [];
 		if (req.files["profile_image"]) {
-			images.push(await userInstance.addUserImage(req.files["profile_image"]));
+			try {
+				images.push(
+					await userInstance.addUserImage(req.files["profile_image"])
+				);
+			} catch (error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: "Gagal. Terjadi Kesalahan Saat Upload Gambar.",
+				};
+				result.output_schema = {};
+				res.status(400).send(result);
+				return;
+			}
 
-			// console.log(images);
 			images = images.map((link) => link.replace(/"/g, ""));
 		}
+		let data = "";
+		if (req.files["data"]) {
+			data = JSON.parse(req.files["data"][0].buffer.toString());
+		} else {
+			result.error_schema = {
+				error_code: "999",
+				error_message: "Gagal. Tidak ada data.",
+			};
+			result.output_schema = {};
+			res.status(400).send(result);
+			return;
+		}
 
-		// parse JSON dari form-data biar jadi proper JSON dulu
-		let data = JSON.parse(req.body.data);
-
-		// abis ngebuat image
-		// masuk ke usermodel buat edit data2nya
 		let user_edit = await userInstance.editMyprofile(userId, data, images[0]);
 
 		if (user_edit instanceof Error) {
-			result.error_schema = { error_code: "999", error_message: "Gagal." };
+			result.error_schema = {
+				error_code: "999",
+				error_message: "Gagal. Terjadi Kesalahan Saat Merubah Data.",
+			};
 			result.output_schema = {};
-			res.send(400).send(result);
+			res.status(400).send(result);
 			return;
 		} else {
-			result.error_schema = { error_code: "200", error_message: "Success." };
+			result.error_schema = { error_code: "200", error_message: "Sukses." };
 			result.output_schema = {};
+			res.send(result);
+			return;
 		}
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
-		result.output_schema = null;
-		res.send(400).send(result);
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
+		result.output_schema = {};
+		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.editBankDetails = async (req, res) => {
-	// harus get session-id buat cocokin
-	// ini pakai params dari body isiannya
 	let result = {};
 
 	result.error_schema = {};
@@ -368,30 +367,34 @@ app.editBankDetails = async (req, res) => {
 
 	let x_token = req.get("X-Token");
 	const userInstance = new User();
+	const bankInstance = new BankInformation();
 	let curr_session = await userInstance.getUserSessionData(x_token);
-	console.log(curr_session);
-
 	if (curr_session.session_id == x_token) {
-		// console.log(req.body);
 		try {
-			let change = await userInstance.editBankDetails(
+			let change = await bankInstance.editBankDetails(
 				curr_session.session_data.client_id,
 				req.body
 			);
 			result.error_schema = { error_code: "200", error_message: "Success." };
 			result.output_schema = {};
 		} catch (error) {
-			result.error_schema = { error_code: "999", error_message: "Gagal." };
+			result.error_schema = {
+				error_code: "999",
+				error_message: "Gagal. Terjadi Kesalahan Saat Merubah Data.",
+			};
 			result.output_schema = {};
-			res.send(400).send(result);
+			res.status(400).send(result);
 			return;
 		}
 		res.send(result);
 		return;
 	} else {
-		result.error_schema = { error_code: "403", error_message: "Forbidden." };
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda Tidak Memiliki Hak Akses.",
+		};
 		result.output_schema = {};
-		res.send(400).send(result);
+		res.status(400).send(result);
 		return;
 	}
 };

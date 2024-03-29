@@ -13,7 +13,7 @@ module.exports = class Task {
     name as name,
     description as description,
     tags as tags,
-    deadline as due_date,
+    TO_CHAR(deadline, 'DD Mon YYYY') as due_date, 
     difficulty as difficulty,
     price as price 
     from 
@@ -125,7 +125,7 @@ module.exports = class Task {
     t.name, 
     t.description, 
     t.tags, 
-    t.deadline as due_date, 
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,  
     t.difficulty, 
     t.price 
     from public.task t
@@ -169,49 +169,6 @@ module.exports = class Task {
 		}
 	}
 
-	async getTaskCategories() {
-		// const subcatInstance = new Subcategory();
-		// let result = await Category.getAllCategoriesForTask();
-		// // console.log(result);
-		// if (result.length == 0) {
-		// 	return null;
-		// }
-		// // get subcategories
-		// // get all the subcategories for each category
-		// for (let i = 0; i < result.length; i++) {
-		// 	let subcatResult = await subcatInstance.getSubcatLiteByCategoryID(
-		// 		result[i].id
-		// 	);
-
-		// 	// console.log('Subcat Result');
-		// 	// console.log(subcatResult);
-		// 	// get amount based on subcat
-		// 	let count = 0;
-		// 	for (let j = 0; j < subcatResult.length; j++) {
-		// 		let countResult = await subcatInstance.getSubcatCountByID(
-		// 			subcatResult[j].id
-		// 		);
-		// 		// console.log('Count Result di Task Model');
-		// 		// console.log(countResult.count);
-		// 		count += parseInt(countResult.count);
-		// 	}
-		// 	result[i].task_amount = count;
-		// 	result[i].sub_categories = subcatResult;
-		// }
-		let SP = `
-    
-    `;
-
-		try {
-			let result = db.any(SP);
-
-			return result;
-		} catch (error) {
-			return new Error("Cannot Get Categories");
-		}
-		return result;
-	}
-
 	async getTaskDetails(taskId) {
 		let result = {};
 
@@ -222,7 +179,7 @@ module.exports = class Task {
       task_id as id,
       name as name,
       tags as tags,
-      deadline as due_date,
+      TO_CHAR(deadline, 'DD Mon YYYY') as due_date,
       difficulty as difficulty,
       price as price,
       description as description 
@@ -284,6 +241,10 @@ module.exports = class Task {
       `;
 
 			reg_freelancer_details = await db.any(SP);
+
+			if (reg_freelancer_details.length < 1) {
+				reg_freelancer_details = null;
+			}
 		} catch (error) {
 			return new Error("Gagal Mengambil Data.");
 		}
@@ -292,8 +253,8 @@ module.exports = class Task {
 		try {
 			let SP = `
       select 
-      avg(rating) as average_rating,
-      count(*) as task_amount,
+      round(avg(rating), 1) as average_rating,
+      count(*) as rating_amount,
       (
         select json_agg(t)
         from
@@ -302,7 +263,7 @@ module.exports = class Task {
           c.name,
           r.rating as star,
           r.content as description,
-          r.date as timestamp
+          TO_CHAR(r.date, 'DD Mon YYYY') as timestamp 
           from
           public.review r
           join
@@ -345,7 +306,7 @@ module.exports = class Task {
     t.name,
     t.description,
     t.tags,
-    t.deadline as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.difficulty,
     t.price
     from 
@@ -409,7 +370,7 @@ module.exports = class Task {
 		`;
 
 		try {
-			console.log(SP);
+			//console.log(SP);
 			let result = await db.any(SP);
 			return result;
 		} catch (error) {
@@ -423,10 +384,10 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    t.deadline as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.price as price,
     tr.status as status,
-    tr.delivery_date as delivery_date,
+    TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as delivery_date,
     CASE 
       WHEN (select status from public.transaction where project_id = t.task_id) = '1' 
       OR (select status from public.transaction where project_id = t.task_id) = '6'
@@ -508,7 +469,7 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    t.deadline as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.difficulty as difficulty,
     t.price as price,
     tr.status as status
@@ -552,9 +513,11 @@ module.exports = class Task {
 
 	async getRegisteredFreelancer(taskId, userId) {
 		// choose due date masih harus di confirm
+		// pindahin yang get registerd freelancer ke freelancermodel
+
 		let SP = `
     select 
-    deadline as choose_due_date,
+    TO_CHAR(deadline, 'DD Mon YYYY') as choose_due_date,
     (
       select json_agg(t)
       from 
@@ -651,11 +614,11 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    t.deadline as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.difficulty as difficulty,
     t.price as price,
     tr.status as status, 
-    tr.delivery_date as delivery_date,
+    TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as delivery_date,
     CASE 
       WHEN tr.status = '1' or tr.status = '10'
       THEN (select count(*) from public.task_enrollment where task_id = t.task_id)
@@ -721,7 +684,7 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    t.deadline as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.difficulty as difficulty,
     t.price as price,
     tr.status as status

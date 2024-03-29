@@ -17,7 +17,7 @@ app.getClientReview = async (req, res) => {
 	const clientInstance = new Client();
 	let client_review = await clientInstance.getClientReview(userId);
 
-	if (client_review == null) {
+	if (client_review == null || client_review instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -29,10 +29,9 @@ app.getClientReview = async (req, res) => {
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = client_review;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getClientTask = async (req, res) => {
@@ -45,22 +44,20 @@ app.getClientTask = async (req, res) => {
 	const clientInstance = new Client();
 	let task = await clientInstance.getClientTask(userId);
 
-	if (task == null) {
+	if (task == null || task instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
 		result.output_schema = {};
-
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.tasks = task;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.registerAsFreelancer = async (req, res) => {
@@ -84,7 +81,7 @@ app.registerAsFreelancer = async (req, res) => {
 						const file = req.files["cv"][0];
 						return uploadFile(auth, file);
 					} else {
-						console.log("No file has been uploaded");
+						//console.log("No file has been uploaded");
 					}
 				})
 				.then((resultCode) => {
@@ -108,7 +105,7 @@ app.registerAsFreelancer = async (req, res) => {
 						const file = req.files["portfolio"][0];
 						return uploadFile(auth, file);
 					} else {
-						console.log("No file has been uploaded");
+						//console.log("No file has been uploaded");
 					}
 				})
 				.then((resultCode) => {
@@ -122,11 +119,17 @@ app.registerAsFreelancer = async (req, res) => {
 			port_url = await Google.getPreviewLink(port_id);
 		}
 
-		// get data and regsiter via clientModels
+		let data = "";
+		if (req.files["data"]) {
+			data = JSON.parse(req.files["data"][0].buffer.toString());
+		} else {
+			result.error_schema = { error_code: "999", error_message: "Gagal." };
+			result.output_schema = {};
+			res.status(400).send(result);
+			return;
+		}
 
-		const data = JSON.parse(req.body.data);
 		const userID = curr_session.session_data.client_id;
-		console.log(data);
 
 		let clientInstance = new Client();
 		let reg_result = await clientInstance.register(
@@ -146,6 +149,34 @@ app.registerAsFreelancer = async (req, res) => {
 			res.status(400).send(result);
 			return;
 		} else {
+			// set session data terbaru
+			let session_data = JSON.stringify({
+				client_id: curr_session.session_data.client_id,
+				is_freelancer: true,
+				freelancer_id: reg_result,
+				username: curr_session.session_data.username,
+			});
+
+			console.log("Updated Session Data : ");
+			console.log(session_data);
+
+			let write_session_result = await userInstance.setUserSessionData(
+				curr_session.session_data.client_id,
+				x_token,
+				session_data
+			);
+
+			if (write_session_result instanceof Error) {
+				result.error_schema = {
+					error_code: "903",
+					error_message: "Registrasi Gagal.",
+				};
+				result.output_schema = {};
+
+				res.status(400).send(result);
+				return;
+			}
+
 			result.error_schema = {
 				error_code: "200",
 				error_message: "Sukses.",
@@ -153,7 +184,7 @@ app.registerAsFreelancer = async (req, res) => {
 			result.output_schema = {};
 		}
 
-		res.status(400).send(result);
+		res.send(result);
 		return;
 	} else {
 		result.error_schema = {
@@ -165,9 +196,6 @@ app.registerAsFreelancer = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 module.exports = app;

@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const router = require("./routes/router");
+const apiRouter = require("./routes/apiRouter");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const port = 3000;
@@ -34,7 +34,7 @@ app.listen(port, () => {
 	console.log("Server is running on port 3000");
 });
 
-app.use("", router);
+app.use("/api", apiRouter);
 
 // // If modifying these scopes, delete token.json.
 // const SCOPES = ['https://www.googleapis.com/auth/drive.file'];

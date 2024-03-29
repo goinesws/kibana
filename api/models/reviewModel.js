@@ -82,7 +82,7 @@ module.exports = class Review {
     c.name,
     r.rating as star,
     r.content as description,
-    r.date as timestamp
+    TO_CHAR(r.date, 'DD Mon YYYY') as timestamp
     from public.review r
     join
     public.freelancer f 
@@ -93,7 +93,16 @@ module.exports = class Review {
     on
     f.user_id = c.client_id
     where 
-    destination_id = '${userId}';`;
+    destination_id = '${userId}'
+    or 
+    destination_id = (
+      select 
+      user_id
+      from
+      public.freelancer
+      where
+      freelancer_id = '${userId}'
+    );`;
 
 		let result = db.any(SP);
 
@@ -113,7 +122,16 @@ module.exports = class Review {
     on
     f.user_id = c.client_id
     where 
-    destination_id = '${userId}';`;
+    destination_id = '${userId}'
+    or
+    destination_id = (
+      select 
+      user_id
+      from
+      public.freelancer
+      where
+      freelancer_id = '${userId}'
+    );`;
 
 		let result = await db.any(SP);
 
@@ -134,7 +152,16 @@ module.exports = class Review {
     on
     f.user_id = c.client_id
     where 
-    destination_id = '${userId}';`;
+    destination_id = '${userId}'
+    or
+    destination_id = (
+      select 
+      user_id
+      from
+      public.freelancer
+      where
+      freelancer_id = '${userId}'
+    );`;
 
 		let result = await db.any(SP);
 
@@ -223,7 +250,7 @@ module.exports = class Review {
     )
     `;
 
-		console.log(SP);
+		//console.log(SP);
 
 		try {
 			let result = await db.any(SP);
@@ -233,8 +260,8 @@ module.exports = class Review {
 			return new Error("Gagal Insert Review.");
 		}
 	}
-  
-  async getServiceReview(service_id) {
+
+	async getServiceReview(service_id) {
 		try {
 			var SP = `SELECT 
             (SELECT AVG(rating)

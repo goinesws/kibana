@@ -62,7 +62,7 @@ app.getTransactionInvoice = async (req, res) => {
 			}
 
 			var fee = projectResult.price * 0.01;
-			console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
+			//console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
 
 			if (projectResult == null) {
 				result.error_schema = {
@@ -92,14 +92,14 @@ app.getTransactionInvoice = async (req, res) => {
 				error_code: "403",
 				error_message: errorMessages.NOT_PROJECT_OWNER,
 			};
-			result.output_schema = null;
+			result.output_schema = {};
 		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
 		};
-		result.output_schema = null;
+		result.output_schema = {};
 	}
 	res.send(result);
 };
