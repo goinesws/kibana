@@ -3,8 +3,9 @@ const db = require("../../db");
 const Transaction = require("../models/transactionModel");
 const FormData = require("form-data");
 const uuid = require("uuid");
+const User = require("./userModel");
 
-module.exports = class Freelancer {
+module.exports = class Freelancer extends User {
 	async getFreelancerByTaskID(taskId) {
 		let SPGetRegisteredFreelancer = `select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name
     from 
@@ -180,6 +181,10 @@ module.exports = class Freelancer {
 				let amt_placeholder = await db.any(SPGetReviewTotal);
 				result[i].rating_amount = amt_placeholder[0].count;
 			}
+
+			if (result.length < 1) {
+				return new Error("Gagal Mendapatkan Data.");
+			}
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -274,6 +279,7 @@ module.exports = class Freelancer {
 		}
 	}
 
+	// masih salah
 	async getProjectHistory(userId) {
 		let result = {};
 
@@ -299,7 +305,7 @@ module.exports = class Freelancer {
 				result.project_list = pl;
 			}
 
-			console.log(result);
+			// console.log(result);
 
 			return result;
 		} catch (error) {

@@ -5,6 +5,12 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class User {
+	constructor() {}
+
+	async setId(uuid) {
+		this.id = uuid;
+	}
+
 	async login(username_email, password) {
 		let SP = `
 		select 
@@ -232,7 +238,7 @@ module.exports = class User {
 		}
 	}
 
-	async logout(client_id) {
+	async logout() {
 		let SP = `
 			update 
 			public.client
@@ -240,7 +246,7 @@ module.exports = class User {
 			session_id = null,
 			session_data = null
 			where
-			client_id = '${client_id}'
+			client_id = '${this.id}'
 		`;
 
 		try {

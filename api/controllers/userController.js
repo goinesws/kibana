@@ -21,7 +21,7 @@ app.login = async (req, res) => {
 		login_info == undefined
 	) {
 		result.error_schema = { error_code: "903", error_message: "Login Gagal." };
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -54,7 +54,7 @@ app.login = async (req, res) => {
 				error_code: "903",
 				error_message: "Login Gagal.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -94,7 +94,7 @@ app.register = async (req, res) => {
 			error_code: "999",
 			error_message: "Registrasi Gagal.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -124,7 +124,7 @@ app.register = async (req, res) => {
 				error_code: "903",
 				error_message: "Registrasi Gagal.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		}
@@ -142,19 +142,20 @@ app.logout = async (req, res) => {
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
 	if (curr_session.session_id == x_token) {
-		//console.log("Logout");
 		req.session.destroy();
 
-		let logout_result = await userInstance.logout(
+		let set_result = await userInstance.setId(
 			curr_session.session_data.client_id
 		);
+
+		let logout_result = await userInstance.logout();
 
 		if (logout_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
 				error_message: "Logout Failed.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		}
@@ -166,7 +167,7 @@ app.logout = async (req, res) => {
 			error_code: "999",
 			error_message: "Logout Failed.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	}
@@ -191,7 +192,7 @@ app.getOtherProfile = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	} else {
@@ -228,7 +229,7 @@ app.getMyProfile = async (req, res) => {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		} else {
@@ -242,7 +243,7 @@ app.getMyProfile = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	}
@@ -270,7 +271,7 @@ app.getMyBankDetails = async (req, res) => {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -284,7 +285,7 @@ app.getMyBankDetails = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	}
@@ -312,7 +313,7 @@ app.editMyProfile = async (req, res) => {
 					error_code: "999",
 					error_message: "Gagal. Terjadi Kesalahan Saat Upload Gambar.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 				res.status(400).send(result);
 				return;
 			}
@@ -327,7 +328,7 @@ app.editMyProfile = async (req, res) => {
 				error_code: "999",
 				error_message: "Gagal. Tidak ada data.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		}
@@ -339,7 +340,7 @@ app.editMyProfile = async (req, res) => {
 				error_code: "999",
 				error_message: "Gagal. Terjadi Kesalahan Saat Merubah Data.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		} else {
@@ -353,7 +354,7 @@ app.editMyProfile = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	}
@@ -382,7 +383,7 @@ app.editBankDetails = async (req, res) => {
 				error_code: "999",
 				error_message: "Gagal. Terjadi Kesalahan Saat Merubah Data.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		}
@@ -393,7 +394,7 @@ app.editBankDetails = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	}

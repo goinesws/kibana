@@ -15,7 +15,7 @@ app.getAllCategorySubcategory = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema.categories = subcatResult;
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -39,22 +39,21 @@ app.getAllCategorySubcategoryTask = async (req, res) => {
 
 	// console.log(taskResult);
 
-	if (category == null) {
+	if (category == null || category instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema.categories = category;
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.categories = category;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 module.exports = app;

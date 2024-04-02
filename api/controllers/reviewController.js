@@ -30,7 +30,7 @@ app.insertReviewClient = async (req, res) => {
 				error_code: "903",
 				error_mesage: "Insert Gagal.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -48,7 +48,7 @@ app.insertReviewClient = async (req, res) => {
 			error_mesage:
 				"Anda tidak memiliki hak akses untuk melakukan hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -79,7 +79,7 @@ app.insertReviewFreelancer = async (req, res) => {
 				error_code: "903",
 				error_mesage: "Insert Gagal.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -97,7 +97,7 @@ app.insertReviewFreelancer = async (req, res) => {
 			error_mesage:
 				"Anda tidak memiliki hak akses untuk melakukan hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -128,7 +128,7 @@ app.insertReviewService = async (req, res) => {
 				error_code: "903",
 				error_mesage: "Insert Gagal.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -147,7 +147,7 @@ app.insertReviewService = async (req, res) => {
 			error_mesage:
 				"Anda tidak memiliki hak akses untuk melakukan hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;

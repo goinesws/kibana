@@ -20,7 +20,7 @@ app.getFreelancerDescription = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -48,17 +48,16 @@ app.getFreelancerEducationHistory = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.education_history = edu;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getFreelancerSkill = async (req, res) => {
@@ -76,17 +75,16 @@ app.getFreelancerSkill = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.skills = skills;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getFreelancerCV = async (req, res) => {
@@ -104,17 +102,16 @@ app.getFreelancerCV = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = CV;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getPortfolio = async (req, res) => {
@@ -132,17 +129,16 @@ app.getPortfolio = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = portfolio;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getOwnedService = async (req, res) => {
@@ -160,17 +156,16 @@ app.getOwnedService = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.services = owned_service;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getFreelancerProjectHistory = async (req, res) => {
@@ -188,17 +183,16 @@ app.getFreelancerProjectHistory = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = projects;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.editFreelancerDescription = async (req, res) => {
@@ -228,15 +222,15 @@ app.editFreelancerDescription = async (req, res) => {
 				error_code: "903",
 				error_message: "Edit tidak dapat dilakukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
-			result.output_schema = edit_result;
+			result.output_schema = {};
 
-			res.status(400).send(result);
+			res.send(result);
 			return;
 		}
 	} else {
@@ -244,7 +238,7 @@ app.editFreelancerDescription = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.send(result);
 		return;
 	}
@@ -282,7 +276,7 @@ app.editFreelancerSkills = async (req, res) => {
 				error_code: "903",
 				error_message: "Edit tidak dapat dilakukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -295,7 +289,7 @@ app.editFreelancerSkills = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.send(result);
 		return;
 	}
@@ -333,7 +327,7 @@ app.editFreelancerEducation = async (req, res) => {
 					error_code: "903",
 					error_message: "Edit tidak dapat dilakukan.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 
 				res.send(result);
 				return;
@@ -349,7 +343,7 @@ app.editFreelancerEducation = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.send(result);
 		return;
 	}
@@ -395,7 +389,7 @@ app.editFreelancerCV = async (req, res) => {
 				error_code: "903",
 				error_message: "Edit tidak dapat dilakukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.send(result);
 			return;
 		} else {
@@ -409,7 +403,7 @@ app.editFreelancerCV = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.send(result);
 		return;
 	}
@@ -458,7 +452,7 @@ app.editFreelancerPortfolio = async (req, res) => {
 				error_code: "903",
 				error_message: "Edit tidak dapat dilakukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 			res.send(result);
 			return;
 		} else {
@@ -472,7 +466,7 @@ app.editFreelancerPortfolio = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.send(result);
 		return;
 	}

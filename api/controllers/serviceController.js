@@ -29,17 +29,16 @@ app.getNewService = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.services = serviceResult;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getServiceByCategory = async (req, res) => {
@@ -57,17 +56,17 @@ app.getServiceByCategory = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.services = serviceResult;
-	}
 
-	res.send(result);
-	return;
+		res.send(result);
+		return;
+	}
 };
 
 app.getServiceList = async (req, res) => {
@@ -107,7 +106,7 @@ app.getServiceList = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -147,7 +146,7 @@ app.getServiceDetail = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -204,7 +203,7 @@ app.createNewService = async (req, res) => {
 				error_code: "999",
 				error_message: "Gagal membuat service baru",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -218,7 +217,7 @@ app.createNewService = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -249,7 +248,7 @@ app.getOwnedService = async (req, res) => {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -262,7 +261,7 @@ app.getOwnedService = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -304,7 +303,7 @@ app.getOwnedServiceDetail = async (req, res) => {
 					error_code: "903",
 					error_message: "Tidak ada data yang ditemukan.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 
 				res.status(400).send(result);
 				return;
@@ -327,7 +326,7 @@ app.getOwnedServiceDetail = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -364,7 +363,7 @@ app.getOwnedServiceOrders = async (req, res) => {
 					error_code: "903",
 					error_message: "Tidak ada data yang ditemukan.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 
 				res.status(400).send(result);
 				return;
@@ -377,7 +376,7 @@ app.getOwnedServiceOrders = async (req, res) => {
 				error_code: "403",
 				error_message: "Not the owner of this service.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -387,7 +386,7 @@ app.getOwnedServiceOrders = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -422,7 +421,7 @@ app.deactivateService = async (req, res) => {
 					error_code: "903",
 					error_message: "Deactivate gagal.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 
 				res.status(400).send(result);
 				return;
@@ -435,7 +434,7 @@ app.deactivateService = async (req, res) => {
 				error_code: "403",
 				error_message: "Not the owner of this service.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -445,7 +444,7 @@ app.deactivateService = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -480,7 +479,7 @@ app.deleteService = async (req, res) => {
 					error_code: "903",
 					error_message: "Delete gagal.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 
 				res.status(400).send(result);
 				return;
@@ -493,7 +492,7 @@ app.deleteService = async (req, res) => {
 				error_code: "403",
 				error_message: "Not the owner of this service.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -503,7 +502,7 @@ app.deleteService = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -539,7 +538,7 @@ app.getServiceHistory = async (req, res) => {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -552,7 +551,7 @@ app.getServiceHistory = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;

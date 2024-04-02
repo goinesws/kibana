@@ -22,7 +22,7 @@ app.getClientReview = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -49,7 +49,7 @@ app.getClientTask = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 		res.status(400).send(result);
 		return;
 	} else {
@@ -124,7 +124,7 @@ app.registerAsFreelancer = async (req, res) => {
 			data = JSON.parse(req.files["data"][0].buffer.toString());
 		} else {
 			result.error_schema = { error_code: "999", error_message: "Gagal." };
-			result.output_schema = {};
+			result.output_schema = null;
 			res.status(400).send(result);
 			return;
 		}
@@ -144,7 +144,7 @@ app.registerAsFreelancer = async (req, res) => {
 				error_code: "999",
 				error_message: "Registrasi Gagal.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -171,7 +171,7 @@ app.registerAsFreelancer = async (req, res) => {
 					error_code: "903",
 					error_message: "Registrasi Gagal.",
 				};
-				result.output_schema = {};
+				result.output_schema = null;
 
 				res.status(400).send(result);
 				return;
@@ -191,7 +191,7 @@ app.registerAsFreelancer = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;

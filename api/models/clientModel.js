@@ -3,8 +3,9 @@ const db = require("../../db");
 const Review = require("../models/reviewModel");
 const Task = require("../models/taskModel");
 const Freelancer = require("../models/freelancerModel");
+const User = require("./userModel");
 
-module.exports = class Client {
+module.exports = class Client extends User {
 	async getClientByTaskID(taskId) {
 		// SP buat get Client Details
 		let SPGetClient = `select public.client.client_id as id, profile_image as profile_image_url, public.client.name from public.client 

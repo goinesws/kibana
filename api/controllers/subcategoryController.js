@@ -20,7 +20,7 @@ app.getSubcategoryByCategory = async (req, res) => {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
@@ -56,7 +56,7 @@ app.getadditionalInfoBySubcategoryId = async (req, res) => {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",
 			};
-			result.output_schema = {};
+			result.output_schema = null;
 
 			res.status(400).send(result);
 			return;
@@ -69,7 +69,7 @@ app.getadditionalInfoBySubcategoryId = async (req, res) => {
 			error_code: "403",
 			error_message: "Anda Tidak Memiliki Hak Akses.",
 		};
-		result.output_schema = {};
+		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
