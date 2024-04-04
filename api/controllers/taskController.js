@@ -527,4 +527,6 @@ app.chooseFreelancer = async (req, res) => {
 	return;
 };
 
+app.getRequestToken = async (req, res) => {};
+
 module.exports = app;

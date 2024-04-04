@@ -133,14 +133,6 @@ app.getServiceDetail = async (req, res) => {
 	let serviceInstance = new Service();
 	var serviceResult = await serviceInstance.getServiceDetail(service_id);
 
-	let freelancerInstance = new Freelancer();
-	var freelancerResult = await freelancerInstance.getFreelancerByServiceId(
-		service_id
-	);
-
-	let reviewInstance = new Review();
-	var reviewResult = await reviewInstance.getServiceReview(service_id);
-
 	if (Array.isArray(serviceResult) && serviceResult.length === 0) {
 		result.error_schema = {
 			error_code: "903",
@@ -152,9 +144,7 @@ app.getServiceDetail = async (req, res) => {
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
-		result.output_schema.service_detail = serviceResult;
-		result.output_schema.freelancer = freelancerResult;
-		result.output_schema.review = reviewResult;
+		result.output_schema = serviceResult;
 	}
 
 	res.send(result);
@@ -526,9 +516,7 @@ app.getServiceHistory = async (req, res) => {
 		var serviceInstance = new Service();
 		var userInstance = new User();
 
-		const client_id = userInstance.getClientID(
-			curr_session.session_data.username
-		);
+		const client_id = curr_session.session_data.client_id;
 		var serviceResult = await serviceInstance.getClientServiceHistory(
 			client_id
 		);
@@ -558,6 +546,14 @@ app.getServiceHistory = async (req, res) => {
 	}
 
 	res.send(result);
+};
+
+app.activateService = async (req, res) => {
+	res.send("Activate Service");
+};
+
+app.getRequestToken = async (req, res) => {
+	res.send("Activate Service");
 };
 
 module.exports = app;

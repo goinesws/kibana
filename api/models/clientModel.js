@@ -6,82 +6,20 @@ const Freelancer = require("../models/freelancerModel");
 const User = require("./userModel");
 
 module.exports = class Client extends User {
-	async getClientByTaskID(taskId) {
-		// SP buat get Client Details
-		let SPGetClient = `select public.client.client_id as id, profile_image as profile_image_url, public.client.name from public.client 
-    join 
-    public.task 
-    on
-    public.client.client_id = public.task.client_id
-    and
-    public.task.task_id = '${taskId}';`;
-
-		// console.log("Hasil : ");
-		// console.log(result);
-		try {
-			let result = await db.any(SPGetClient);
-
-			return result[0];
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
-	async getOtherClientProfile(userId) {
-		let SPGetClientDetails = `
-		select 
-		c.client_id as id, 
-		c.profile_image as profile_image_url, 
-		c.name, 
-		c.username 
-		from 
-		public.client c
-		join
-		public.freelancer f
-		on 
-		f.user_id = c.client_id
-    where 
-		c.client_id = '${userId}'
-		or f.freelancer_id = '${userId}'; `;
-
-		try {
-			let result = await db.any(SPGetClientDetails);
-
-			return result[0];
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
+	// Inquiry Client Review
 	async getClientReview(userId) {
-		let result = {};
-
 		let reviewInstance = new Review();
 
 		try {
 			let review = await reviewInstance.getClientReviewByUserId(userId);
 
-			let average_rating = await reviewInstance.getClientAverageRatingByUserId(
-				userId
-			);
-
-			let rating_amount =
-				await reviewInstance.getClientReviewRatingAmountByUserId(userId);
-
-			result.average_rating = average_rating;
-			result.rating_amount = rating_amount;
-			if (review.length < 1) {
-				result.review_list = null;
-			} else {
-				result.review_list = review;
-			}
-
-			return result;
+			return review;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
 
+	// Inquiry Owned Task
 	async getClientTask(userId) {
 		let taskInstance = new Task();
 		try {
@@ -97,6 +35,7 @@ module.exports = class Client extends User {
 		}
 	}
 
+	// Register As Freelancer
 	async register(data, cv_url, port_url, userId) {
 		// manggil freelancer buat create freelancer instance
 

@@ -5,6 +5,7 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class BankInformation {
+	// Inquiry Bank Details
 	async getBankDetails(clientId) {
 		let SP = `
     select 
@@ -30,6 +31,7 @@ module.exports = class BankInformation {
 		}
 	}
 
+	// Edit Bank Details
 	async editBankDetails(clientId, body) {
 		let SP = `
     UPDATE

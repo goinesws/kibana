@@ -5,6 +5,7 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class AdditionalInfo {
+	// Inquiry Additional Info
 	async getAdditionalInfo(subcategoryId) {
 		let SP = `SELECT
         additionalInfo.additional_info_id as id,

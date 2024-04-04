@@ -182,10 +182,9 @@ app.getOtherProfile = async (req, res) => {
 	result.error_schema = {};
 	result.output_schema = {};
 
-	const clientInstance = new Client();
+	const userInstance = new User();
 	const freelancerInstance = new Freelancer();
-	let clientDetails = await clientInstance.getOtherClientProfile(userId);
-	let isFreelancer = await freelancerInstance.isFreelancer(userId);
+	let clientDetails = await userInstance.getOtherProfile(userId);
 
 	if (clientDetails == null) {
 		result.error_schema = {

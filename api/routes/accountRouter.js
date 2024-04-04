@@ -17,6 +17,10 @@ router.get("/my/profile", userController.getMyProfile);
 router.get("/bank-detail", userController.getMyBankDetails);
 router.post("/edit/bank-detail", userController.editBankDetails);
 router.get(
+	"/project/history",
+	freelancerController.getFreelancerProjectHistory
+);
+router.get(
 	"/project/history/:userId",
 	freelancerController.getFreelancerProjectHistory
 );

@@ -382,4 +382,16 @@ app.getTransactionDetailsFreelancerService = async (req, res) => {
 	res.send(result);
 };
 
+app.getFreelancerTransactionActivity = async (req, res) => {
+	res.send("Good");
+};
+
+app.sendRequirement = async (req, res) => {
+	res.send("Good");
+};
+
+app.sendMessage = async (req, res) => {};
+
+app.sendAdditionalFile = async (req, res) => {};
+
 module.exports = app;

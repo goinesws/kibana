@@ -5,6 +5,7 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class Education {
+	// Inquiry Freelancer Education History
 	async getEducation(userId) {
 		let SP = `
     select degree, major, university, country, year as graduation_year from public.education p
@@ -30,6 +31,7 @@ module.exports = class Education {
 		}
 	}
 
+	// Edit Freelancer Education
 	async editEducation(userId, education) {
 		// ini SP buat insert educationHistory
 		let SP_insert = `
@@ -65,6 +67,7 @@ module.exports = class Education {
 		}
 	}
 
+	// Ini buat di insert tapi di techdoc ga ada
 	async insertEducation(userId, education) {
 		let ed_uuid = uuid.v4();
 

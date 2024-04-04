@@ -3,6 +3,7 @@ const db = require("../../db");
 const { v4: uuidv4 } = require("uuid");
 
 module.exports = class Requirement {
+	// Create Layanan
 	async createNewRequirement(additionalInfoId, serviceId, isTrue) {
 		const uuid = uuidv4();
 

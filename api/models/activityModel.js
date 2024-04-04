@@ -5,6 +5,7 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class Activity {
+	// Inquiry Activity Pesanan Client
 	async getClientActivity(transaction_id) {
 		let SP = `
         `;
@@ -22,6 +23,7 @@ module.exports = class Activity {
 		}
 	}
 
+	// Inquiry Activity Pesanan Freelancer
 	async getFreelancerActivity(transaction_id) {
 		let SP = `
         `;
@@ -39,7 +41,18 @@ module.exports = class Activity {
 		}
 	}
 
+	// Send Requirement
+	// Send Message
+	// Send Additional File
+	// Send Result
+	// Ask Return
+	// Cancel Return
+	// Ask Revision
+	// Complete Transaksi
+	// Manage Cancellation
+	// Call Admin
+	// Ask Cancellation
+	// Cancel Cancellation
+	// Manage Return
 	async createActivity() {}
-
-	async createActivityWithFile() {}
 };

@@ -119,25 +119,6 @@ module.exports = class User {
 		}
 	}
 
-	async getClientID(username) {
-		let SPGetClientID = `
-		select 
-		client_id 
-		from 
-		public.client 
-		where email = '${username}' 
-		or username='${username}';`;
-
-		try {
-			let res = await db.any(SPGetClientID);
-			var client_id = res[0].client_id;
-
-			return client_id;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
 	async getMyProfile(clientId) {
 		let SP = `
 		select 
@@ -166,6 +147,43 @@ module.exports = class User {
 			let bank_result = await BankInstance.getBankDetails(clientId);
 
 			return bank_result;
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Data.");
+		}
+	}
+
+	async getOtherProfile(clientId) {
+		let SPGetClientDetails = `
+		select 
+		c.client_id as id, 
+		c.profile_image as profile_image_url, 
+		c.name, 
+		c.username,
+		CASE
+			WHEN (
+				select 
+				count(*) 
+				from public.freelancer 
+				where user_id = '${clientId}' 
+				or freelancer_id = '${clientId}' 
+				) > 0
+			THEN true
+			ELSE false
+		END is_freelancer
+		from 
+		public.client c
+		join
+		public.freelancer f
+		on 
+		f.user_id = c.client_id
+    where 
+		c.client_id = '${clientId}'
+		or f.freelancer_id = '${clientId}';`;
+
+		try {
+			let result = await db.any(SPGetClientDetails);
+
+			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}

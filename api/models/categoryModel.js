@@ -3,18 +3,7 @@ const db = require("../../db");
 const Subcategory = require("../models/subcategoryModel");
 
 module.exports = class Category {
-	async getAllCategoriesForTask() {
-		let SPGetCategories = `select category_id as id, name, image from public.category`;
-
-		try {
-			let result = await db.any(SPGetCategories);
-
-			return result;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
+	// Inquiry Categori Layanan
 	async getAllCategorySubcategory() {
 		let SPGetCategories = `
     select category.category_id as id, category.name as name, category.image as image_url, 
@@ -47,6 +36,7 @@ module.exports = class Category {
 		}
 	}
 
+	// Inquiry Category Tugas
 	async getAllCategorySubcategoryTask() {
 		let SP = `
     select 

@@ -4,10 +4,10 @@ const Review = require("../models/reviewModel");
 const Task = require("../models/taskModel");
 
 module.exports = class Transaction {
-	// ganti SP karena masih salah
+	// Utilities
 	async getFreelancerProjectByUserId(userId) {
 		let SP = `
-        select 
+        select distinct
         s.name as project_name,
         r.rating as star,
         s.description as description,
@@ -15,19 +15,21 @@ module.exports = class Transaction {
         from 
         public.transaction tr
         join
-        public.service s
-        on
-        tr.project_id = s.service_id
-        join
         public.freelancer f
         on
-        f.freelancer_id = s.freelancer_id
-        left join
+        f.freelancer_id = tr.freelancer_id
+        join
+        public.service s
+        on
+        s.service_id = tr.project_id
+        join
         public.review r
         on
         r.transaction_id = tr.transaction_id
         where
         f.user_id = '${userId}'
+        or
+        f.freelancer_id = '${userId}'
         `;
 
 		try {
@@ -41,6 +43,7 @@ module.exports = class Transaction {
 		}
 	}
 
+	// Inquiry Invoice
 	async getAllTransactionDetail(transaction_id) {
 		// SP buat get Client Details
 		let SP = `SELECT 
@@ -66,6 +69,7 @@ module.exports = class Transaction {
 		return result[0];
 	}
 
+	// Inquiry Invoice
 	async getTransactionInvoice(taskId) {
 		// SP buat get Client Details
 		let SPGetClient = `select public.client.client_id as id, profile_image as profile_image_url, public.client.name from public.client 
@@ -81,6 +85,7 @@ module.exports = class Transaction {
 		return result;
 	}
 
+	// Utilities
 	async getTransactionClient(transaction_id) {
 		// SP buat get Client Details
 		let SP = `SELECT 
@@ -98,6 +103,7 @@ module.exports = class Transaction {
 		return result[0];
 	}
 
+	// Utilities
 	async getTransactionFreelancer(transaction_id) {
 		// SP buat get Client Details
 		let SP = `SELECT 
@@ -119,6 +125,7 @@ module.exports = class Transaction {
 		return result[0];
 	}
 
+	// Inquiry Detail Pesanan Tugas Client
 	async getTransactionDetailsTaskClient(transaction_id) {
 		let SP = `
         select 
@@ -225,6 +232,7 @@ module.exports = class Transaction {
 		}
 	}
 
+	// Inquiry Detail Pesanan Tugas Freelancer
 	async getTransactionDetailsTaskFreelancer(transaction_id) {
 		let SP = `
         select 
@@ -329,8 +337,10 @@ module.exports = class Transaction {
 	}
 
 	// masuk activity
+	// Inquiry Activity Pesanan Client
 	async getTransactionActivityClient(transaction_id) {}
 
+	// Inquiry Detail Pesanan Layanan Client
 	async getTransactionDetailsServiceClient(transaction_id) {
 		let SP = `
         select
@@ -438,6 +448,7 @@ module.exports = class Transaction {
 		}
 	}
 
+	// Inquiry Detail Pesanan Layanan Freelancer
 	async getTransactionDetailsServiceFreelancer(transaction_id) {
 		let SP = `
         select
@@ -527,46 +538,61 @@ module.exports = class Transaction {
 	}
 
 	// masuk activity
+	// Inquiry Activity Pesanan Freelancer
 	async getTransactionActivityFreelancer(transaction_id) {}
 
 	// masuk activity
+	// Send Requirement
 	async sendRequirement() {}
 
 	// masuk activity
+	// Send Message
 	async sendMessage() {}
 
 	// masuk activity
+	// Send Additional File
 	async sendAdditionalFile() {}
 
 	// masuk activity
+	// Send Result
 	async sendResult() {}
 
 	// masuk activity
+	// Ask Return
 	async askReturn() {}
 
 	// masuk activity
+	// Cancel Return
 	async cancelReturn() {}
 
 	// masuk activity
+	// Ask Revision
 	async askRevision() {}
 
 	// masuk activity
+	// Complete Transaction
 	async completeTransaction() {}
 
 	// masuk activity
+	// Manage Cancellation
 	async manageCancellation() {}
 
 	// masuk activity
+	// Call Admin
 	async callAdmin() {}
 
 	// masuk activity
+	// Ask Cancellation
 	async askCancellation() {}
 
 	// masuk activity
+	// Cancel Cancellation
 	async cancelCancellation() {}
 
 	// masuk activity
+	// Manage Return
 	async manageReturn() {}
 
-	async sendFeddback() {}
+	// Send Feedback
+	async sendFeedback() {}
 };

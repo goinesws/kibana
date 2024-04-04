@@ -3,6 +3,7 @@ const db = require("../../db");
 const AdditionalInfo = require("./additionalInfoModel");
 
 module.exports = class Subcategory {
+	// Inquiry Task Baru
 	async getListSubcatByCategoryID(categoryId) {
 		let SPGetSubcat = `select subcategory_id from public.subcategory where category_id = '${categoryId}';`;
 
@@ -31,6 +32,7 @@ module.exports = class Subcategory {
 		return list;
 	}
 
+	// Utilities
 	async getSubcatByCategoryID(categoryId) {
 		let SPGetCategories = `select subcategory_id as id, name, description as desc, image as image_url from subcategory where category_id = '${categoryId}'`;
 
@@ -39,26 +41,7 @@ module.exports = class Subcategory {
 		return result;
 	}
 
-	async getSubcatLiteByCategoryID(categoryId) {
-		let spGetSubcategories = `select subcategory_id as id, name from public.subcategory where category_id ='${categoryId}'`;
-
-		let result = {};
-
-		result = await db.any(spGetSubcategories);
-
-		return result;
-	}
-
-	async getSubcatCountByID(subcategoryId) {
-		let spGetCount = `select count(*) from public.task where sub_category_id = '${subcategoryId}'`;
-
-		var countResult = {};
-
-		countResult = await db.any(spGetCount);
-
-		return countResult[0];
-	}
-
+	// Inquiry Additional Info
 	async getadditionalInfoBySubcategoryId(subcategoryId) {
 		const AdditionalInfoInstance = new AdditionalInfo();
 

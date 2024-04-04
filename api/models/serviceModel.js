@@ -11,6 +11,7 @@ const { v4: uuidv4 } = require("uuid");
 class Service {
 	constructor() {}
 
+	// Inquiry Invoice
 	async getAllServiceDetail(service_id) {
 		try {
 			var SP = `select service_id,
@@ -30,6 +31,7 @@ class Service {
 		}
 	}
 
+	// Inquiry Invoice
 	async getAdditionalData(service_id) {
 		try {
 			var SP = `SELECT 
@@ -49,6 +51,7 @@ class Service {
 		}
 	}
 
+	// Utilities
 	async getServiceOwner(service_id) {
 		try {
 			var SP = `select freelancer_id from service where service_id = '${service_id}'`;
@@ -60,6 +63,7 @@ class Service {
 		}
 	}
 
+	// Inquiry Layanan Baru
 	async getNewService(category_id) {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
@@ -97,6 +101,7 @@ class Service {
 		}
 	}
 
+	// Inquiry Layanan Baru
 	async getNewServiceNoCat(category_id) {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
@@ -129,6 +134,7 @@ class Service {
 		}
 	}
 
+	// ?? dipake ato engga
 	async getServiceByCategory(category_id) {
 		try {
 			var SP = `select service_id as id, service.name, service.description as desc, images as image_url from service
@@ -142,6 +148,7 @@ class Service {
 		}
 	}
 
+	// Inquiry List Layanan
 	async getServiceList(body) {
 		const searchText = body["search_text"];
 		const subcategory = body["sub_category"];
@@ -231,8 +238,10 @@ class Service {
 		return result;
 	}
 
+	// Inquiry Detail Layanan
 	async getServiceDetail(service_id) {
 		try {
+			let result = {};
 			var SP = `select service.service_id as id,
             images as image_url,
             service.name,
@@ -265,13 +274,70 @@ class Service {
               service.service_id = '${service_id}'
             GROUP BY 
               service.service_id`;
-			const result = await db.any(SP);
-			return result[0];
+			let service_result = await db.any(SP);
+
+			let SP1 = `
+      select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name, freelancer.description
+      from 
+      public.client
+      join 
+      public.freelancer 
+      on 
+      public.freelancer.user_id = public.client.client_id
+      join
+      service on service.freelancer_id = freelancer.freelancer_id
+      where
+      service.service_id = '${service_id}';
+      `;
+
+			let fl_result = await db.any(SP1);
+
+			let SP2 = `
+      SELECT 
+            (SELECT AVG(rating)
+            FROM
+              review
+            WHERE
+            destination_id = service.service_id) as average_rating,
+            (SELECT COUNT(rating)
+            FROM 
+            review
+            WHERE 
+            destination_id = service.service_id) as rating_amount,
+        (SELECT
+                  jsonb_agg(
+                    jsonb_build_object(
+              'name', client.name,
+              'star', review.rating,
+              'description', review.content,
+              'timestamp', TO_CHAR(review.date, 'DD Mon YYYY')
+                    )
+                  )
+                FROM 
+                  review
+                JOIN 
+                  client on client.client_id = review.writer_id
+                WHERE 
+                  review.destination_id = service.service_id
+                ) AS review_list
+            FROM service
+        WHERE service_id = '${service_id}'
+        ORDER BY service.created_date DESC
+      `;
+
+			let rev_result = await db.any(SP2);
+
+			result.service_detail = service_result[0];
+			result.freelancer = fl_result[0];
+			result.review = rev_result[0];
+
+			return result;
 		} catch (error) {
 			throw new Error("Failed to fetch user tasks");
 		}
 	}
 
+	// Create Layanan
 	async createNewService(images, data_incoming, clientId) {
 		const serviceId = uuidv4();
 		const data = JSON.parse(data_incoming);
@@ -320,6 +386,7 @@ class Service {
 		return serviceId;
 	}
 
+	// Utitlities
 	async addServiceImage(image) {
 		var link;
 		const clientId = "33df5c9de1e057a";
@@ -352,6 +419,7 @@ class Service {
 		return link;
 	}
 
+	// Inquiry Layanan Saya
 	async getOwnedService(freelancer_id) {
 		try {
 			var SP = `select
@@ -395,6 +463,7 @@ class Service {
 		}
 	}
 
+	// Inquiry Detail Layanan Saya
 	async getOwnedServiceDetail(service_id) {
 		try {
 			var SP = `SELECT
@@ -449,6 +518,7 @@ class Service {
 		}
 	}
 
+	// Inquiry Pesanan Saya
 	async getOwnedServiceOrders(service_id) {
 		try {
 			var SP = `SELECT 
@@ -492,6 +562,7 @@ class Service {
 		}
 	}
 
+	// Non-Active Layanan
 	async deactivateService(service_id) {
 		try {
 			var SP = `update service
@@ -504,6 +575,10 @@ class Service {
 		}
 	}
 
+	// Activate Layanan
+	async activateService(service_id) {}
+
+	// Delete Layanan
 	async deleteService(service_id) {
 		try {
 			var SP = `delete from service
@@ -515,6 +590,7 @@ class Service {
 		}
 	}
 
+	// Inquiry Riwayat Layanan
 	async getClientServiceHistory(client_id) {
 		try {
 			var SP = `SELECT 
@@ -574,6 +650,9 @@ class Service {
 			throw new Error("Failed to fetch owned services detail");
 		}
 	}
+
+	// Request Token Service
+	async getServiceToken(service_id) {}
 }
 
 module.exports = Service;

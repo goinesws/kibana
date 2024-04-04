@@ -29,5 +29,6 @@ router.put("/:taskId/delete", taskController.deleteTask);
 router.get("/history", taskController.getTaskHistory);
 router.get("/history/:taskId", taskController.getTaskHistoryDetails);
 router.post("/:taskId/choose-freelancer", taskController.chooseFreelancer);
+router.post("/:taskId/request-token", taskController.getRequestToken);
 
 module.exports = router;

@@ -7,47 +7,8 @@ const User = require("./userModel");
 const Education = require("./educationModel");
 
 module.exports = class Freelancer extends User {
-	async getFreelancerByTaskID(taskId) {
-		let SPGetRegisteredFreelancer = `select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name
-    from 
-    public.client
-    join 
-    public.freelancer 
-    on 
-    public.freelancer.user_id = public.client.client_id
-    join
-    public.task_enrollment
-    on 
-    public.task_enrollment.freelancer_id = public.freelancer.freelancer_id
-    join
-    public.task
-    on 
-    public.task.task_id = public.task_enrollment.task_id
-    and 
-    public.task.task_id = '${taskId}';`;
-
-		try {
-			let result = await db.any(SPGetRegisteredFreelancer);
-
-			return result;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
-	async isFreelancer(userId) {
-		let SPGetIsFreelancer = `select count(*) from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';`;
-
-		let result = await db.any(SPGetIsFreelancer);
-
-		if (result[0].count > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	async getDesc(userId) {
+	// Inquiry Freelancer Description
+	async getDescription(userId) {
 		let SP = `select description from public.freelancer where user_id='${userId}' or freelancer_id = '${userId}';`;
 
 		try {
@@ -63,6 +24,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Inquiry Freelancer Education
 	async getFreelancerEducation(userId) {
 		let EducationInstance = new Education();
 
@@ -75,6 +37,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Inquiry Freelancer SKills
 	async getSkill(userId) {
 		let SP = `select skills from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';`;
 
@@ -91,6 +54,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Inquiry Freelancer CV
 	async getCV(userId) {
 		let SP = `
     select cv as cv_url from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';
@@ -109,6 +73,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Inquiry Freelancer Portfolio
 	async getPortfolio(userId) {
 		let SP = `
     select portfolio as portfolio_url from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';
@@ -125,9 +90,9 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Inquiry Freelancer Owned Service
+	// rewrite buat get service dari service model terus di hit dari sini
 	async getOwnedService(userId) {
-		// rewrite buat get service dari service model terus di hit dari sini
-
 		let SPGetService = `select s.service_id as id, s.images as image_url, s.name, s.tags, s.price, s.working_time from public.service s 
     join 
     public.freelancer f 
@@ -179,121 +144,67 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
-	async getFreelancerByServiceId(serviceId) {
-		let SPGetRegisteredFreelancer = `select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name, freelancer.description
-    from 
-    public.client
-    join 
-    public.freelancer 
-    on 
-		public.freelancer.user_id = public.client.client_id
-		join
-		service on service.freelancer_id = freelancer.freelancer_id
-   	where
-    service.service_id = '${serviceId}';`;
-
-		try {
-			let result = await db.any(SPGetRegisteredFreelancer);
-
-			return result[0];
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
-	async getFreelancerAverageRating(userId) {
-		let SP = `
-    select 
-    round(avg(r.rating), 1)
-    from 
-    public.review r
-    join 
-    public.transaction tr
-    on
-    r.transaction_id = tr.transaction_id
-    join
-    public.service s
-    on
-    tr.project_id = s.service_id
-    join
-    public.freelancer f
-    on
-    s.freelancer_id = f.freelancer_id
-    where
-    f.user_id = '${userId}'
-		or f.freelancer_id = '${userId}';
-    `;
-
-		try {
-			let result = await db.any(SP);
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-			return result[0].avg;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
-	async getFreelancerTotalProject(userId) {
-		let SP = `select 
-    count(*)
-    from 
-    public.review r
-    join 
-    public.transaction tr
-    on
-    r.transaction_id = tr.transaction_id
-    join
-    public.service s
-    on
-    tr.project_id = s.service_id
-    join
-    public.freelancer f
-    on
-    s.freelancer_id = f.freelancer_id
-    where
-    f.user_id = '${userId}'
-		or f.freelancer_id = '${userId}';`;
-
-		try {
-			let result = await db.any(SP);
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-			return result[0].count;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
-	// masih salah
+	// Inquiry Project History
 	async getProjectHistory(userId) {
 		let result = {};
 
 		let transactionInstance = new Transaction();
 
 		try {
-			let ar = await this.getFreelancerAverageRating(userId);
-			if (ar instanceof Error) {
-				result.average_rating = null;
-			} else {
-				result.average_rating = ar;
-			}
-			let pa = await this.getFreelancerTotalProject(userId);
-			if (pa instanceof Error) {
-				result.project_amount = null;
-			} else {
-				result.project_amount = pa;
-			}
-			let pl = await transactionInstance.getFreelancerProjectByUserId(userId);
-			if (pl.length < 1 || pl instanceof Error) {
-				result.project_list = null;
-			} else {
-				result.project_list = pl;
-			}
+			let SP1 = `
+			select 
+			round(avg(rating),1)
+			from
+			public.review
+			where
+			destination_id 
+			=
+			'${userId}'
+			or
+			destination_id
+			in
+			(
+				select
+				service_id
+				from
+				public.service
+				where
+				freelancer_id = '${userId}'
+			)
+			`;
 
-			// console.log(result);
+			let sp1_result = await db.any(SP1);
+
+			let SP2 = `
+			select 
+			count(*)
+			from
+			public.review
+			where
+			destination_id 
+			=
+			'${userId}'
+			or
+			destination_id
+			in
+			(
+				select
+				service_id
+				from
+				public.service
+				where
+				freelancer_id = '${userId}'
+			)
+			`;
+
+			let sp2_result = await db.any(SP2);
+
+			let project_result =
+				await transactionInstance.getFreelancerProjectByUserId(userId);
+
+			result.average_rating = sp1_result[0].round;
+			result.project_amount = sp2_result[0].count;
+			result.project_list = project_result;
 
 			return result;
 		} catch (error) {
@@ -301,6 +212,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	//Edit Freelancer Description
 	async editDescription(userId, description) {
 		let SP = `UPDATE public.freelancer set description = '${description}' where user_id = '${userId}' or freelancer_id = '${userId}';`;
 
@@ -313,6 +225,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Edit Freelancer Education
 	async editFreelancerEducation(userId, education) {
 		let EducationInstance = new Education();
 
@@ -328,6 +241,7 @@ module.exports = class Freelancer extends User {
 		}
 	}
 
+	// Edit Freelancer Skills
 	async editFreelancerSkills(userId, skill) {
 		let SP = `
 		UPDATE  
@@ -343,6 +257,91 @@ module.exports = class Freelancer extends User {
 			let result = await db.any(SP);
 
 			return result;
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Data.");
+		}
+	}
+
+	// Edit Freelancer CV
+	async editFreelancerCV(userId, cv_url) {
+		let SP = `
+		update 
+		public.freelancer
+		set 
+		cv = '${cv_url}'
+		where
+		user_id = '${userId}'
+		or freelancer_id = '${userId}';`;
+
+		//console.log(SP);
+
+		try {
+			let result = await db.any(SP);
+			return result;
+		} catch (error) {
+			return new Error("Edit Gagal");
+		}
+	}
+
+	// Edit Freelancer Portfolio
+	async editFreelancerPortfolio(userId, portfolio_url) {
+		let SP = `
+		update 
+		public.freelancer
+		set 
+		portfolio = '${portfolio_url}'
+		where
+		user_id = '${userId}'
+		or freelancer_id = '${userId}';`;
+
+		//console.log(SP);
+
+		try {
+			let result = await db.any(SP);
+			return result;
+		} catch (error) {
+			return new Error("Edit Gagal");
+		}
+	}
+
+	// Register As Freelancer
+	async createFreelancer(userId, description, cv, portfolio, skills) {
+		const fl_uuid = uuid.v4();
+		let SP = `
+		insert 
+		into
+		public.freelancer
+		(freelancer_id, user_id, description, cv, portfolio, skills)
+		values
+		(
+			'${fl_uuid}',
+			'${userId}',
+			'${description}',
+			'${cv}',
+			'${portfolio}',
+			'{${skills}}'
+		)
+		`;
+
+		try {
+			let result = await db.any(SP);
+			return fl_uuid;
+		} catch (error) {
+			return new Error("Gagal Insert.");
+		}
+	}
+
+	// Register As Freelancer
+	async insertFreelancerEducation(userId, education) {
+		let EducationInstance = new Education();
+
+		try {
+			let education_result = await EducationInstance.insertEducation(
+				userId,
+				education
+			);
+
+			return education_result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
@@ -378,86 +377,5 @@ module.exports = class Freelancer extends User {
 			});
 
 		return link;
-	}
-
-	async editFreelancerCV(userId, cv_url) {
-		let SP = `
-		update 
-		public.freelancer
-		set 
-		cv = '${cv_url}'
-		where
-		user_id = '${userId}'
-		or freelancer_id = '${userId}';`;
-
-		//console.log(SP);
-
-		try {
-			let result = await db.any(SP);
-			return result;
-		} catch (error) {
-			return new Error("Edit Gagal");
-		}
-	}
-
-	async editFreelancerPortfolio(userId, portfolio_url) {
-		let SP = `
-		update 
-		public.freelancer
-		set 
-		portfolio = '${portfolio_url}'
-		where
-		user_id = '${userId}'
-		or freelancer_id = '${userId}';`;
-
-		//console.log(SP);
-
-		try {
-			let result = await db.any(SP);
-			return result;
-		} catch (error) {
-			return new Error("Edit Gagal");
-		}
-	}
-
-	async createFreelancer(userId, description, cv, portfolio, skills) {
-		const fl_uuid = uuid.v4();
-		let SP = `
-		insert 
-		into
-		public.freelancer
-		(freelancer_id, user_id, description, cv, portfolio, skills)
-		values
-		(
-			'${fl_uuid}',
-			'${userId}',
-			'${description}',
-			'${cv}',
-			'${portfolio}',
-			'{${skills}}'
-		)
-		`;
-
-		try {
-			let result = await db.any(SP);
-			return fl_uuid;
-		} catch (error) {
-			return new Error("Gagal Insert.");
-		}
-	}
-
-	async insertFreelancerEducation(userId, education) {
-		let EducationInstance = new Education();
-
-		try {
-			let education_result = await EducationInstance.insertEducation(
-				userId,
-				education
-			);
-
-			return education_result;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
 	}
 };

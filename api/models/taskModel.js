@@ -7,6 +7,7 @@ const Freelancer = require("../models/freelancerModel");
 const Review = require("../models/reviewModel");
 
 module.exports = class Task {
+	// Inquiry Tugas Baru
 	async getNewTask() {
 		let SP = `
     select 
@@ -36,6 +37,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Invoice
 	async getAllTaskDetail(task_id) {
 		let SP = `select 
       task_id,
@@ -58,6 +60,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry List Tugas
 	async getTaskList(body) {
 		// console.log(body);
 
@@ -160,6 +163,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Tuga Baru
 	async getNewTaskByCategory(categoryId) {
 		// get list of SUBCAT BY CATEGORY ID
 		const subcatInstance = new Subcategory();
@@ -207,18 +211,7 @@ module.exports = class Task {
 		}
 	}
 
-	async getTaskCategoryDetail(categoryId) {
-		const subcatInstance = new Subcategory();
-		try {
-			let result = await subcatInstance.getSubcatByCategoryID(categoryId);
-
-			if (result.length == 0) return null;
-			else return result;
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
+	// Inquiry Detail Tugas
 	async getTaskDetails(taskId) {
 		let result = {};
 
@@ -349,6 +342,7 @@ module.exports = class Task {
 		return result;
 	}
 
+	// Inquiry Owned Task
 	async getTaskByClientId(userId) {
 		let SP = `
     select 
@@ -361,10 +355,6 @@ module.exports = class Task {
     t.price
     from 
     public.task t
-    join
-    public.transaction tr
-    on
-    t.task_id = tr.project_id
     where
     t.client_id = '${userId}'
     or
@@ -381,8 +371,7 @@ module.exports = class Task {
       where
       f.freelancer_id = '${userId}'
     )
-    and
-    tr.status = '1';
+		;
     `;
 
 		try {
@@ -394,6 +383,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Create Tugas
 	async createTask(data, userId) {
 		let task_uuid = uuid.v4();
 		let subcat = data.subcategory;
@@ -429,6 +419,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Tugas Saya
 	async getOwnedTask(userId) {
 		let SP = `
     select 
@@ -514,6 +505,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Details Tugas Saya
 	async getOwnedTaskDetails(taskId, userId) {
 		let SP = `
     select 
@@ -562,6 +554,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Pemilihan Freelancer
 	async getRegisteredFreelancer(taskId, userId) {
 		let SP = `
     select 
@@ -622,6 +615,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Delete Tugas
 	async deleteTask(taskId, userId) {
 		let SP = `
       delete 
@@ -656,6 +650,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Riwayat Tugas
 	async getTaskHistory(userId) {
 		let SP = `
     select 
@@ -726,6 +721,7 @@ module.exports = class Task {
 		}
 	}
 
+	// Inquiry Detail Riwayat Tugas
 	async getTaskHistoryDetails(taskId, userId) {
 		let SP = `
     select 
@@ -756,4 +752,10 @@ module.exports = class Task {
 			return new Error("Gagal mendapatkan data.");
 		}
 	}
+
+	// Pilih Freelancer
+	async chooseFreelancer() {}
+
+	// Request Task Token
+	async getTaskToken() {}
 };

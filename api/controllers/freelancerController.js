@@ -13,7 +13,7 @@ app.getFreelancerDescription = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let desc = await freelancerInstance.getDesc(userId);
+	let desc = await freelancerInstance.getDescription(userId);
 
 	if (desc == null || desc instanceof Error) {
 		result.error_schema = {
@@ -170,7 +170,16 @@ app.getOwnedService = async (req, res) => {
 
 app.getFreelancerProjectHistory = async (req, res) => {
 	let result = {};
-	let userId = req.params.userId;
+	let userId = "";
+
+	if (req.params.userId) {
+		userId = req.params.userId;
+	} else {
+		let UserInstance = new User();
+		let res = await UserInstance.getUserSessionData(req.get("X-Token"));
+
+		userId = res.session_data.freelancer_id;
+	}
 
 	result.error_schema = {};
 	result.output_schema = {};

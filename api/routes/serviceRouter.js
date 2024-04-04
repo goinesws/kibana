@@ -42,5 +42,7 @@ router.get(
 	subcategoryController.getadditionalInfoBySubcategoryId
 );
 router.get("/category", categoryController.getAllCategorySubcategory);
+router.put("/:serviceId/activate", serviceController.activateService);
+router.post("/:serviceId/request-token", serviceController.getRequestToken);
 
 module.exports = router;
