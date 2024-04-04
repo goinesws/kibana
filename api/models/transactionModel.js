@@ -328,22 +328,8 @@ module.exports = class Transaction {
 		}
 	}
 
-	async getTransactionActivityClient(transaction_id) {
-		let SP = `
-        `;
-
-		try {
-			let result = await db.any(SP);
-
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			} else {
-				return result;
-			}
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
+	// masuk activity
+	async getTransactionActivityClient(transaction_id) {}
 
 	async getTransactionDetailsServiceClient(transaction_id) {
 		let SP = `
@@ -539,4 +525,48 @@ module.exports = class Transaction {
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
+
+	// masuk activity
+	async getTransactionActivityFreelancer(transaction_id) {}
+
+	// masuk activity
+	async sendRequirement() {}
+
+	// masuk activity
+	async sendMessage() {}
+
+	// masuk activity
+	async sendAdditionalFile() {}
+
+	// masuk activity
+	async sendResult() {}
+
+	// masuk activity
+	async askReturn() {}
+
+	// masuk activity
+	async cancelReturn() {}
+
+	// masuk activity
+	async askRevision() {}
+
+	// masuk activity
+	async completeTransaction() {}
+
+	// masuk activity
+	async manageCancellation() {}
+
+	// masuk activity
+	async callAdmin() {}
+
+	// masuk activity
+	async askCancellation() {}
+
+	// masuk activity
+	async cancelCancellation() {}
+
+	// masuk activity
+	async manageReturn() {}
+
+	async sendFeddback() {}
 };

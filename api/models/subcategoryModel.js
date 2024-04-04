@@ -1,80 +1,71 @@
 const express = require("express");
 const db = require("../../db");
+const AdditionalInfo = require("./additionalInfoModel");
 
 module.exports = class Subcategory {
-  async getListSubcatByCategoryID (categoryId) {
-    let SPGetSubcat = `select subcategory_id from public.subcategory where category_id = '${categoryId}';`;
+	async getListSubcatByCategoryID(categoryId) {
+		let SPGetSubcat = `select subcategory_id from public.subcategory where category_id = '${categoryId}';`;
 
-    let result = await db.any(SPGetSubcat);
+		let result = await db.any(SPGetSubcat);
 
-    // console.log(listSubcat);
+		// console.log(listSubcat);
 
-    if (result == null || result.length == 0) {
-      return null;
-    }
+		if (result == null || result.length == 0) {
+			return null;
+		}
 
-    // rewrite list subcat buat masuk SP
-    let list = "(";
+		// rewrite list subcat buat masuk SP
+		let list = "(";
 
-    for (let i = 0; i < result.length; i++) {
-      list += "'" + result[i].subcategory_id + "'";
-      if (i == result.length - 1) {
-        list += ")";
-      } else {
-        list += ",";
-      }
-    }
+		for (let i = 0; i < result.length; i++) {
+			list += "'" + result[i].subcategory_id + "'";
+			if (i == result.length - 1) {
+				list += ")";
+			} else {
+				list += ",";
+			}
+		}
 
-    // console.log(listSubcatSP);
+		// console.log(listSubcatSP);
 
-    return list;
-  }
+		return list;
+	}
 
-  async getSubcatByCategoryID (categoryId) {
-    let SPGetCategories = `select subcategory_id as id, name, description as desc, image as image_url from subcategory where category_id = '${categoryId}'`;
+	async getSubcatByCategoryID(categoryId) {
+		let SPGetCategories = `select subcategory_id as id, name, description as desc, image as image_url from subcategory where category_id = '${categoryId}'`;
 
-    let result = await db.any(SPGetCategories);
+		let result = await db.any(SPGetCategories);
 
-    return result;
-  }
+		return result;
+	}
 
-  async getSubcatLiteByCategoryID (categoryId) {
-    let spGetSubcategories = `select subcategory_id as id, name from public.subcategory where category_id ='${categoryId}'`;
+	async getSubcatLiteByCategoryID(categoryId) {
+		let spGetSubcategories = `select subcategory_id as id, name from public.subcategory where category_id ='${categoryId}'`;
 
-    let result = {};
+		let result = {};
 
-    result = await db.any(spGetSubcategories);
+		result = await db.any(spGetSubcategories);
 
-    return result;
-  }
+		return result;
+	}
 
-  async getSubcatCountByID(subcategoryId) {
-    let spGetCount = `select count(*) from public.task where sub_category_id = '${subcategoryId}'`;
+	async getSubcatCountByID(subcategoryId) {
+		let spGetCount = `select count(*) from public.task where sub_category_id = '${subcategoryId}'`;
 
-    var countResult ={};
-    
-    countResult = await db.any(spGetCount);
+		var countResult = {};
 
-    return countResult[0];
-  }
+		countResult = await db.any(spGetCount);
 
-  async getadditionalInfoBySubcategoryId(subcategoryId) {
-    let SP = `SELECT
-        additionalInfo.additional_info_id as id,
-        additionalInfo.question as title
-    FROM 
-      subcategory
-    JOIN 
-      additionalInfo on subcategory.subcategory_id = additionalInfo.subcategory_id
-    WHERE 
-      additionalInfo.subcategory_id =  '${subcategoryId}'`;
+		return countResult[0];
+	}
 
-    var additionalInfo ={};
-    
-    additionalInfo= await db.any(SP);
+	async getadditionalInfoBySubcategoryId(subcategoryId) {
+		const AdditionalInfoInstance = new AdditionalInfo();
 
-    return additionalInfo;
-  }
+		let additionalInfo_result = await AdditionalInfoInstance.getAdditionalInfo(
+			subcategoryId
+		);
 
-  
-}
+		return additionalInfo_result;
+	}
+};
