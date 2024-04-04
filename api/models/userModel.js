@@ -3,6 +3,7 @@ const db = require("../../db");
 const crypto = require("crypto");
 const FormData = require("form-data");
 const uuid = require("uuid");
+const BankInformation = require("./bankInformationModel");
 
 module.exports = class User {
 	constructor() {}
@@ -98,6 +99,26 @@ module.exports = class User {
 		}
 	}
 
+	async logout() {
+		let SP = `
+			update 
+			public.client
+			set
+			session_id = null,
+			session_data = null
+			where
+			client_id = '${this.id}'
+		`;
+
+		try {
+			let result = await db.any(SP);
+
+			return result;
+		} catch (error) {
+			return new Error("Gagal Mengubah Data.");
+		}
+	}
+
 	async getClientID(username) {
 		let SPGetClientID = `
 		select 
@@ -138,6 +159,18 @@ module.exports = class User {
 		}
 	}
 
+	async getBankDetails(clientId) {
+		let BankInstance = new BankInformation();
+
+		try {
+			let bank_result = await BankInstance.getBankDetails(clientId);
+
+			return bank_result;
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Data.");
+		}
+	}
+
 	async editMyprofile(clientId, data, image_url) {
 		let SP = `
 		update 
@@ -159,6 +192,18 @@ module.exports = class User {
 			return result;
 		} catch (error) {
 			return new Error("Gagal Edit.");
+		}
+	}
+
+	async editBankDetails(clientId, body) {
+		let BankInstance = new BankInformation();
+
+		try {
+			let bank_result = await BankInstance.editBankDetails(clientId, body);
+
+			return bank_result;
+		} catch (error) {
+			return new Error("Gagal Mengubah Data.");
 		}
 	}
 
@@ -235,26 +280,6 @@ module.exports = class User {
 			}
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
-		}
-	}
-
-	async logout() {
-		let SP = `
-			update 
-			public.client
-			set
-			session_id = null,
-			session_data = null
-			where
-			client_id = '${this.id}'
-		`;
-
-		try {
-			let result = await db.any(SP);
-
-			return result;
-		} catch (error) {
-			return new Error("Gagal Mengubah Data.");
 		}
 	}
 };

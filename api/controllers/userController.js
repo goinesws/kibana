@@ -259,11 +259,10 @@ app.getMyBankDetails = async (req, res) => {
 
 	let x_token = req.get("X-Token");
 	const userInstance = new User();
-	const bankInstance = new BankInformation();
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
 	if (x_token == curr_session.session_id) {
-		bank = await bankInstance.getBankDetails(
+		bank = await userInstance.getBankDetails(
 			curr_session.session_data.client_id
 		);
 		if (bank == null || bank instanceof Error) {
@@ -368,11 +367,10 @@ app.editBankDetails = async (req, res) => {
 
 	let x_token = req.get("X-Token");
 	const userInstance = new User();
-	const bankInstance = new BankInformation();
 	let curr_session = await userInstance.getUserSessionData(x_token);
 	if (curr_session.session_id == x_token) {
 		try {
-			let change = await bankInstance.editBankDetails(
+			let change = await userInstance.editBankDetails(
 				curr_session.session_data.client_id,
 				req.body
 			);

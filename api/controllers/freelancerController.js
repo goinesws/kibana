@@ -41,7 +41,7 @@ app.getFreelancerEducationHistory = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let edu = await freelancerInstance.getEducationHistory(userId);
+	let edu = await freelancerInstance.getFreelancerEducation(userId);
 
 	if (edu == null || edu instanceof Error) {
 		result.error_schema = {

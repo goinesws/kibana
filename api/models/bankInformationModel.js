@@ -41,9 +41,6 @@ module.exports = class BankInformation {
     where 
     user_id = '${clientId}';`;
 
-		// console.log('--RES--');
-		// console.log(res);
-
 		try {
 			let res = await db.any(SP);
 
