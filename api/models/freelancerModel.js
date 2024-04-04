@@ -5,6 +5,7 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 const User = require("./userModel");
 const Education = require("./educationModel");
+const Google = require("./googleModel");
 
 module.exports = class Freelancer extends User {
 	async getFreelancerByTaskID(taskId) {
@@ -103,7 +104,7 @@ module.exports = class Freelancer extends User {
 				return new Error("Gagal Mendapatkan Data.");
 			}
 
-			return result[0];
+			return Google.getPreviewLink(result[0].cv_url);
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
@@ -119,7 +120,7 @@ module.exports = class Freelancer extends User {
 			if (result.length < 1) {
 				return new Error("Gagal Mendapatkan Data.");
 			}
-			return result[0];
+			return Google.getPreviewLink(result[0].portfolio_url);
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
