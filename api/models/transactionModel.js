@@ -543,56 +543,56 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Requirement
-	async sendRequirement() {}
+	async sendRequirement(transaction_iud, file, description) {}
 
 	// masuk activity
 	// Send Message
-	async sendMessage() {}
+	async sendMessage(transaction_id, message) {}
 
 	// masuk activity
 	// Send Additional File
-	async sendAdditionalFile() {}
+	async sendAdditionalFile(transaction_id, additionalFile) {}
 
 	// masuk activity
 	// Send Result
-	async sendResult() {}
+	async sendResult(transaction_id, files, description) {}
 
 	// masuk activity
 	// Ask Return
-	async askReturn() {}
+	async askReturn(transaction_id, message) {}
 
 	// masuk activity
 	// Cancel Return
-	async cancelReturn() {}
+	async cancelReturn(transaction_id) {}
 
 	// masuk activity
 	// Ask Revision
-	async askRevision() {}
+	async askRevision(transaction_id, message) {}
 
 	// masuk activity
 	// Complete Transaction
-	async completeTransaction() {}
+	async completeTransaction(transaction_id) {}
 
 	// masuk activity
 	// Manage Cancellation
-	async manageCancellation() {}
+	async manageCancellation(transaction_id, type) {}
 
 	// masuk activity
 	// Call Admin
-	async callAdmin() {}
+	async callAdmin(transaction_id) {}
 
 	// masuk activity
 	// Ask Cancellation
-	async askCancellation() {}
+	async askCancellation(transaction_id, message) {}
 
 	// masuk activity
 	// Cancel Cancellation
-	async cancelCancellation() {}
+	async cancelCancellation(transaction_id) {}
 
 	// masuk activity
 	// Manage Return
-	async manageReturn() {}
+	async manageReturn(transaction_id, type) {}
 
 	// Send Feedback
-	async sendFeedback() {}
+	async sendFeedback(payment_id) {}
 };
