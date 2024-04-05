@@ -8,10 +8,12 @@ const BankInformation = require("./bankInformationModel");
 module.exports = class User {
 	constructor() {}
 
+	// Utilities
 	async setId(uuid) {
 		this.id = uuid;
 	}
 
+	// Login
 	async login(username_email, password) {
 		let SP = `
 		select 
@@ -61,6 +63,7 @@ module.exports = class User {
 		}
 	}
 
+	// Register
 	async register(email, username, name, phone, password) {
 		let client_uuid = uuid.v4();
 
@@ -99,6 +102,7 @@ module.exports = class User {
 		}
 	}
 
+	// Logout
 	async logout() {
 		let SP = `
 			update 
@@ -119,6 +123,7 @@ module.exports = class User {
 		}
 	}
 
+	// Inquiry My Profile
 	async getMyProfile(clientId) {
 		let SP = `
 		select 
@@ -140,6 +145,7 @@ module.exports = class User {
 		}
 	}
 
+	// Inquiry Bank Details
 	async getBankDetails(clientId) {
 		let BankInstance = new BankInformation();
 
@@ -152,6 +158,7 @@ module.exports = class User {
 		}
 	}
 
+	// Inquiry Other PRofile
 	async getOtherProfile(clientId) {
 		let SPGetClientDetails = `
 		select 
@@ -189,6 +196,7 @@ module.exports = class User {
 		}
 	}
 
+	// Edit My Profile
 	async editMyprofile(clientId, data, image_url) {
 		let SP = `
 		update 
@@ -213,6 +221,7 @@ module.exports = class User {
 		}
 	}
 
+	// Edit Bank Details
 	async editBankDetails(clientId, body) {
 		let BankInstance = new BankInformation();
 
@@ -225,6 +234,7 @@ module.exports = class User {
 		}
 	}
 
+	// Utilities
 	async addUserImage(image) {
 		let link = "";
 		const clientId = "33df5c9de1e057a";
@@ -257,6 +267,7 @@ module.exports = class User {
 		return link;
 	}
 
+	// Utilities
 	async setUserSessionData(client_id, session_id, session_data) {
 		let SP = `
 			update 
@@ -277,6 +288,7 @@ module.exports = class User {
 		}
 	}
 
+	// Utilities
 	async getUserSessionData(session_id) {
 		let SP = `
 			select
