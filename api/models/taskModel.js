@@ -5,6 +5,7 @@ const Subcategory = require("../models/subcategoryModel");
 const Category = require("../models/categoryModel");
 const Freelancer = require("../models/freelancerModel");
 const Review = require("../models/reviewModel");
+const Midtrans = require("../models/midtransModel");
 
 module.exports = class Task {
 	// Inquiry Tugas Baru
@@ -757,5 +758,95 @@ module.exports = class Task {
 	async chooseFreelancer() {}
 
 	// Request Task Token
-	async getTaskToken() {}
+	async getTaskToken(taskId) {
+		try {
+			let midtransInstance = new Midtrans();
+
+			// get task details
+			let SP1 = `
+			select
+				price,
+				client_id,
+				deadline,
+				freelancer_id
+			from
+				public.task
+			where
+				task_id = '${taskId}'
+			;
+		`;
+
+			let task_result = await db.any(SP1);
+
+			// get client details
+			let SP2 = `
+			select
+			name,
+			email,
+			phone_number
+			from
+			public.client
+			where
+			client_id = '${task_result[0].client_id}'
+			;
+		`;
+
+			let client_result = await db.any(SP2);
+
+			let result = {};
+
+			result.token = await midtransInstance.getToken(
+				taskId,
+				"TASK",
+				task_result[0].price,
+				client_result[0]
+			);
+
+			let trx_uuid = uuid.v4();
+
+			var datetime = new Date();
+			datetime = datetime.toISOString().split("T")[0];
+			console.log(datetime);
+
+			task_result[0].deadline = task_result[0].deadline
+				.toISOString()
+				.split("T")[0];
+
+			let SP3 = `
+			INSERT
+			INTO
+			PUBLIC.TRANSACTION
+			(
+			transaction_id,
+			project_id,
+			client_id,
+			status,
+			deadline,
+			payment_date,
+			freelancer_id,
+			project_type
+			)
+			VALUES
+			(
+			'${trx_uuid}',
+			'${taskId}',
+			'${task_result[0].client_id}',
+			'2',
+			'${task_result[0].deadline}',
+			'${datetime}',
+			'${task_result[0].freelancer_id}',
+			'TASK'
+			)
+		`;
+
+			let trx_result = await db.any(SP3);
+
+			result.payment_id = trx_uuid;
+
+			return result;
+			s;
+		} catch (error) {
+			return new Error("Gagal Membuat Data.");
+		}
+	}
 };

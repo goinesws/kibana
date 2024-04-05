@@ -527,6 +527,50 @@ app.chooseFreelancer = async (req, res) => {
 	return;
 };
 
-app.getRequestToken = async (req, res) => {};
+app.getRequestToken = async (req, res) => {
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	// if (curr_session.session_id == x_token) {
+	let taskId = req.params.taskId;
+
+	let taskInstance = new Task();
+	let task_result = await taskInstance.getTaskToken(taskId);
+
+	if (task_result instanceof Error) {
+		result.error_schema = {
+			error_code: "999",
+			error_message: "Gagal Membuat Data.",
+		};
+		result.output_schema = null;
+
+		res.status(400).send(result);
+		return;
+	} else {
+		result.error_schema = {
+			error_code: "200",
+			error_message: "Sukses.",
+		};
+		result.output_schema = task_result;
+		res.send(result);
+		return;
+	}
+	// } else {
+	// 	result.error_schema = {
+	// 		error_code: "403",
+	// 		error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
+	// 	};
+	// 	result.output_schema = null;
+
+	// 	res.status(400).send(result);
+	// 	return;
+	// }
+};
 
 module.exports = app;
