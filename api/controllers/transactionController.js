@@ -394,4 +394,26 @@ app.sendMessage = async (req, res) => {};
 
 app.sendAdditionalFile = async (req, res) => {};
 
+app.sendResult = async (req, res) => {};
+
+app.askReturn = async (req, res) => {};
+
+app.cancelRturn = async (req, res) => {};
+
+app.askRevision = async (req, res) => {};
+
+app.completeTransaction = async (req, res) => {};
+
+app.manageCancellation = async (req, res) => {};
+
+app.callAdmin = async (req, res) => {};
+
+app.askCancellation = async (req, res) => {};
+
+app.cancelCancellation = async (req, res) => {};
+
+app.manageReturn = async (req, res) => {};
+
+app.sendFeedback = async (req, res) => {};
+
 module.exports = app;
