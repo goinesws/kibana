@@ -543,7 +543,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Requirement
-	async sendRequirement(transaction_iud, file, description) {}
+	async sendRequirement(transaction_id, file, description) {}
 
 	// masuk activity
 	// Send Message

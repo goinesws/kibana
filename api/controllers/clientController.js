@@ -3,9 +3,9 @@ const app = express();
 const User = require("../models/userModel.js");
 const Client = require("../models/clientModel.js");
 const Freelancer = require("../models/freelancerModel.js");
-const Google = require("../models/googleModel.js");
+const Google = require("../utils/googleUtil.js");
 var multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../models/googleModel");
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
 
 app.getClientReview = async (req, res) => {
 	let result = {};

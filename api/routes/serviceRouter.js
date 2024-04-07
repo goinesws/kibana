@@ -8,7 +8,7 @@ const serviceController = require("../controllers/serviceController");
 const subcategoryController = require("../controllers/subcategoryController");
 const categoryController = require("../controllers/categoryController");
 const multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../models/googleModel");
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 

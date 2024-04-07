@@ -8,7 +8,7 @@ const userController = require("../controllers/userController");
 const clientController = require("../controllers/clientController");
 const freelancerController = require("../controllers/freelancerController");
 const multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../models/googleModel");
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 

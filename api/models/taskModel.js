@@ -5,7 +5,7 @@ const Subcategory = require("../models/subcategoryModel");
 const Category = require("../models/categoryModel");
 const Freelancer = require("../models/freelancerModel");
 const Review = require("../models/reviewModel");
-const Midtrans = require("../models/midtransModel");
+const Midtrans = require("../utils/midtransUtil");
 
 module.exports = class Task {
 	// Inquiry Tugas Baru

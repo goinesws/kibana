@@ -3,7 +3,7 @@ const app = express();
 const Freelancer = require("../models/freelancerModel.js");
 const User = require("../models/userModel.js");
 var multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../models/googleModel");
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 
 app.getFreelancerDescription = async (req, res) => {
 	let result = {};
