@@ -1,4 +1,5 @@
 // paymentModel.js
+const Midtrans = require("../models/midtransModel");
 
 class PaymentModel {
 	constructor() {
@@ -42,6 +43,12 @@ class PaymentModel {
 	}
 
 	// Add more methods as needed for your payment-related operations
+
+	async createPayment(id, type, amount, customer) {}
+
+	async updatePaymentStatus(paymentId) {}
+
+	async addTransactionToPayment(paymentId, transactionId) {}
 }
 
 module.exports = PaymentModel;

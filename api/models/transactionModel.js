@@ -595,4 +595,7 @@ module.exports = class Transaction {
 
 	// Send Feedback
 	async sendFeedback(payment_id) {}
+
+	// Create Transac After Payment Berhasil
+	async createTransaction() {}
 };

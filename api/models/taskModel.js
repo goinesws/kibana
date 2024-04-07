@@ -795,6 +795,7 @@ module.exports = class Task {
 
 			let result = {};
 
+			// ini pindah ke payment model
 			result.token = await midtransInstance.getToken(
 				taskId,
 				"TASK",
