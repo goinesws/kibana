@@ -339,7 +339,9 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Inquiry Activity Pesanan Client
-	async getTransactionActivityClient(transaction_id) {}
+	async getTransactionActivityClient(transaction_id) {
+        // getClientActivity(transaction_id) di activity model
+    }
 
 	// Inquiry Detail Pesanan Layanan Client
 	async getTransactionDetailsServiceClient(transaction_id) {
@@ -540,7 +542,9 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Inquiry Activity Pesanan Freelancer
-	async getTransactionActivityFreelancer(transaction_id) {}
+	async getTransactionActivityFreelancer(transaction_id) {
+        // getFreelancerActivity(transaction_id) activitymodel
+    }
 
 	// masuk activity
 	// Send Requirement

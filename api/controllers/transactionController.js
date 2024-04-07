@@ -229,12 +229,13 @@ app.getClientTransactionActivity = async (req, res) => {
 
 	if (curr_session.session_id == x_token) {
 		let transaction_id = req.params.transactionId;
-
+		console.log(curr_session+"1")
 		let transactionInstance = new Transaction();
 		let transaction_client = await transactionInstance.getTransactionClient(
 			transaction_id
 		);
 
+		console.log(curr_session+"2")
 		if (transaction_client.username == curr_session.session_data.username) {
 			let transaction_result =
 				await transactionInstance.getTransactionActivityClient(transaction_id);
@@ -383,37 +384,112 @@ app.getTransactionDetailsFreelancerService = async (req, res) => {
 };
 
 app.getFreelancerTransactionActivity = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		let transaction_id = req.params.transactionId;
+
+		let transactionInstance = new Transaction();
+		let transaction_client = await transactionInstance.getTransactionClient(
+			transaction_id
+		);
+
+		if (transaction_client.username == curr_session.session_data.username) {
+			let transaction_result =
+				await transactionInstance.getTransactionActivityClient(transaction_id);
+
+			if (transaction_result instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.DATA_NOT_FOUND,
+				};
+				result.output_schema = null;
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+				result.output_schema.activity = transaction_result;
+			}
+		} else {
+			result.error_schema = {
+				error_code: "403",
+				error_message: errorMessages.NOT_PROJECT_OWNER,
+			};
+			result.output_schema = null;
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.sendRequirement = async (req, res) => {
 	res.send("Good");
 };
 
-app.sendMessage = async (req, res) => {};
+app.sendMessage = async (req, res) => {
+	res.send("Good");
+};
 
-app.sendAdditionalFile = async (req, res) => {};
+app.sendAdditionalFile = async (req, res) => {
+	res.send("Good");
+};
 
-app.sendResult = async (req, res) => {};
+app.sendResult = async (req, res) => {
+	res.send("Good");
+};
 
-app.askReturn = async (req, res) => {};
+app.askReturn = async (req, res) => {
+	res.send("Good");
+};
 
-app.cancelReturn = async (req, res) => {};
+app.cancelReturn = async (req, res) => {
+	res.send("Good");
+};
 
-app.askRevision = async (req, res) => {};
+app.askRevision = async (req, res) => {
+	res.send("Good");
+};
 
-app.completeTransaction = async (req, res) => {};
+app.completeTransaction = async (req, res) => {
+	res.send("Good");
+};
 
-app.manageCancellation = async (req, res) => {};
+app.manageCancellation = async (req, res) => {
+	res.send("Good");
+};
 
-app.callAdmin = async (req, res) => {};
+app.callAdmin = async (req, res) => {
+	res.send("Good");
+};
 
-app.askCancellation = async (req, res) => {};
+app.askCancellation = async (req, res) => {
+	res.send("Good");
+};
 
-app.cancelCancellation = async (req, res) => {};
+app.cancelCancellation = async (req, res) => {
+	res.send("Good");
+};
 
-app.manageReturn = async (req, res) => {};
+app.manageReturn = async (req, res) => {
+	res.send("Good");
+};
 
-app.sendFeedback = async (req, res) => {};
+app.sendFeedback = async (req, res) => {
+	res.send("Good");
+};
 
 module.exports = app;
