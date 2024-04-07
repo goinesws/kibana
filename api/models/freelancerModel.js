@@ -5,7 +5,7 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 const User = require("./userModel");
 const Education = require("./educationModel");
-const Google = require("./googleModel");
+const Google = require("../utils/googleUtil");
 
 module.exports = class Freelancer extends User {
 	// Inquiry Freelancer Description
