@@ -1,4 +1,5 @@
 // paymentModel.js
+const db = require("../../db");
 const Midtrans = require("../utils/midtransUtil");
 const Transaction = require("../models/transactionModel");
 const uuid = require("uuid");
@@ -57,8 +58,6 @@ class Payment {
 			console.log("Token : ");
 			console.log(token);
 
-			console.log(customer);
-
 			let transaction_id = await transactionInstance.createTransaction(
 				projectId,
 				customer.client_id,
@@ -72,7 +71,7 @@ class Payment {
 
 			let payment_id = uuid.v4();
 
-			let SP = `
+			let query = `
 				INSERT 
 				INTO
 				PUBLIC.PAYMENT
@@ -89,16 +88,16 @@ class Payment {
 					'${payment_id}',
 					'${transaction_id}',
 					'0',
-					${nominal},
+					'${nominal}',
 					'${time_started}',
 					null
-				)
+				);
 			`;
 
 			console.log("SP PAYMENT : ");
-			console.log(SP);
+			console.log(query);
 
-			let payment_result = await db.any(SP);
+			let payment_result = await db.any(query);
 
 			console.log("PAYMENT ID:");
 			console.log(payment_id);

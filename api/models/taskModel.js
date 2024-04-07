@@ -588,7 +588,6 @@ module.exports = class Task {
     and
     client_id = '${userId}'
     or
-    or
     client_id = 
     (
       select 
