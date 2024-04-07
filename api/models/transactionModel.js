@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../../db");
 const Review = require("../models/reviewModel");
 const Task = require("../models/taskModel");
+const uuid = require("uuid");
 
 module.exports = class Transaction {
 	// Utilities
@@ -596,6 +597,81 @@ module.exports = class Transaction {
 	// Send Feedback
 	async sendFeedback(payment_id) {}
 
-	// Create Transac After Payment Berhasil
-	async createTransaction() {}
+	// Create Transac Buat Payment
+	async createTransaction(project_id, client_id, freelancer_id, project_type) {
+		try {
+			let trx_uuid = uuid.v4();
+
+			let project;
+
+			if (project.project_type == "TASK") {
+				let SPP = `
+                select
+                *
+                from
+                public.task
+                where
+                task_id = '${project_id}'
+                `;
+
+				project = await db.any(SPP);
+				project = project[0];
+			} else if (project.project_type == "SERVICE") {
+				let SPP = `
+                select
+                *
+                from
+                public.service
+                where
+                service_id = '${project_id}'
+                `;
+
+				project = await db.any(SPP);
+				project = project[0];
+			}
+
+			let SP = `
+                INSERT
+                INTO
+                PUBLIC.TRANSACTION
+                (
+                    transaction_id,
+                    project_id,
+                    client_id,
+                    status,
+                    deadline,
+                    delivery_date,
+                    remaining_revision,
+                    is_need_admin,
+                    can_cancel,
+                    can_return,
+                    payment_date,
+                    freelancer_id,
+                    project_type
+                )
+                VALUES
+                (
+                    '${trx_uuid}',
+                    '${project_id}',
+                    '${client_id}',
+                    '${status}',
+                    '${deadline}',
+                    '${delivery_date}',
+                    '${remaning_revision}',
+                    '${is_need_admin}',
+                    '${can_cancel}',
+                    '${can_return}',
+                    '${payment_date}',
+                    '${freelancer_id}',
+                    '${project_type}'
+                )
+            `;
+
+			let insert_result = await db.any(SP);
+
+			return trx_uuid;
+		} catch (error) {
+			return new Error("Gagal Menciptakan Transaksi.");
+		}
+	}
 };

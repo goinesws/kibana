@@ -8,7 +8,7 @@ const taskController = require("../controllers/taskController");
 const subcategoryController = require("../controllers/subcategoryController");
 const categoryController = require("../controllers/categoryController");
 const multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -28,7 +28,7 @@ router.get("/:taskId/freelancer-list", taskController.getRegisteredFreelancer);
 router.put("/:taskId/delete", taskController.deleteTask);
 router.get("/history", taskController.getTaskHistory);
 router.get("/history/:taskId", taskController.getTaskHistoryDetails);
-router.post("/:taskId/choose-freelancer", taskController.chooseFreelancer);
 router.post("/:taskId/request-token", taskController.getRequestToken);
+router.put("/:taskId/register", taskController.registerForTask);
 
 module.exports = router;

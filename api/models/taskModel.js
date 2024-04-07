@@ -2,10 +2,7 @@ const express = require("express");
 const db = require("../../db");
 const uuid = require("uuid");
 const Subcategory = require("../models/subcategoryModel");
-const Category = require("../models/categoryModel");
-const Freelancer = require("../models/freelancerModel");
-const Review = require("../models/reviewModel");
-const Midtrans = require("../utils/midtransUtil");
+const Payment = require("../models/paymentModel");
 
 module.exports = class Task {
 	// Inquiry Tugas Baru
@@ -754,13 +751,29 @@ module.exports = class Task {
 		}
 	}
 
-	// Pilih Freelancer
-	async chooseFreelancer() {}
-
 	// Request Task Token
-	async getTaskToken(taskId) {
+	async getTaskToken(taskId, freelancerId) {
 		try {
-			let midtransInstance = new Midtrans();
+			// cek apakah freelancerId dipilih sudah terdaftar
+			let SPC = `
+			select
+			count(*)
+			from 
+			task_enrollment
+			where
+			task_id = '${taskId}'
+			and
+			freelancer_id = '${freelancerId}'
+			`;
+
+			let cnt = await db.any(SPC);
+
+			console.log("FREELANCER - TASK COUNT :");
+			console.log(cnt[0].count);
+
+			if (cnt[0].count != 1) {
+				return new Error("Tidak ada Pendaftaran Freelancer dan Task Tersebut.");
+			}
 
 			// get task details
 			let SP1 = `
@@ -781,6 +794,7 @@ module.exports = class Task {
 			// get client details
 			let SP2 = `
 			select
+			client_id,
 			name,
 			email,
 			phone_number
@@ -793,61 +807,33 @@ module.exports = class Task {
 
 			let client_result = await db.any(SP2);
 
-			let result = {};
-
 			// ini pindah ke payment model
-			result.token = await midtransInstance.getToken(
+			let time = Date.now();
+
+			console.log("Current Time : ");
+			console.log(time);
+
+			let paymentInstance = new Payment();
+
+			let result = paymentInstance.createPayment(
 				taskId,
 				"TASK",
 				task_result[0].price,
-				client_result[0]
+				client_result[0],
+				freelancerId,
+				time
 			);
 
-			let trx_uuid = uuid.v4();
-
-			var datetime = new Date();
-			datetime = datetime.toISOString().split("T")[0];
-			console.log(datetime);
-
-			task_result[0].deadline = task_result[0].deadline
-				.toISOString()
-				.split("T")[0];
-
-			let SP3 = `
-			INSERT
-			INTO
-			PUBLIC.TRANSACTION
-			(
-			transaction_id,
-			project_id,
-			client_id,
-			status,
-			deadline,
-			payment_date,
-			freelancer_id,
-			project_type
-			)
-			VALUES
-			(
-			'${trx_uuid}',
-			'${taskId}',
-			'${task_result[0].client_id}',
-			'2',
-			'${task_result[0].deadline}',
-			'${datetime}',
-			'${task_result[0].freelancer_id}',
-			'TASK'
-			)
-		`;
-
-			let trx_result = await db.any(SP3);
-
-			result.payment_id = trx_uuid;
+			if (result instanceof Error) {
+				return new Error(result.message);
+			}
 
 			return result;
-			s;
 		} catch (error) {
-			return new Error("Gagal Membuat Data.");
+			return new Error("Gagal Membuat Transaksi/Token.");
 		}
 	}
+
+	// Daftar Untuk Mengerjakan
+	async registerForTask(taskId, userId) {}
 };

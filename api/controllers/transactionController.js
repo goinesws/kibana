@@ -398,7 +398,7 @@ app.sendResult = async (req, res) => {};
 
 app.askReturn = async (req, res) => {};
 
-app.cancelRturn = async (req, res) => {};
+app.cancelReturn = async (req, res) => {};
 
 app.askRevision = async (req, res) => {};
 

@@ -54,5 +54,5 @@ module.exports = class Activity {
 	// Ask Cancellation
 	// Cancel Cancellation
 	// Manage Return
-	async createActivity(transaction_id, activity) {}
+	async createActivity(transaction_id, activity, file) {}
 };

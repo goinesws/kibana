@@ -10,6 +10,8 @@ var multer = require("multer");
 const axios = require("axios");
 const FormData = require("form-data");
 const path = require("path");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 app.getNewService = async (req, res) => {
 	var result = {};
@@ -150,9 +152,6 @@ app.getServiceDetail = async (req, res) => {
 	res.send(result);
 	return;
 };
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 app.createNewService = async (req, res) => {
 	var serviceInstance = new Service();
