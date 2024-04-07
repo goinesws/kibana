@@ -134,13 +134,11 @@ async function getDownloadLink(id) {
 
 async function getFileName(authClient, id) {
 	try {
-		// Fetch file metadata from Google Drive.
 		const drive = google.drive({ version: "v3", auth: authClient });
 		const fileInfo = await drive.files.get({
 			fileId: id,
 		});
 
-		// Get the file name from the metadata.
 		const fileName = fileInfo.data.name;
 
 		return fileName;

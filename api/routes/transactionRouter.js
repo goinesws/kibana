@@ -45,12 +45,6 @@ router.get(
 	transactionController.getTransactionDetailsFreelancerTask
 );
 
-//inquiry activity pesanan client
-router.get(
-	"/:transactionId/client/activity",
-	transactionController.getClientTransactionActivity
-);
-
 //Inquiry Detail Pesanan Layanan Client
 router.get(
 	"/service/client/:transactionId",
@@ -63,34 +57,100 @@ router.get(
 	transactionController.getTransactionDetailsFreelancerService
 );
 
+//inquiry activity pesanan client
+router.get(
+	"/:transactionId/client/activity",
+	transactionController.getClientTransactionActivity
+);
+
 //inquiry activity pesanan freelancer
+router.get(
+	":transactionId/freelancer/activity",
+	transactionController.getFreelancerTransactionActivity
+);
 
 //send requirement
+router.post(
+	"send-requirement",
+	transactionController.sendRequirement
+);
 
 //send message
+router.post(
+	"send-message",
+	transactionController.sendMessage
+);
 
 //send additional file
+router.post(
+	"send-file",
+	transactionController.sendAdditionalFile
+);
 
 //send result
+router.post(
+	"send-result",
+	transactionController.sendResult
+);
 
 //ask return
+router.post(
+	"ask-return",
+	transactionController.askReturn
+);
 
 //cancel return
+router.put(
+	"cancel-return",
+	transactionController.cancelReturn
+);
 
 //ask revision
+router.post(
+	"ask-revision",
+	transactionController.askRevision
+);
 
 //complete transaksi
+router.put(
+	"complete",
+	transactionController.completeTransaction
+);
 
 //manage cancellation
+router.post(
+	"manage-cancellation",
+	transactionController.manageCancellation
+);
 
 //call admin
+router.put(
+	"call-admin",
+	transactionController.callAdmin
+);
 
 //ask cancellation
+router.post(
+	"ask-cancellation",
+	transactionController.askCancellation
+);
 
 //cancel cancellation
+router.put(
+	"cancel-cancellation",
+	transactionController.cancelCancellation
+);
 
 //manage return
+router.post(
+	"manage-return",
+	transactionController.manageReturn
+);
 
 //send feedback - transaction
+router.put(
+	":paymentId/send-feedback",
+	transactionController.sendFeedback
+);
 
 module.exports = router;
