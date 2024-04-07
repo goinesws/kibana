@@ -472,7 +472,7 @@ module.exports = class Task {
     END review
     from 
     public.task t
-    join
+    left join
     public.transaction tr
     on
     tr.project_id = t.task_id
@@ -808,9 +808,11 @@ module.exports = class Task {
 			let client_result = await db.any(SP2);
 
 			// ini pindah ke payment model
-			let time = Date.now();
 
-			console.log("Current Time : ");
+			let time = new Date().toLocaleString("en-UK", {
+				timeZone: "Asia/Jakarta",
+			});
+			console.log("Time : ");
 			console.log(time);
 
 			let paymentInstance = new Payment();

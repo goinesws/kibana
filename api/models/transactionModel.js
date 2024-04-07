@@ -605,10 +605,15 @@ module.exports = class Transaction {
 	async createTransaction(project_id, client_id, freelancer_id, project_type) {
 		try {
 			let trx_uuid = uuid.v4();
-
 			let project;
+			let SP;
 
-			if (project.project_type == "TASK") {
+			console.log(project_type);
+
+			if (project_type == "TASK") {
+				console.log("PROJECT ID:");
+				console.log(project_id);
+
 				let SPP = `
                 select
                 *
@@ -620,21 +625,11 @@ module.exports = class Transaction {
 
 				project = await db.any(SPP);
 				project = project[0];
-			} else if (project.project_type == "SERVICE") {
-				let SPP = `
-                select
-                *
-                from
-                public.service
-                where
-                service_id = '${project_id}'
-                `;
 
-				project = await db.any(SPP);
-				project = project[0];
-			}
+				console.log("PROJECT : ");
+				console.log(project);
 
-			let SP = `
+				SP = `
                 INSERT
                 INTO
                 PUBLIC.TRANSACTION
@@ -658,24 +653,42 @@ module.exports = class Transaction {
                     '${trx_uuid}',
                     '${project_id}',
                     '${client_id}',
-                    '${status}',
-                    '${deadline}',
-                    '${delivery_date}',
-                    '${remaning_revision}',
-                    '${is_need_admin}',
-                    '${can_cancel}',
-                    '${can_return}',
-                    '${payment_date}',
+                    '2',
+                    '${project.deadline.toLocaleString("en-UK", {
+											timeZone: "Asia/Jakarta",
+										})}',
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
                     '${freelancer_id}',
                     '${project_type}'
                 )
-            `;
+                `;
+
+				console.log("SP");
+				console.log(SP);
+			} else if (project_type == "SERVICE") {
+				let SPP = `
+                select
+                *
+                from
+                public.service
+                where
+                service_id = '${project_id}'
+                `;
+
+				project = await db.any(SPP);
+				project = project[0];
+			}
 
 			let insert_result = await db.any(SP);
 
 			return trx_uuid;
 		} catch (error) {
-			return new Error("Gagal Menciptakan Transaksi.");
+			return new Error("Gagal Membuat Transaksi.");
 		}
 	}
 };

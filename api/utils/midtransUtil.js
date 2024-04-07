@@ -10,7 +10,7 @@ module.exports = class Midtrans {
 
 			let parameter = {
 				transaction_details: {
-					order_id: "KIBANA-" + type + "-" + id,
+					order_id: "KIBANA-" + type + "-" + project_id,
 					gross_amount: price,
 				},
 				credit_card: {

@@ -1,6 +1,7 @@
 // paymentModel.js
 const Midtrans = require("../utils/midtransUtil");
 const Transaction = require("../models/transactionModel");
+const uuid = require("uuid");
 
 class Payment {
 	constructor() {
@@ -53,16 +54,61 @@ class Payment {
 				return new Error(token.message);
 			}
 
-			let payment_id = await transactionInstance.createTransaction();
+			console.log("Token : ");
+			console.log(token);
 
-			if (payment_id instanceof Error) {
-				return new Error(payment_id.message);
+			console.log(customer);
+
+			let transaction_id = await transactionInstance.createTransaction(
+				projectId,
+				customer.client_id,
+				freelancerId,
+				"TASK"
+			);
+
+			if (transaction_id instanceof Error) {
+				return new Error(transaction_id.message);
 			}
+
+			let payment_id = uuid.v4();
+
+			let SP = `
+				INSERT 
+				INTO
+				PUBLIC.PAYMENT
+				(
+					PAYMENT_ID,
+					TRANSACTION_ID,
+					STATUS,
+					NOMINAL,
+					TIME_STARTED,
+					TIME_PAID
+				)
+				VALUES
+				(
+					'${payment_id}',
+					'${transaction_id}',
+					'0',
+					${nominal},
+					'${time_started}',
+					null
+				)
+			`;
+
+			console.log("SP PAYMENT : ");
+			console.log(SP);
+
+			let payment_result = await db.any(SP);
+
+			console.log("PAYMENT ID:");
+			console.log(payment_id);
 
 			let result = {};
 
 			result.token = token;
 			result.payment_id = payment_id;
+
+			return result;
 		} catch (error) {
 			return new Error("Gagal Membuat Pembayaran");
 		}
