@@ -65,91 +65,94 @@ router.get(
 
 //inquiry activity pesanan freelancer
 router.get(
-	":transactionId/freelancer/activity",
+	"/:transactionId/freelancer/activity",
 	transactionController.getFreelancerTransactionActivity
 );
 
 //send requirement
 router.post(
-	"send-requirement",
+	"/send-requirement",
+	upload.fields([
+		{ name: "supporting_file", maxCount: 1 }
+	]),
 	transactionController.sendRequirement
 );
 
 //send message
 router.post(
-	"send-message",
+	"/send-message",
 	transactionController.sendMessage
 );
 
 //send additional file
 router.post(
-	"send-file",
+	"/send-file",
 	transactionController.sendAdditionalFile
 );
 
 //send result
 router.post(
-	"send-result",
+	"/send-result",
 	transactionController.sendResult
 );
 
 //ask return
 router.post(
-	"ask-return",
+	"/ask-return",
 	transactionController.askReturn
 );
 
 //cancel return
 router.put(
-	"cancel-return",
+	"/cancel-return",
 	transactionController.cancelReturn
 );
 
 //ask revision
 router.post(
-	"ask-revision",
+	"/ask-revision",
 	transactionController.askRevision
 );
 
 //complete transaksi
 router.put(
-	"complete",
+	"/complete",
 	transactionController.completeTransaction
 );
 
 //manage cancellation
 router.post(
-	"manage-cancellation",
+	"/manage-cancellation",
 	transactionController.manageCancellation
 );
 
 //call admin
 router.put(
-	"call-admin",
+	"/call-admin",
 	transactionController.callAdmin
 );
 
 //ask cancellation
 router.post(
-	"ask-cancellation",
+	"/ask-cancellation",
 	transactionController.askCancellation
 );
 
 //cancel cancellation
 router.put(
-	"cancel-cancellation",
+	"/cancel-cancellation",
 	transactionController.cancelCancellation
 );
 
 //manage return
 router.post(
-	"manage-return",
+	"/manage-return",
 	transactionController.manageReturn
 );
 
 //send feedback - transaction
 router.put(
-	":paymentId/send-feedback",
+	"/:paymentId/send-feedback",
 	transactionController.sendFeedback
 );
 

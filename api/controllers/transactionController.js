@@ -4,6 +4,8 @@ const Transaction = require("../models/transactionModel.js");
 const Service = require("../models/serviceModel.js");
 const Task = require("../models/taskModel.js");
 const User = require("../models/userModel.js");
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
+
 const errorMessages = require("../messages/errorMessages");
 
 app.getTransactionInvoice = async (req, res) => {
@@ -437,11 +439,100 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 };
 
 app.sendRequirement = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		//upload the file to google docs
+		const file = await authorize()
+			.then((auth) => {
+				if (req.files && req.files["supporting_file"]) {
+					const file = req.files["supporting_file"][0];
+					return uploadFile(auth, file);
+				} else {
+					console.log("No file has been uploaded");
+				}
+			})
+			.then((resultCode) => {
+				const id = resultCode;
+				return id;
+			})
+			.catch((err) => {
+				console.error("Error:", err);
+				return null;
+			});
+		let data = JSON.parse(req.body.data);
+		const transaction_id = data.transaction_id;
+		const description = data.description;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.sendRequirement(transaction_id, file, description, x_token);
+
+			if (insert instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.DATA_NOT_FOUND,
+				};
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+			}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};  
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.sendMessage = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+		const message = req.body.message;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.sendMessage(transaction_id, message, x_token);
+
+			if (insert instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.DATA_NOT_FOUND,
+				};
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+			}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};  
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.sendAdditionalFile = async (req, res) => {

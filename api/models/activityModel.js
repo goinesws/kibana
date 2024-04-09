@@ -54,5 +54,38 @@ module.exports = class Activity {
 	// Ask Cancellation
 	// Cancel Cancellation
 	// Manage Return
-	async createActivity(transaction_id, activity, file) {}
+	async createActivity(transaction_id, activity, file) {
+		let id = activity.id === undefined ? null : `'${activity.id}'`;
+		let client_id = activity.client_id === undefined ? null : `'${activity.client_id}'`;
+		let title = activity.title === undefined ? null : `'${activity.title}'`;
+		let content = activity.content === undefined ? null : `'${activity.content}'`;
+		let code = activity.code === undefined ? null : `'${activity.code}'`;
+		let code_temp = activity.code_temp === undefined ? null : `'${activity.code_temp}'`;
+		let response_deadline = activity.response_deadline === undefined ? null : `'${activity.response_deadline}'`;
+		let deadline_extension = activity.deadline_extension === undefined ? null : `'${activity.deadline_extension}'`;
+		let file_array = file === null ? null : `ARRAY['${file}']`; 
+		let SP = `
+            INSERT INTO public.activity(
+                activity_id, transaction_id, client_id, date, title, content, attachment, code, code_temp, response_deadline, deadline_extension)
+            VALUES (
+                ${id}, 
+                '${transaction_id}', 
+                ${client_id}, 
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta', 
+                ${title}, 
+                ${content}, 
+				${file_array},
+				${code},
+				${code_temp},
+				${response_deadline},
+				${deadline_extension}
+            );
+        `;
+		try {
+			let result = await db.any(SP);
+            return "Data telah dimasukkan";
+		} catch (error) {
+			return new Error("Gagal Memasukkan Data.");
+		}
+	}
 };

@@ -3,6 +3,9 @@ const db = require("../../db");
 const Review = require("../models/reviewModel");
 const Task = require("../models/taskModel");
 const uuid = require("uuid");
+const User = require("../models/userModel");
+const Activity = require("../models/activityModel.js");
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 
 module.exports = class Transaction {
 	// Utilities
@@ -339,9 +342,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Inquiry Activity Pesanan Client
-	async getTransactionActivityClient(transaction_id) {
-        // getClientActivity(transaction_id) di activity model
-    }
+
 
 	// Inquiry Detail Pesanan Layanan Client
 	async getTransactionDetailsServiceClient(transaction_id) {
@@ -545,14 +546,57 @@ module.exports = class Transaction {
 	async getTransactionActivityFreelancer(transaction_id) {
         // getFreelancerActivity(transaction_id) activitymodel
     }
+    
+    async getTransactionActivityClient(transaction_id) {
+        // getClientActivity(transaction_id) di activity model
+    }
 
 	// masuk activity
 	// Send Requirement
-	async sendRequirement(transaction_id, file, description) {}
+	async sendRequirement(transaction_id, file, description, x_token) {
+        let id = uuid.v4();
+
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        //date ambil dari query sql
+        let title = "menambahkan file pendukung dan deskripsi";
+        let activity = {};
+        activity.id = id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.content = description;
+        activity.code = "2";
+
+        let activityInstance = new Activity();
+        let result = await activityInstance.createActivity(transaction_id, activity, file);
+
+        return result;
+    }
 
 	// masuk activity
 	// Send Message
-	async sendMessage(transaction_id, message) {}
+	async sendMessage(transaction_id, message, x_token) {
+        let id = uuid.v4();
+
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "mengirim pesan";
+        let file = null;
+
+        let activity = {};
+        activity.id = id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.content = message;
+        activity.code = "4";
+
+        console.log(activity);
+        let activityInstance = new Activity();
+        let result = await activityInstance.createActivity(transaction_id, activity, file);
+        return result;
+    }
 
 	// masuk activity
 	// Send Additional File
