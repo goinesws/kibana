@@ -620,7 +620,7 @@ module.exports = class Task {
       public.task
       where task_id = '${taskId}'
       and 
-      client_id = '${userId}'
+      (client_id = '${userId}'
       or
       client_id = 
       (
@@ -634,8 +634,8 @@ module.exports = class Task {
         c.client_id = f.user_id
         where
         f.freelancer_id = '${userId}'
-      )
-      ;
+      ))
+      ;	
     `;
 
 		try {
