@@ -410,7 +410,7 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.INSERT_ERROR,
 				};
 				result.output_schema = null;
 			} else {
@@ -472,12 +472,13 @@ app.sendRequirement = async (req, res) => {
 		const description = data.description;
 
 		let transactionInstance = new Transaction();
+		console.log(file + "CONTROLLER")
 		let insert = await transactionInstance.sendRequirement(transaction_id, file, description, x_token);
 
 			if (insert instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.INSERT_ERROR,
 				};
 			} else {
 				result.error_schema = {
@@ -516,7 +517,7 @@ app.sendMessage = async (req, res) => {
 			if (insert instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.INSERT_ERROR,
 				};
 			} else {
 				result.error_schema = {
@@ -536,11 +537,119 @@ app.sendMessage = async (req, res) => {
 };
 
 app.sendAdditionalFile = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		//upload the file to google docs
+		const file = await authorize()
+			.then((auth) => {
+				if (req.files && req.files["additional_file"]) {
+					const file = req.files["additional_file"][0];
+					return uploadFile(auth, file);
+				} else {
+					console.log("No file has been uploaded");
+				}
+			})
+			.then((resultCode) => {
+				const id = resultCode;
+				return id;
+			})
+			.catch((err) => {
+				console.error("Error:", err);
+				return null;
+			});
+			console.log(req.body);
+		let data = JSON.parse(req.body.data);
+		const transaction_id = data.transaction_id;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.sendAdditionalFile(transaction_id, file, x_token);
+
+			if (insert instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.DATA_NOT_FOUND,
+				};
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+			}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};  
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.sendResult = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		//upload the file to google docs
+		const file = await authorize()
+			.then((auth) => {
+				if (req.files && req.files["additional_file"]) {
+					const file = req.files["additional_file"][0];
+					return uploadFile(auth, file);
+				} else {
+					console.log("No file has been uploaded");
+				}
+			})
+			.then((resultCode) => {
+				const id = resultCode;
+				return id;
+			})
+			.catch((err) => {
+				console.error("Error:", err);
+				return null;
+			});
+			console.log(req.body);
+		let data = JSON.parse(req.body.data);
+		const transaction_id = data.transaction_id;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.sendAdditionalFile(transaction_id, file, x_token);
+
+			if (insert instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.DATA_NOT_FOUND,
+				};
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+			}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};  
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.askReturn = async (req, res) => {

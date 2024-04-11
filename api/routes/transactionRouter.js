@@ -87,12 +87,20 @@ router.post(
 //send additional file
 router.post(
 	"/send-file",
+	upload.fields([
+		{ name: "additional_file", maxCount: 1 }
+	]),
 	transactionController.sendAdditionalFile
 );
 
 //send result
 router.post(
 	"/send-result",
+	upload.fields([
+		{ name: "result_1", maxCount: 1 },
+		{ name: "result_2", maxCount: 1 },
+		{ name: "result_3", maxCount: 1 }
+	]),
 	transactionController.sendResult
 );
 

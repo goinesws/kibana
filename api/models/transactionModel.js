@@ -554,22 +554,25 @@ module.exports = class Transaction {
 	// masuk activity
 	// Send Requirement
 	async sendRequirement(transaction_id, file, description, x_token) {
-        let id = uuid.v4();
-
         let UserInstance = new User();
         let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
         //date ambil dari query sql
         let title = "menambahkan file pendukung dan deskripsi";
         let activity = {};
-        activity.id = id;
+        activity.transaction_id = transaction_id;
         activity.client_id = client_id;
         activity.title = title;
         activity.content = description;
+        activity.file = file;
         activity.code = "2";
 
+        //response deadline is the same as the transaction deadline
+        activity.response_deadline = new Date(await this.getDeadline(transaction_id));
+        console.log(activity.response_deadline)
+
         let activityInstance = new Activity();
-        let result = await activityInstance.createActivity(transaction_id, activity, file);
+        let result = await activityInstance.createActivity(activity);
 
         return result;
     }
@@ -577,8 +580,6 @@ module.exports = class Transaction {
 	// masuk activity
 	// Send Message
 	async sendMessage(transaction_id, message, x_token) {
-        let id = uuid.v4();
-
         let UserInstance = new User();
         let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -586,7 +587,7 @@ module.exports = class Transaction {
         let file = null;
 
         let activity = {};
-        activity.id = id;
+        activity.transaction_id = transaction_id;
         activity.client_id = client_id;
         activity.title = title;
         activity.content = message;
@@ -594,17 +595,40 @@ module.exports = class Transaction {
 
         console.log(activity);
         let activityInstance = new Activity();
-        let result = await activityInstance.createActivity(transaction_id, activity, file);
+        let result = await activityInstance.createActivity(activity);
         return result;
     }
 
 	// masuk activity
 	// Send Additional File
-	async sendAdditionalFile(transaction_id, additionalFile) {}
+	async sendAdditionalFile(transaction_id, additionalFile, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        //date ambil dari query sql
+        let title = "menambahkan file pendukung";
+        let activity = {};
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.file = additionalFile;
+        activity.code = "3";
+
+        let activityInstance = new Activity();
+        let result = await activityInstance.createActivity(activity);
+
+        return result;
+    }
 
 	// masuk activity
 	// Send Result
-	async sendResult(transaction_id, files, description) {}
+	async sendResult(transaction_id, files, description) {
+
+        //create activity
+
+        //change transaction status
+        this.changeStatus(transaction_id, 3)
+    }
 
 	// masuk activity
 	// Ask Return
@@ -735,4 +759,40 @@ module.exports = class Transaction {
 			return new Error("Gagal Membuat Transaksi.");
 		}
 	}
+
+    //change status
+    async changeStatus(transaction_id, status) {
+
+    }
+
+    async getDeadline(transaction_id) {
+        //find latest activity, get the code, to use for code_temp in new activity
+		let SP = `
+            SELECT deadline
+            FROM transaction
+            WHERE transaction_id = '${transaction_id}'    
+        `;
+
+        try {
+            let result = await db.any(SP);
+            if (result.length < 1) {
+                throw new Error("Gagal Mendapatkan Data.");
+            } else {
+                return result[0].deadline;
+            }
+        } catch (error) {
+            throw new Error("Gagal Mendapatkan Data.");
+        }
+    }
+
+    async editDeadline(transaction_id) {
+
+    }
+
+    async deleteActivityResponseDeadline(transaction_id) {
+        //update to null semua response deadline dari semua activity yang ada di transaction tersebut
+        //hiit this before creating new activity with response deadline karena hanya ada satu activity yang boleh punya active response deadline
+    }
+
+    
 };
