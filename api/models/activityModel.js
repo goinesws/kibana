@@ -63,6 +63,23 @@ module.exports = class Activity {
 		}
     }
 
+	async updateResponseDeadline(transaction_id) {
+        //delete all response deadline in that transaction so we can add a new one
+		let SP = `
+			UPDATE activity
+			SET response_deadline = NULL
+			WHERE transaction_id = '${transaction_id}';
+		`;
+
+		try {
+			console.log(SP)
+			let result = await db.any(SP);
+			return null;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+    }
+
 	// Send Requirement
 	// Send Message
 	// Send Additional File
@@ -87,9 +104,11 @@ module.exports = class Activity {
 		let response_deadline;
 		if(activity.response_deadline === undefined) {
 			response_deadline = null;
+		} else if (activity.response_deadline == "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'") {
+			response_deadline = activity.response_deadline;
 		} else {
 			const parsedDate = new Date(activity.response_deadline);
-			response_deadline = parsedDate.toISOString().toString();
+			response_deadline = `'${parsedDate.toISOString()}'`;
 		}
 
 		let deadline_extension = activity.deadline_extension === undefined ? null : `'${activity.deadline_extension}'`;
@@ -111,7 +130,7 @@ module.exports = class Activity {
                 ${content}, 
 				${file_array},
 				${code},
-				'${code_temp}',
+				${code_temp},
 				${response_deadline},
 				${deadline_extension}
             );
@@ -124,4 +143,5 @@ module.exports = class Activity {
 			return new Error("Gagal Memasukkan Data.");
 		}
 	}
+	
 };

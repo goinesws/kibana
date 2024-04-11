@@ -605,12 +605,21 @@ app.sendResult = async (req, res) => {
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
 	if (curr_session.session_id == x_token) {
-		//upload the file to google docs
-		const file = await authorize()
+		//upload the file(s) to google docs
+
+		let file = [];
+		file = await authorize()
 			.then((auth) => {
-				if (req.files && req.files["additional_file"]) {
-					const file = req.files["additional_file"][0];
-					return uploadFile(auth, file);
+				if (req.files && req.files["result_1"]) {
+					let result = req.files["result_1"][0];
+					file.push(uploadFile(auth, result));
+					if (req.files["result_2"])
+						result = req.files["result_2"][0];
+						file.push(uploadFile(auth, result));
+					if (req.files["result_3"])
+						result = req.files["result_3"][0];
+						file.push(uploadFile(auth, result));
+					return file;
 				} else {
 					console.log("No file has been uploaded");
 				}
@@ -623,12 +632,13 @@ app.sendResult = async (req, res) => {
 				console.error("Error:", err);
 				return null;
 			});
-			console.log(req.body);
+			console.log(file);
 		let data = JSON.parse(req.body.data);
 		const transaction_id = data.transaction_id;
+		const description = data.description;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.sendAdditionalFile(transaction_id, file, x_token);
+		let insert = await transactionInstance.sendResult(transaction_id, file, description, x_token);
 
 			if (insert instanceof Error) {
 				result.error_schema = {

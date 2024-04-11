@@ -622,12 +622,34 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Result
-	async sendResult(transaction_id, files, description) {
+	async sendResult(transaction_id, files, description, x_token) {
+
+        //apus previous response deadline
+        let activityInstance = new Activity();
+        let update = await activityInstance.updateResponseDeadline(transaction_id);
 
         //create activity
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        //date ambil dari query sql
+        let title = "mengirim hasil pekerjaan";
+        let activity = {};
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.file = files;
+        activity.content = description;
+        activity.code = "5";
+        activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+
+        let result = await activityInstance.createActivity(activity);
+
 
         //change transaction status
-        this.changeStatus(transaction_id, 3)
+        this.changeStatus(transaction_id, 3);
+
+        return result;
     }
 
 	// masuk activity
@@ -762,7 +784,18 @@ module.exports = class Transaction {
 
     //change status
     async changeStatus(transaction_id, status) {
+        let SP = `
+            UPDATE transaction 
+            SET status = '${status}'
+            WHERE transaction_id = '${transaction_id}'  
+        `;
 
+        try {
+			let result = await db.any(SP);
+			return null;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
     }
 
     async getDeadline(transaction_id) {
