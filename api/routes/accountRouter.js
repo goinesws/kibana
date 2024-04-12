@@ -8,7 +8,7 @@ const userController = require("../controllers/userController");
 const clientController = require("../controllers/clientController");
 const freelancerController = require("../controllers/freelancerController");
 const multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -16,10 +16,6 @@ router.get("/profile/:userId", userController.getOtherProfile);
 router.get("/my/profile", userController.getMyProfile);
 router.get("/bank-detail", userController.getMyBankDetails);
 router.post("/edit/bank-detail", userController.editBankDetails);
-router.get(
-	"/project/history",
-	freelancerController.getFreelancerProjectHistory
-);
 router.get(
 	"/project/history/:userId",
 	freelancerController.getFreelancerProjectHistory

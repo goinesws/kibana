@@ -814,13 +814,15 @@ module.exports = class Task {
 			console.log("Time : ");
 			console.log(time);
 
-			let paymentInstance = new Payment();
+			let price = task_result[0].price;
+			let client = client_result[0];
 
+			let paymentInstance = new Payment();
 			let result = paymentInstance.createPayment(
 				taskId,
 				"TASK",
-				task_result[0].price,
-				client_result[0],
+				price,
+				client,
 				freelancerId,
 				time
 			);
@@ -829,6 +831,18 @@ module.exports = class Task {
 				return new Error(result.message);
 			}
 
+			// Update di Task buat Freelancer IDnya
+			let SP3 = `
+				UPDATE 
+				PUBLIC.TASK
+				SET
+				FREELANCER_ID
+				=
+				'${freelancerId}';
+			`;
+
+			let update_result = await db.any(SP3);
+
 			return result;
 		} catch (error) {
 			return new Error("Gagal Membuat Transaksi/Token.");
@@ -836,5 +850,32 @@ module.exports = class Task {
 	}
 
 	// Daftar Untuk Mengerjakan
-	async registerForTask(taskId, userId) {}
+	async registerForTask(taskId, freelancerId) {
+		// insert task enrollment
+		try {
+			let te_uuid = uuid.v4();
+			let SP = `
+				INSERT 
+				INTO 
+				PUBLIC.TASK_ENROLLMENT
+				(
+					task_enrollment_id,
+					task_id,
+					freelancer_id
+				)
+				VALUES
+				(
+					'${te_uuid}',
+					'${taskId}',
+					'${freelancerId}'
+				)
+			`;
+
+			let result = await db.any(SP);
+
+			return result;
+		} catch (error) {
+			return new Error("Pendaftaran Untuk Tugas Gagal.");
+		}
+	}
 };
