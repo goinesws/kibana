@@ -877,6 +877,54 @@ module.exports = class Transaction {
         return result;
     }
 
+    // masuk activity
+	// Ask Cancellation
+	async askCancellation(transaction_id, message, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "meminta pembatalan.";
+
+        let id = uuid.v4();
+        let activity = {};
+        activity.activity_id = id;
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.content = message;
+        activity.code = "10";
+
+        //create response deadline
+        activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+
+        console.log(activity);
+        let activityInstance = new Activity();
+        
+        //apus response deadline sebelumnya
+        let result = await activityInstance.updateResponseDeadline(transaction_id);
+
+        //change transaction status to 7
+        this.changeStatus(transaction_id, 7);
+
+        //create activity
+        result = await activityInstance.createActivity(activity);
+
+        //delete all previous buttons
+        result = await activityInstance.deleteButton(transaction_id);
+
+        //add buttons
+        //tolak permintaan pembatalan
+        result = await activityInstance.createButton(id, transaction_id, 6);
+
+        //terima permintaan pembatalan 
+        result = await activityInstance.createButton(id, transaction_id, 7);
+
+        //batalkan ajuan pembatalan
+        result = await activityInstance.createButton(id, transaction_id, 8);
+
+        return result;
+    }
+
 	// masuk activity
 	// Manage Cancellation
 	async manageCancellation(transaction_id, type) {}
@@ -884,10 +932,6 @@ module.exports = class Transaction {
 	// masuk activity
 	// Call Admin
 	async callAdmin(transaction_id) {}
-
-	// masuk activity
-	// Ask Cancellation
-	async askCancellation(transaction_id, message) {}
 
 	// masuk activity
 	// Cancel Cancellation

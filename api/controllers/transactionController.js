@@ -815,15 +815,50 @@ app.completeTransaction = async (req, res) => {
 	res.send(result);
 };
 
+app.askCancellation = async (req, res) => {
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+		const message = req.body.message;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.askCancellation(transaction_id, message, x_token);
+
+			if (insert instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.INSERT_ERROR,
+				};
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+			}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};  
+		result.output_schema = null;
+	}
+
+	res.send(result);
+};
+
 app.manageCancellation = async (req, res) => {
 	res.send("Good");
 };
 
 app.callAdmin = async (req, res) => {
-	res.send("Good");
-};
-
-app.askCancellation = async (req, res) => {
 	res.send("Good");
 };
 
