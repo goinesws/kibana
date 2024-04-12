@@ -94,7 +94,8 @@ module.exports = class Activity {
 	// Cancel Cancellation
 	// Manage Return
 	async createActivity(activity) {
-		let id = uuid.v4()
+		// let id = uuid.v4()
+		let id = activity.activity_id === undefined ? uuid.v4() : `${activity.activity_id}`;
 		let transaction_id = activity.transaction_id === undefined ? null : `'${activity.transaction_id}'`;
 		let client_id = activity.client_id === undefined ? null : `'${activity.client_id}'`;
 		let title = activity.title === undefined ? null : `'${activity.title}'`;
@@ -113,9 +114,6 @@ module.exports = class Activity {
 
 		let deadline_extension = activity.deadline_extension === undefined ? null : `'${activity.deadline_extension}'`;
 		let file_array = activity.file === undefined ? null : `ARRAY['${activity.file}']`;
-
-		console.log(activity.file)
-		console.log(file_array)
 
 
 		let SP = `
@@ -143,5 +141,112 @@ module.exports = class Activity {
 			return new Error("Gagal Memasukkan Data.");
 		}
 	}
+
+	async createButton(activity_id, transaction_id, code) {
+
+		// 1 = Minta Revisi (${revision-count})
+		// 2 = Selesaikan Pesanan
+		// 3 = Tolak Permintaan Pengembalian
+		// 4 = Terima Permintaan Pengembalian
+		// 5 = Batalkan Ajuan Pengembalian
+		// 6 = Tolak Permintaan Pembatalan
+		// 7 = Terima Permintaan Pembatalan
+		// 8 = Batalkan Ajuan Pembatalan
+		// 9 = Hubungi Admin
+
+		let id = uuid.v4()
+		let name;
+		let revision_count;
+		if(code == 1) {
+			//get remaining revision
+			let SP = `
+				SELECT remaining_revision
+				FROM transaction
+				WHERE transaction_id = '${transaction_id}';
+			`;
+
+			try {
+				let result = await db.any(SP);
+				revision_count = result[0].remaining_revision;
+				if(revision_count == 0) {
+					return null;
+				}
+			} catch (error) {
+				throw new Error("Gagal Mendapatkan Data.");
+			}
+		}
+
+		switch (code) {
+			case 1:
+				name = `Minta Revisi (${revision_count})`;
+				break;
+			case 2:
+				name = 'Selesaikan Pesanan';
+				break;
+			case 3:
+				name = 'Tolak Permintaan Pengembalian';
+				break;
+			case 4:
+				name = 'Terima Permintaan Pengembalian';
+				break;
+			case 5:
+				name = 'Batalkan Ajuan Pengembalian';
+				break;
+			case 6:
+				name = 'Tolak Permintaan Pembatalan';
+				break;
+			case 7:
+				name = 'Terima Permintaan Pembatalan';
+				break;
+			case 8:
+				name = 'Batalkan Ajuan Pembatalan';
+				break;
+			case 9:
+				name = 'Hubungi Admin';
+				break;
+			default:
+				name = 'Invalid action code';
+		}
+		
+        //create button for activity
+		let SP = `
+			INSERT INTO public.button(
+			button_id, activity_id, name, code)
+			VALUES (
+				'${id}', 
+				'${activity_id}',
+				'${name}',
+				'${code}'
+			);
+		`;
+
+		try {
+			console.log(SP)
+			let result = await db.any(SP);
+			return null;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+    }
+
+	async deleteButton(transaction_id) {
+        //delete all button to all activity in a transaction
+		let SP = `
+			DELETE FROM button
+			WHERE activity_id IN (
+				SELECT activity_id
+				FROM activity
+				WHERE transaction_id = '${transaction_id}'
+			);
+		`;
+
+		try {
+			console.log(SP)
+			let result = await db.any(SP);
+			return null;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+    }
 	
 };
