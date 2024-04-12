@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const Task = require("../models/taskModel.js");
 const User = require("../models/userModel.js");
+const errorMessages = require("../messages/errorMessages.js");
 
 app.getNewTask = async (req, res) => {
 	//console.log(req.params);
@@ -511,47 +512,79 @@ app.getRequestToken = async (req, res) => {
 	let UserInstance = new User();
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
-	// if (curr_session.session_id == x_token) {
-	let taskId = req.params.taskId;
-	let freelancerId = req.body.freelancer_id;
+	if (curr_session.session_id == x_token) {
+		let taskId = req.params.taskId;
+		let freelancerId = req.body.freelancer_id;
 
-	let taskInstance = new Task();
-	let task_result = await taskInstance.getTaskToken(taskId, freelancerId);
+		let taskInstance = new Task();
+		let task_result = await taskInstance.getTaskToken(taskId, freelancerId);
 
-	console.log("TASK RESULT:");
-	console.log(task_result);
+		console.log("TASK RESULT:");
+		console.log(task_result);
 
-	if (task_result instanceof Error) {
-		result.error_schema = {
-			error_code: "999",
-			error_message: task_result.message,
-		};
-		result.output_schema = null;
-		res.status(400).send(result);
-		return;
+		if (task_result instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: task_result.message,
+			};
+			result.output_schema = null;
+			res.status(400).send(result);
+			return;
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: "Sukses.",
+			};
+			result.output_schema = task_result;
+			res.send(result);
+			return;
+		}
 	} else {
 		result.error_schema = {
-			error_code: "200",
-			error_message: "Sukses.",
+			error_code: "403",
+			error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
 		};
-		result.output_schema = task_result;
-		res.send(result);
+		result.output_schema = null;
+
+		res.status(400).send(result);
 		return;
 	}
-	// } else {
-	// 	result.error_schema = {
-	// 		error_code: "403",
-	// 		error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
-	// 	};
-	// 	result.output_schema = null;
-
-	// 	res.status(400).send(result);
-	// 	return;
-	// }
 };
 
 app.registerForTask = async (req, res) => {
-	res.send("Masuk");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_data.is_freelancer == false) {
+		result.error_schema.error_code = 403;
+		result.error_schema.error_message = errorMessages.NOT_FREELANCER;
+
+		res.status(400).send(result);
+	}
+
+	let taskId = req.params.taskId;
+	let freelancerId = curr_session.session_data.freelancer_id;
+
+	let taskInstance = new Task();
+	let task_result = await taskInstance.registerForTask(taskId, freelancerId);
+
+	if (task_result instanceof Error) {
+		result.error_schema.error_code = 403;
+		result.error_schema.error_message = task_result.message;
+
+		res.status(400).send(result);
+	} else {
+		result.error_schema.error_code = 200;
+		result.error_schema.error_message = errorMessages.QUERY_SUCCESSFUL;
+
+		res.send(result);
+	}
 };
 
 module.exports = app;

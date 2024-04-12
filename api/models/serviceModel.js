@@ -6,6 +6,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const path = require("path");
 const Requirement = require("../models/requirementModel.js");
+const Payment = require("../models/paymentModel.js");
 const { v4: uuidv4 } = require("uuid");
 
 class Service {
@@ -576,7 +577,42 @@ class Service {
 	}
 
 	// Activate Layanan
-	async activateService(service_id) {}
+	async activateService(service_id) {
+		try {
+			let SPC = `
+        select 
+        is_active
+        from 
+        public.service
+        where
+        service_id = '${service_id}'
+      `;
+
+			let check_result = await db.any(SPC);
+
+			console.log("Check Service Active Status : ");
+			console.log(check_result);
+
+			if (check_result[0].is_active == true) {
+				return new Error("Layanan Sudah Aktif.");
+			}
+
+			let SP = `
+        UPDATE
+        PUBLIC.SERVICE
+        SET
+        is_active = true
+        where
+        service_id = '${service_id}'
+      `;
+
+			let result = await db.any(SP);
+
+			return result;
+		} catch (error) {
+			return new Error("Gagal Dalam Mengaktivasi Layanan.");
+		}
+	}
 
 	// Delete Layanan
 	async deleteService(service_id) {
@@ -652,7 +688,64 @@ class Service {
 	}
 
 	// Request Token Service
-	async getServiceToken(service_id) {}
+	async getServiceToken(service_id, client_id) {
+		try {
+			// get service details
+			let SP1 = `
+        select 
+        price,
+        freelancer_id
+        from
+        public.service
+        where
+        service_id = '${service_id}'
+      `;
+
+			let service_result = await db.any(SP1);
+
+			// get client details
+			let SP2 = `
+      select 
+      client_id,
+      name,
+      email,
+      phone_number
+      from
+      public.client
+      where
+      client_id = '${client_id}'
+      `;
+			let client_result = await db.any(SP2);
+
+			// create payment
+			let time = new Date().toLocaleString("en-UK", {
+				timeZone: "Asia/Jakarta",
+			});
+
+			// get freelancer id dari hasil query service
+			let freelancerId = service_result[0].freelancer_id;
+			let price = service_result[0].price;
+			let client = client_result[0];
+
+			let paymentInstance = new Payment();
+			let result = await paymentInstance.createPayment(
+				service_id,
+				"SERVICE",
+				price,
+				client,
+				freelancerId,
+				time
+			);
+
+			if (result instanceof Error) {
+				return new Error(result.message);
+			}
+
+			return result;
+		} catch (error) {
+			return new Error("Gagal Menciptakan Token Pembayaran.");
+		}
+	}
 }
 
 module.exports = Service;

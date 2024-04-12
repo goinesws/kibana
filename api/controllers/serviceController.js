@@ -10,6 +10,7 @@ var multer = require("multer");
 const axios = require("axios");
 const FormData = require("form-data");
 const path = require("path");
+const errorMessages = require("../messages/errorMessages.js");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -548,11 +549,97 @@ app.getServiceHistory = async (req, res) => {
 };
 
 app.activateService = async (req, res) => {
-	res.send("Activate Service");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let userInstance = new User();
+	let curr_session = await userInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token && x_token) {
+		if (curr_session.session_data.is_freelancer == false) {
+			result.error_schema.error_code = 400;
+			result.error_schema.error_message = errorMessages.ERROR;
+			res.status(400).send(result);
+			return;
+		}
+
+		let serviceId = req.params.serviceId;
+
+		let serviceInstance = new Service();
+		let service_result = await serviceInstance.activateService(serviceId);
+
+		if (service_result instanceof Error) {
+			result.error_schema.error_code = 400;
+			result.error_schema.error_message = errorMessages.ERROR;
+			res.status(400).send(result);
+			return;
+		} else {
+			result.error_schema.error_code = 200;
+			result.error_schema.error_message = errorMessages.QUERY_SUCCESSFUL;
+			res.send(result);
+			return;
+		}
+	} else {
+		result.error_schema = {
+			error_code: "400",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+
+		res.status(400).send(result);
+		return;
+	}
 };
 
 app.getRequestToken = async (req, res) => {
-	res.send("Activate Service");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let userInstance = new User();
+	let curr_session = await userInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token && x_token) {
+		let serviceId = req.params.serviceId;
+		let client_id = curr_session.session_data.client_id;
+
+		let serviceInstance = new Service();
+		let service_result = await serviceInstance.getServiceToken(
+			serviceId,
+			client_id
+		);
+
+		if (service_result instanceof Error) {
+			result.error_schema = {
+				error_code: "400",
+				error_message: service_result.message,
+			};
+
+			res.status(400).send(result);
+			return;
+		} else {
+			result.error_schema = {
+				error_code: 200,
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+			result.output_schema = service_result;
+
+			res.send(result);
+			return;
+		}
+	} else {
+		result.error_schema = {
+			error_code: "400",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+
+		res.status(400).send(result);
+		return;
+	}
 };
 
 module.exports = app;

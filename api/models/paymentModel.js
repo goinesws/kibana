@@ -36,10 +36,6 @@ class Payment {
 		freelancerId,
 		time_started
 	) {
-		// panggil buat create transac
-
-		// returnnya payment_id & request token
-
 		try {
 			let midtransUtil = new Midtrans();
 			let transactionInstance = new Transaction();
@@ -58,12 +54,25 @@ class Payment {
 			console.log("Token : ");
 			console.log(token);
 
-			let transaction_id = await transactionInstance.createTransaction(
-				projectId,
-				customer.client_id,
-				freelancerId,
-				"TASK"
-			);
+			let transaction_id = "";
+			if (type == "TASK") {
+				transaction_id = await transactionInstance.createTransaction(
+					projectId,
+					customer.client_id,
+					freelancerId,
+					"TASK"
+				);
+			} else if (type == "SERVICE") {
+				transaction_id = await transactionInstance.createTransaction(
+					projectId,
+					customer.client_id,
+					freelancerId,
+					"SERVICE"
+				);
+			}
+
+			console.log("TRX ID : ");
+			console.log(transaction_id);
 
 			if (transaction_id instanceof Error) {
 				return new Error(transaction_id.message);

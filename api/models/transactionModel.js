@@ -343,7 +343,6 @@ module.exports = class Transaction {
 	// masuk activity
 	// Inquiry Activity Pesanan Client
 
-
 	// Inquiry Detail Pesanan Layanan Client
 	async getTransactionDetailsServiceClient(transaction_id) {
 		let SP = `
@@ -545,28 +544,20 @@ module.exports = class Transaction {
 	// Inquiry Activity Pesanan Freelancer
 	async getTransactionActivityFreelancer(transaction_id) {
         // getFreelancerActivity(transaction_id) activitymodel
-        // if x_token == freelancer dari transaction tersebut, then only show buttons that are code nya 
-        // tolak permintaan pengembalian 3
-        // terima permintaan pengembalian 4
-        // batalkan ajuan pembatalan 5
-        // hubungi admin 9 -> di lawan menolak permintaan pembatalan
-        // batalkan ajuan pembatalan 8
     }
     
     async getTransactionActivityClient(transaction_id) {
-        // getClientActivity(transaction_id) di activity model 
-        // 1,2,5,8, 9
-        // hubungi admin 9 -> di lawan menolak permintaan pengembalian dana
+        // getClientActivity(transaction_id) di activity model
     }
 
 	// masuk activity
 	// Send Requirement
 	async sendRequirement(transaction_id, file, description, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
         //date ambil dari query sql
-        let title = "menambahkan file pendukung dan deskripsi.";
+        let title = "menambahkan file pendukung dan deskripsi";
         let activity = {};
         activity.transaction_id = transaction_id;
         activity.client_id = client_id;
@@ -577,43 +568,44 @@ module.exports = class Transaction {
 
         //response deadline is the same as the transaction deadline
         activity.response_deadline = new Date(await this.getDeadline(transaction_id));
+        console.log(activity.response_deadline)
 
-        let activityInstance = new Activity();
-        let result = await activityInstance.createActivity(activity);
+		let activityInstance = new Activity();
+		let result = await activityInstance.createActivity(activity);
 
-        return result;
-    }
+		return result;
+	}
 
 	// masuk activity
 	// Send Message
 	async sendMessage(transaction_id, message, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "mengirim pesan.";
+        let title = "mengirim pesan";
         let file = null;
 
-        let activity = {};
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.content = message;
-        activity.code = "4";
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.content = message;
+		activity.code = "4";
 
-        console.log(activity);
-        let activityInstance = new Activity();
-        let result = await activityInstance.createActivity(activity);
-        return result;
-    }
+		console.log(activity);
+		let activityInstance = new Activity();
+		let result = await activityInstance.createActivity(activity);
+		return result;
+	}
 
 	// masuk activity
 	// Send Additional File
 	async sendAdditionalFile(transaction_id, additionalFile, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
         //date ambil dari query sql
-        let title = "menambahkan file pendukung.";
+        let title = "menambahkan file pendukung";
         let activity = {};
         activity.transaction_id = transaction_id;
         activity.client_id = client_id;
@@ -621,29 +613,26 @@ module.exports = class Transaction {
         activity.file = additionalFile;
         activity.code = "3";
 
-        let activityInstance = new Activity();
-        let result = await activityInstance.createActivity(activity);
+		let activityInstance = new Activity();
+		let result = await activityInstance.createActivity(activity);
 
-        return result;
-    }
+		return result;
+	}
 
 	// masuk activity
 	// Send Result
 	async sendResult(transaction_id, files, description, x_token) {
+		//apus previous response deadline
+		let activityInstance = new Activity();
+		let update = await activityInstance.updateResponseDeadline(transaction_id);
 
-        //apus previous response deadline
-        let activityInstance = new Activity();
-        let update = await activityInstance.updateResponseDeadline(transaction_id);
-
-        //create activity
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		//create activity
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
         //date ambil dari query sql
-        let title = "mengirimkan hasil pekerjaan.";
-        let id = uuid.v4();
+        let title = "mengirim hasil pekerjaan";
         let activity = {};
-        activity.activity_id = id;
         activity.transaction_id = transaction_id;
         activity.client_id = client_id;
         activity.title = title;
@@ -652,21 +641,13 @@ module.exports = class Transaction {
         activity.code = "5";
         activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
-        let result = await activityInstance.createActivity(activity);
-
+		let result = await activityInstance.createActivity(activity);
 
         //change transaction status
         this.changeStatus(transaction_id, 3);
 
-        //delete all previous buttons
-        result = await activityInstance.deleteButton(transaction_id);
-
-        //add new buttons
-        result = await activityInstance.createButton(id, transaction_id, 1);
-        result = await activityInstance.createButton(id, transaction_id, 2);
-
-        return result;
-    }
+		return result;
+	}
 
 	// masuk activity
 	// Ask Return
@@ -833,8 +814,75 @@ module.exports = class Transaction {
                 service_id = '${project_id}'
                 `;
 
+				console.log("SPP : ");
+				console.log(SPP);
+
 				project = await db.any(SPP);
 				project = project[0];
+
+				// harus set deadline via get dari service terus
+				// ditambahin working days
+
+				console.log("PROJECT SERVICE : ");
+				console.log(project);
+
+				let remaining_revision = project.revision_count;
+				console.log("REMAINING REVISION: ");
+				console.log(remaining_revision);
+
+				let working_time = project.working_time * 24 * 60 * 60 * 1000;
+				console.log("WORKING TIME : ");
+				console.log(working_time);
+
+				let date = new Date();
+				console.log("DATE : ");
+				console.log(date.valueOf());
+
+				let deadlinems = Math.round(date.valueOf() + working_time);
+				let deadline = new Date(deadlinems);
+				console.log("DEADLINE : ");
+				console.log(deadline);
+
+				// SP Buat create transaction
+				SP = `
+                INSERT
+                INTO
+                PUBLIC.TRANSACTION
+                (
+                    transaction_id,
+                    project_id,
+                    client_id,
+                    status,
+                    deadline,
+                    delivery_date,
+                    remaining_revision,
+                    is_need_admin,
+                    can_cancel,
+                    can_return,
+                    payment_date,
+                    freelancer_id,
+                    project_type
+                )
+                VALUES
+                (
+                    '${trx_uuid}',
+                    '${project_id}',
+                    '${client_id}',
+                    '2',
+                    '${deadline.toLocaleString()}',
+                    null,
+                    '${remaining_revision}',
+                    false,
+                    false,
+                    false,
+                    null,
+                    '${freelancer_id}',
+                    'SERVICE'
+                )
+                `;
+
+				console.log("SP SERVICE : ");
+				console.log(SP);
 			}
 
 			let insert_result = await db.any(SP);
@@ -845,44 +893,49 @@ module.exports = class Transaction {
 		}
 	}
 
-    //change status
-    async changeStatus(transaction_id, status) {
-        let SP = `
+	//change status
+	async changeStatus(transaction_id, status) {
+		let SP = `
             UPDATE transaction 
             SET status = '${status}'
             WHERE transaction_id = '${transaction_id}'  
         `;
 
-        try {
+		try {
 			let result = await db.any(SP);
 			return null;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-    }
+	}
 
-    async getDeadline(transaction_id) {
-        //find latest activity, get the code, to use for code_temp in new activity
+	async getDeadline(transaction_id) {
+		//find latest activity, get the code, to use for code_temp in new activity
 		let SP = `
             SELECT deadline
             FROM transaction
             WHERE transaction_id = '${transaction_id}'    
         `;
 
-        try {
-            let result = await db.any(SP);
-            if (result.length < 1) {
-                throw new Error("Gagal Mendapatkan Data.");
-            } else {
-                return result[0].deadline;
-            }
-        } catch (error) {
-            throw new Error("Gagal Mendapatkan Data.");
-        }
-    }
+		try {
+			let result = await db.any(SP);
+			if (result.length < 1) {
+				throw new Error("Gagal Mendapatkan Data.");
+			} else {
+				return result[0].deadline;
+			}
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+	}
 
     async editDeadline(transaction_id) {
 
+    }
+
+    async deleteActivityResponseDeadline(transaction_id) {
+        //update to null semua response deadline dari semua activity yang ada di transaction tersebut
+        //hiit this before creating new activity with response deadline karena hanya ada satu activity yang boleh punya active response deadline
     }
 
     
