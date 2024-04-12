@@ -685,21 +685,54 @@ module.exports = class Transaction {
         result = await activityInstance.deleteButton(transaction_id);
 
         //add buttons
-        //batalkan ajuan pembatalan
+        //tolak permintaan pengembalian
+        result = await activityInstance.createButton(id, transaction_id, 3);
+
+        //terima permintaan pengembalian
+        result = await activityInstance.createButton(id, transaction_id, 4);
+
+        //batalkan ajuan pengembalian
         result = await activityInstance.createButton(id, transaction_id, 5);
-
-        //tolak permintaan pembatalan
-        result = await activityInstance.createButton(id, transaction_id, 6);
-
-        //terima permintaan pembatalan
-        result = await activityInstance.createButton(id, transaction_id, 7);
 
         return result;
     }
 
 	// masuk activity
 	// Cancel Return
-	async cancelReturn(transaction_id) {}
+	async cancelReturn(transaction_id, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "membatalkan permintaan pengembalian dana.";
+
+        let activity = {};
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.code = "11";
+
+        //no buttons -> no activity id
+        console.log(activity);
+        let activityInstance = new Activity();
+
+        //delete all previous buttons + no new buttons
+        let result = await activityInstance.deleteButton(transaction_id);
+
+        //apus response deadline yang pas pengajuan pengembalian
+        result = await activityInstance.updateResponseDeadline(transaction_id);
+
+        //get old transaction_code
+        let code = await this.getPrevStatus(transaction_id);
+
+        //change transaction status to prev code before pengajuan pengembalian
+        code = await this.changeStatus(transaction_id, code);
+
+        //create activity
+        result = await activityInstance.createActivity(activity);
+
+        return result;
+
+    }
 
 	// masuk activity
 	// Ask Revision
@@ -895,13 +928,31 @@ module.exports = class Transaction {
 
 	//change status
 	async changeStatus(transaction_id, status) {
+        //get current status (sblm diupdate)
+        let oldStatus;
+        let SP1 = `
+            SELECT status
+            FROM public.transaction
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+		try {
+            console.log(SP1);
+			let result = await db.any(SP1);
+            oldStatus = result[0].status;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+
+        //masukkin old status ke status_temp and new status dari param ke status
 		let SP = `
             UPDATE transaction 
-            SET status = '${status}'
+            SET status = '${status}', status_temp = '${oldStatus}'
             WHERE transaction_id = '${transaction_id}'  
         `;
 
 		try {
+            console.log(SP)
 			let result = await db.any(SP);
 			return null;
 		} catch (error) {
@@ -936,6 +987,28 @@ module.exports = class Transaction {
     async deleteActivityResponseDeadline(transaction_id) {
         //update to null semua response deadline dari semua activity yang ada di transaction tersebut
         //hiit this before creating new activity with response deadline karena hanya ada satu activity yang boleh punya active response deadline
+    }
+
+    async getPrevStatus(transaction_id) {
+        //cari activity paling baru
+        //liat code temp nya
+        //assign status dari code temp
+        let code;
+        let SP = `
+            SELECT status_temp
+            FROM transaction
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+		try {
+            console.log(SP)
+			let result = await db.any(SP);
+			code = result[0].status_temp;
+            console.log(code)
+            return code;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}		
     }
 
     

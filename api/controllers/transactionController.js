@@ -612,6 +612,7 @@ app.sendResult = async (req, res) => {
 		try {
 			auth = await authorize();
 			if (req.files && req.files["result_1"]) {
+				console.log("MASUK1")
 				let result = await req.files["result_1"][0];
 				file.push(await uploadFile(auth, result));
 				if (req.files["result_2"]) {
@@ -700,7 +701,41 @@ app.askReturn = async (req, res) => {
 };
 
 app.cancelReturn = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.cancelReturn(transaction_id, x_token);
+
+			if (insert instanceof Error) {
+				result.error_schema = {
+					error_code: "999",
+					error_message: errorMessages.INSERT_ERROR,
+				};
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+			}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};  
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.askRevision = async (req, res) => {
