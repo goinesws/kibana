@@ -736,8 +736,90 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Ask Revision
-	async askRevision(transaction_id, message) {
+	async askRevision(transaction_id, message, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "meminta revisi.";
+
+        let id = uuid.v4();
+        let activity = {};
+        activity.activity_id = id;
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.content = message;
+        activity.code = "14";
+
+        //create deadline extension (3 hari)
+        let date = new Date(await this.getDeadline(transaction_id));
+        activity.deadline_extension = date.setDate(date.getDate() + 3);
+
+        let activityInstance = new Activity();
+
+        //apus response deadline sebelumnya
+        let result = await activityInstance.updateResponseDeadline(transaction_id);
+
+        console.log(activity);
+        
         //reduce remaining revision in transaction
+        let SP1 = `
+            UPDATE transaction
+            SET remaining_revision = remaining_revision-1
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+        try {
+            console.log(SP1)
+            let result = await db.any(SP1);
+        } catch (error) {
+            throw new Error("Gagal Mendapatkan Data.");
+        }		
+
+        //delay deadline 3 hari
+        let SP2 = `
+            UPDATE transaction
+            SET deadline = deadline + INTERVAL '3 day'
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+        try {
+            console.log(SP2)
+            let result = await db.any(SP2);
+        } catch (error) {
+            throw new Error("Gagal Mendapatkan Data.");
+        }	
+
+        //if transaction type == task
+        //delay deadline yang ada di table task juga
+        let SP3 = `
+            UPDATE task
+            SET deadline = deadline + INTERVAL '3 day'
+            WHERE task_id = (
+                SELECT project_id 
+                FROM transaction 
+                WHERE transaction_id = '${transaction_id}'
+                AND project_type = 'TASK'
+            );
+        `;
+
+        try {
+            console.log(SP3)
+            let result = await db.any(SP3);
+        } catch (error) {
+            throw new Error("Gagal Mendapatkan Data.");
+        }	
+
+        //change transaction status to 2
+        this.changeStatus(transaction_id, 2);
+
+        //create activity
+        result = await activityInstance.createActivity(activity);
+
+        //delete all previous buttons
+        result = await activityInstance.deleteButton(transaction_id);
+
+        return result;
 
     }
 

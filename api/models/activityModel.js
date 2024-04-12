@@ -112,7 +112,16 @@ module.exports = class Activity {
 			response_deadline = `'${parsedDate.toISOString()}'`;
 		}
 
-		let deadline_extension = activity.deadline_extension === undefined ? null : `'${activity.deadline_extension}'`;
+		let deadline_extension;
+		if(activity.deadline_extension === undefined) {
+			deadline_extension = null;
+		} else if (activity.deadline_extension == "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '3 days'") {
+			deadline_extension = activity.deadline_extension;
+		} else {
+			const parsedDate = new Date(activity.deadline_extension);
+			deadline_extension = `'${parsedDate.toISOString()}'`;
+		}
+
 		let file_array = activity.file === undefined ? null : `ARRAY['${activity.file}']`;
 
 
