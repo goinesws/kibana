@@ -544,6 +544,7 @@ module.exports = class Transaction {
 	// Inquiry Activity Pesanan Freelancer
 	async getTransactionActivityFreelancer(transaction_id) {
         // getFreelancerActivity(transaction_id) activitymodel
+        //if code 15 then dont add author di depan title
     }
     
     async getTransactionActivityClient(transaction_id) {
@@ -825,7 +826,42 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Complete Transaction
-	async completeTransaction(transaction_id) {}
+	async completeTransaction(transaction_id, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "Pesanan berhasil diselesaikan dan dana berhasil diteruskan kepada freelancer.";
+
+        let activity = {};
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.code = "15";
+
+        //no buttons -> no activity id
+        console.log(activity);
+        let activityInstance = new Activity();
+
+        //delete all previous buttons + no new buttons
+        let result = await activityInstance.deleteButton(transaction_id);
+
+        //apus response deadline yang pas pengajuan pengembalian
+        result = await activityInstance.updateResponseDeadline(transaction_id);
+
+        //get old transaction_code
+        let code = await this.getPrevStatus(transaction_id);
+
+        //change transaction status to prev code before pengajuan pengembalian
+        code = await this.changeStatus(transaction_id, code);
+
+        //create activity
+        result = await activityInstance.createActivity(activity);
+
+        //change transaction status to 4
+        this.changeStatus(transaction_id, 4);
+
+        return result;
+    }
 
 	// masuk activity
 	// Manage Cancellation
