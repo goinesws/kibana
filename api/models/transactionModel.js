@@ -644,6 +644,20 @@ module.exports = class Transaction {
 
 		let result = await activityInstance.createActivity(activity);
 
+        //add delivery date in transaction
+        let SP1 = `
+            UPDATE transaction
+            SET delivery_date = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+        try {
+            console.log(SP1)
+            let result = await db.any(SP1);
+        } catch (error) {
+            throw new Error("Gagal Mendapatkan Data.");
+        }		
+
         //change transaction status
         this.changeStatus(transaction_id, 3);
 
