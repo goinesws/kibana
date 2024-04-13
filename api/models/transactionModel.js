@@ -546,6 +546,7 @@ module.exports = class Transaction {
         // getFreelancerActivity(transaction_id) activitymodel
         //if code 15 then dont add author di depan title
         //if code 18 then dont add author di depan title
+        //if code 16 then dont add author di depan title
     }
     
     async getTransactionActivityClient(transaction_id) {
@@ -992,7 +993,36 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Call Admin
-	async callAdmin(transaction_id) {}
+	async callAdmin(transaction_id, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "Admin berhasil dihubungi dan investigasi sedang dilakukan";
+
+        let activity = {};
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.code = "16";
+
+        console.log(activity);
+        let activityInstance = new Activity();
+        
+        //apus response deadline sebelumnya
+        let result = await activityInstance.updateResponseDeadline(transaction_id);
+
+        //change status to 9
+        this.changeStatus(transaction_id, 9);
+
+        //create activity
+        result = await activityInstance.createActivity(activity);
+
+        //delete all previous buttons
+        result = await activityInstance.deleteButton(transaction_id);
+        
+        return result;
+
+    }
 
 	// masuk activity
 	// Cancel Cancellation
