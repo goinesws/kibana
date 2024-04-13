@@ -6,7 +6,7 @@ const uuid = require("uuid");
 
 class Payment {
 	constructor() {
-		// Initialize any properties or set up connections here
+		console.log("BERHASIL INIT PAYMENT");
 	}
 
 	async processPayment(paymentDetails) {
@@ -122,7 +122,29 @@ class Payment {
 		}
 	}
 
-	async updatePaymentStatus(paymentId) {}
+	async updatePaymentStatus(paymentId) {
+		try {
+			console.log("Payment ID Payment Model : " + paymentId);
+
+			let SP = `
+				UPDATE
+				PUBLIC.PAYMENT
+				SET 
+				STATUS = '1'
+				WHERE
+				payment_id = '${paymentId}';
+			`;
+
+			console.log("SP UPDATE PAYMENT:");
+			console.log(SP);
+
+			let result = await db.any(SP);
+
+			return result;
+		} catch (error) {
+			return new Error("Gagal Update Payment Status.");
+		}
+	}
 }
 
 module.exports = Payment;

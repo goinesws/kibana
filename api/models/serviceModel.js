@@ -718,9 +718,7 @@ class Service {
 			let client_result = await db.any(SP2);
 
 			// create payment
-			let time = new Date().toLocaleString("en-UK", {
-				timeZone: "Asia/Jakarta",
-			});
+			let time = new Date().toLocaleString();
 
 			// get freelancer id dari hasil query service
 			let freelancerId = service_result[0].freelancer_id;

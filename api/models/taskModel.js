@@ -808,9 +808,7 @@ module.exports = class Task {
 
 			// ini pindah ke payment model
 
-			let time = new Date().toLocaleString("en-UK", {
-				timeZone: "Asia/Jakarta",
-			});
+			let time = new Date().toLocaleString();
 			console.log("Time : ");
 			console.log(time);
 

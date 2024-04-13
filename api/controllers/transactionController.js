@@ -4,6 +4,7 @@ const Transaction = require("../models/transactionModel.js");
 const Service = require("../models/serviceModel.js");
 const Task = require("../models/taskModel.js");
 const User = require("../models/userModel.js");
+const Payment = require("../models/paymentModel.js");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 
 const errorMessages = require("../messages/errorMessages");
@@ -959,9 +960,31 @@ app.sendFeedback = async (req, res) => {
 	if (curr_session.session_id == x_token && x_token) {
 		let payment_id = req.params.paymentId;
 
-		let transactionInstance = new Transaction();
+		console.log("Payment ID Controller : " + payment_id);
 
-		let trx_result = transactionInstance.sendFeedback(payment_id);
+		let transactionInstance = new Transaction();
+		let trx_result = await transactionInstance.sendFeedback(payment_id);
+
+		console.log("TRX Result : ");
+		console.log(trx_result);
+
+		if (trx_result instanceof Error) {
+			result.error_schema = {
+				error_code: "400",
+				error_message: errorMessages.ERROR,
+			};
+			res.status(400).send(result);
+			return;
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+			result.output_schema = trx_result;
+		}
+
+		res.send(result);
+		return;
 	} else {
 		result.error_schema = {
 			error_code: "400",

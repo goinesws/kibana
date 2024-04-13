@@ -1,11 +1,10 @@
 const express = require("express");
 const db = require("../../db");
-const Review = require("../models/reviewModel");
-const Task = require("../models/taskModel");
 const uuid = require("uuid");
 const User = require("../models/userModel");
 const Activity = require("../models/activityModel.js");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
+const Payment = require("./paymentModel.js");
 
 module.exports = class Transaction {
 	// Utilities
@@ -543,14 +542,14 @@ module.exports = class Transaction {
 	// masuk activity
 	// Inquiry Activity Pesanan Freelancer
 	async getTransactionActivityFreelancer(transaction_id) {
-        // getFreelancerActivity(transaction_id) activitymodel
-        //if code 15 then dont add author di depan title
-        //if code 18 then dont add author di depan title
-    }
-    
-    async getTransactionActivityClient(transaction_id) {
-        // getClientActivity(transaction_id) di activity model
-    }
+		// getFreelancerActivity(transaction_id) activitymodel
+		//if code 15 then dont add author di depan title
+		//if code 18 then dont add author di depan title
+	}
+
+	async getTransactionActivityClient(transaction_id) {
+		// getClientActivity(transaction_id) di activity model
+	}
 
 	// masuk activity
 	// Send Requirement
@@ -558,19 +557,21 @@ module.exports = class Transaction {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        //date ambil dari query sql
-        let title = "menambahkan file pendukung dan deskripsi";
-        let activity = {};
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.content = description;
-        activity.file = file;
-        activity.code = "2";
+		//date ambil dari query sql
+		let title = "menambahkan file pendukung dan deskripsi";
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.content = description;
+		activity.file = file;
+		activity.code = "2";
 
-        //response deadline is the same as the transaction deadline
-        activity.response_deadline = new Date(await this.getDeadline(transaction_id));
-        console.log(activity.response_deadline)
+		//response deadline is the same as the transaction deadline
+		activity.response_deadline = new Date(
+			await this.getDeadline(transaction_id)
+		);
+		console.log(activity.response_deadline);
 
 		let activityInstance = new Activity();
 		let result = await activityInstance.createActivity(activity);
@@ -584,8 +585,8 @@ module.exports = class Transaction {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "mengirim pesan";
-        let file = null;
+		let title = "mengirim pesan";
+		let file = null;
 
 		let activity = {};
 		activity.transaction_id = transaction_id;
@@ -606,14 +607,14 @@ module.exports = class Transaction {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        //date ambil dari query sql
-        let title = "menambahkan file pendukung";
-        let activity = {};
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.file = additionalFile;
-        activity.code = "3";
+		//date ambil dari query sql
+		let title = "menambahkan file pendukung";
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.file = additionalFile;
+		activity.code = "3";
 
 		let activityInstance = new Activity();
 		let result = await activityInstance.createActivity(activity);
@@ -632,35 +633,36 @@ module.exports = class Transaction {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        //date ambil dari query sql
-        let title = "mengirim hasil pekerjaan";
-        let activity = {};
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.file = files;
-        activity.content = description;
-        activity.code = "5";
-        activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+		//date ambil dari query sql
+		let title = "mengirim hasil pekerjaan";
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.file = files;
+		activity.content = description;
+		activity.code = "5";
+		activity.response_deadline =
+			"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
 		let result = await activityInstance.createActivity(activity);
 
-        //add delivery date in transaction
-        let SP1 = `
+		//add delivery date in transaction
+		let SP1 = `
             UPDATE transaction
             SET delivery_date = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'
             WHERE transaction_id = '${transaction_id}'
         `;
 
-        try {
-            console.log(SP1)
-            let result = await db.any(SP1);
-        } catch (error) {
-            throw new Error("Gagal Mendapatkan Data.");
-        }		
+		try {
+			console.log(SP1);
+			let result = await db.any(SP1);
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
-        //change transaction status
-        this.changeStatus(transaction_id, 3);
+		//change transaction status
+		this.changeStatus(transaction_id, 3);
 
 		return result;
 	}
@@ -668,147 +670,147 @@ module.exports = class Transaction {
 	// masuk activity
 	// Ask Return
 	async askReturn(transaction_id, message, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "meminta pengembalian dana.";
+		let title = "meminta pengembalian dana.";
 
-        let id = uuid.v4();
-        let activity = {};
-        activity.activity_id = id;
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.content = message;
-        activity.code = "6";
+		let id = uuid.v4();
+		let activity = {};
+		activity.activity_id = id;
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.content = message;
+		activity.code = "6";
 
-        //create response deadline
-        activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+		//create response deadline
+		activity.response_deadline =
+			"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
-        console.log(activity);
-        let activityInstance = new Activity();
-        
-        //apus response deadline sebelumnya
-        let result = await activityInstance.updateResponseDeadline(transaction_id);
+		console.log(activity);
+		let activityInstance = new Activity();
 
-        //change transaction status to 7
-        this.changeStatus(transaction_id, 7);
+		//apus response deadline sebelumnya
+		let result = await activityInstance.updateResponseDeadline(transaction_id);
 
-        //create activity
-        result = await activityInstance.createActivity(activity);
+		//change transaction status to 7
+		this.changeStatus(transaction_id, 7);
 
-        //delete all previous buttons
-        result = await activityInstance.deleteButton(transaction_id);
+		//create activity
+		result = await activityInstance.createActivity(activity);
 
-        //add buttons
-        //tolak permintaan pengembalian
-        result = await activityInstance.createButton(id, transaction_id, 3);
+		//delete all previous buttons
+		result = await activityInstance.deleteButton(transaction_id);
 
-        //terima permintaan pengembalian
-        result = await activityInstance.createButton(id, transaction_id, 4);
+		//add buttons
+		//tolak permintaan pengembalian
+		result = await activityInstance.createButton(id, transaction_id, 3);
 
-        //batalkan ajuan pengembalian
-        result = await activityInstance.createButton(id, transaction_id, 5);
+		//terima permintaan pengembalian
+		result = await activityInstance.createButton(id, transaction_id, 4);
 
-        return result;
-    }
+		//batalkan ajuan pengembalian
+		result = await activityInstance.createButton(id, transaction_id, 5);
+
+		return result;
+	}
 
 	// masuk activity
 	// Cancel Return
 	async cancelReturn(transaction_id, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "membatalkan permintaan pengembalian dana.";
+		let title = "membatalkan permintaan pengembalian dana.";
 
-        let activity = {};
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.code = "11";
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.code = "11";
 
-        //no buttons -> no activity id
-        console.log(activity);
-        let activityInstance = new Activity();
+		//no buttons -> no activity id
+		console.log(activity);
+		let activityInstance = new Activity();
 
-        //delete all previous buttons + no new buttons
-        let result = await activityInstance.deleteButton(transaction_id);
+		//delete all previous buttons + no new buttons
+		let result = await activityInstance.deleteButton(transaction_id);
 
-        //apus response deadline yang pas pengajuan pengembalian
-        result = await activityInstance.updateResponseDeadline(transaction_id);
+		//apus response deadline yang pas pengajuan pengembalian
+		result = await activityInstance.updateResponseDeadline(transaction_id);
 
-        //get old transaction_code
-        let code = await this.getPrevStatus(transaction_id);
+		//get old transaction_code
+		let code = await this.getPrevStatus(transaction_id);
 
-        //change transaction status to prev code before pengajuan pengembalian
-        code = await this.changeStatus(transaction_id, code);
+		//change transaction status to prev code before pengajuan pengembalian
+		code = await this.changeStatus(transaction_id, code);
 
-        //create activity
-        result = await activityInstance.createActivity(activity);
+		//create activity
+		result = await activityInstance.createActivity(activity);
 
-        return result;
-
-    }
+		return result;
+	}
 
 	// masuk activity
 	// Ask Revision
 	async askRevision(transaction_id, message, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "meminta revisi.";
+		let title = "meminta revisi.";
 
-        let id = uuid.v4();
-        let activity = {};
-        activity.activity_id = id;
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.content = message;
-        activity.code = "14";
+		let id = uuid.v4();
+		let activity = {};
+		activity.activity_id = id;
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.content = message;
+		activity.code = "14";
 
-        //create deadline extension (3 hari)
-        let date = new Date(await this.getDeadline(transaction_id));
-        activity.deadline_extension = date.setDate(date.getDate() + 3);
+		//create deadline extension (3 hari)
+		let date = new Date(await this.getDeadline(transaction_id));
+		activity.deadline_extension = date.setDate(date.getDate() + 3);
 
-        let activityInstance = new Activity();
+		let activityInstance = new Activity();
 
-        //apus response deadline sebelumnya
-        let result = await activityInstance.updateResponseDeadline(transaction_id);
+		//apus response deadline sebelumnya
+		let result = await activityInstance.updateResponseDeadline(transaction_id);
 
-        console.log(activity);
-        
-        //reduce remaining revision in transaction
-        let SP1 = `
+		console.log(activity);
+
+		//reduce remaining revision in transaction
+		let SP1 = `
             UPDATE transaction
             SET remaining_revision = remaining_revision-1
             WHERE transaction_id = '${transaction_id}'
         `;
 
-        try {
-            console.log(SP1)
-            let result = await db.any(SP1);
-        } catch (error) {
-            throw new Error("Gagal Mendapatkan Data.");
-        }		
+		try {
+			console.log(SP1);
+			let result = await db.any(SP1);
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
-        //delay deadline 3 hari
-        let SP2 = `
+		//delay deadline 3 hari
+		let SP2 = `
             UPDATE transaction
             SET deadline = deadline + INTERVAL '3 day'
             WHERE transaction_id = '${transaction_id}'
         `;
 
-        try {
-            console.log(SP2)
-            let result = await db.any(SP2);
-        } catch (error) {
-            throw new Error("Gagal Mendapatkan Data.");
-        }	
+		try {
+			console.log(SP2);
+			let result = await db.any(SP2);
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
-        //if transaction type == task
-        //delay deadline yang ada di table task juga
-        let SP3 = `
+		//if transaction type == task
+		//delay deadline yang ada di table task juga
+		let SP3 = `
             UPDATE task
             SET deadline = deadline + INTERVAL '3 day'
             WHERE task_id = (
@@ -819,176 +821,177 @@ module.exports = class Transaction {
             );
         `;
 
-        try {
-            console.log(SP3)
-            let result = await db.any(SP3);
-        } catch (error) {
-            throw new Error("Gagal Mendapatkan Data.");
-        }	
+		try {
+			console.log(SP3);
+			let result = await db.any(SP3);
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
-        //change transaction status to 2
-        this.changeStatus(transaction_id, 2);
+		//change transaction status to 2
+		this.changeStatus(transaction_id, 2);
 
-        //create activity
-        result = await activityInstance.createActivity(activity);
+		//create activity
+		result = await activityInstance.createActivity(activity);
 
-        //delete all previous buttons
-        result = await activityInstance.deleteButton(transaction_id);
+		//delete all previous buttons
+		result = await activityInstance.deleteButton(transaction_id);
 
-        return result;
-
-    }
+		return result;
+	}
 
 	// masuk activity
 	// Complete Transaction
 	async completeTransaction(transaction_id, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "Pesanan berhasil diselesaikan dan dana berhasil diteruskan kepada freelancer.";
+		let title =
+			"Pesanan berhasil diselesaikan dan dana berhasil diteruskan kepada freelancer.";
 
-        let activity = {};
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.code = "15";
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.code = "15";
 
-        //no buttons -> no activity id
-        console.log(activity);
-        let activityInstance = new Activity();
+		//no buttons -> no activity id
+		console.log(activity);
+		let activityInstance = new Activity();
 
-        //delete all previous buttons + no new buttons
-        let result = await activityInstance.deleteButton(transaction_id);
+		//delete all previous buttons + no new buttons
+		let result = await activityInstance.deleteButton(transaction_id);
 
-        //apus response deadline yang pas pengajuan pengembalian
-        result = await activityInstance.updateResponseDeadline(transaction_id);
+		//apus response deadline yang pas pengajuan pengembalian
+		result = await activityInstance.updateResponseDeadline(transaction_id);
 
-        //get old transaction_code
-        let code = await this.getPrevStatus(transaction_id);
+		//get old transaction_code
+		let code = await this.getPrevStatus(transaction_id);
 
-        //change transaction status to prev code before pengajuan pengembalian
-        code = await this.changeStatus(transaction_id, code);
+		//change transaction status to prev code before pengajuan pengembalian
+		code = await this.changeStatus(transaction_id, code);
 
-        //create activity
-        result = await activityInstance.createActivity(activity);
+		//create activity
+		result = await activityInstance.createActivity(activity);
 
-        //change transaction status to 4
-        this.changeStatus(transaction_id, 4);
+		//change transaction status to 4
+		this.changeStatus(transaction_id, 4);
 
-        return result;
-    }
+		return result;
+	}
 
-    // masuk activity
+	// masuk activity
 	// Ask Cancellation
 	async askCancellation(transaction_id, message, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
-        let title = "meminta pembatalan.";
+		let title = "meminta pembatalan.";
 
-        let id = uuid.v4();
-        let activity = {};
-        activity.activity_id = id;
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
-        activity.title = title;
-        activity.content = message;
-        activity.code = "10";
+		let id = uuid.v4();
+		let activity = {};
+		activity.activity_id = id;
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.content = message;
+		activity.code = "10";
 
-        //create response deadline
-        activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+		//create response deadline
+		activity.response_deadline =
+			"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
-        console.log(activity);
-        let activityInstance = new Activity();
-        
-        //apus response deadline sebelumnya
-        let result = await activityInstance.updateResponseDeadline(transaction_id);
+		console.log(activity);
+		let activityInstance = new Activity();
 
-        //change transaction status to 7
-        this.changeStatus(transaction_id, 7);
+		//apus response deadline sebelumnya
+		let result = await activityInstance.updateResponseDeadline(transaction_id);
 
-        //create activity
-        result = await activityInstance.createActivity(activity);
+		//change transaction status to 7
+		this.changeStatus(transaction_id, 7);
 
-        //delete all previous buttons
-        result = await activityInstance.deleteButton(transaction_id);
+		//create activity
+		result = await activityInstance.createActivity(activity);
 
-        //add buttons
-        //tolak permintaan pembatalan
-        result = await activityInstance.createButton(id, transaction_id, 6);
+		//delete all previous buttons
+		result = await activityInstance.deleteButton(transaction_id);
 
-        //terima permintaan pembatalan 
-        result = await activityInstance.createButton(id, transaction_id, 7);
+		//add buttons
+		//tolak permintaan pembatalan
+		result = await activityInstance.createButton(id, transaction_id, 6);
 
-        //batalkan ajuan pembatalan
-        result = await activityInstance.createButton(id, transaction_id, 8);
+		//terima permintaan pembatalan
+		result = await activityInstance.createButton(id, transaction_id, 7);
 
-        return result;
-    }
+		//batalkan ajuan pembatalan
+		result = await activityInstance.createButton(id, transaction_id, 8);
+
+		return result;
+	}
 
 	// masuk activity
 	// Manage Cancellation
 	async manageCancellation(transaction_id, type, x_token) {
-        let UserInstance = new User();
-        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 
-        let id = uuid.v4();
-        let activity = {};
-        activity.activity_id = id;
-        activity.transaction_id = transaction_id;
-        activity.client_id = client_id;
+		let id = uuid.v4();
+		let activity = {};
+		activity.activity_id = id;
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
 
-        console.log(activity);
-        let activityInstance = new Activity();
+		console.log(activity);
+		let activityInstance = new Activity();
 
-        //delete all prev button
-        let result = await activityInstance.deleteButton(transaction_id);
+		//delete all prev button
+		let result = await activityInstance.deleteButton(transaction_id);
 
-        //delete all prev response deadline
-        result = await activityInstance.updateResponseDeadline(transaction_id);
+		//delete all prev response deadline
+		result = await activityInstance.updateResponseDeadline(transaction_id);
 
-        if(type == "REJECT") {
-            activity.code = "12";
-            activity.title = "menolak permintaan pembatalan.";
-            //add button for hubungi admin
-            result = await activityInstance.createButton(id, transaction_id, 9);
+		if (type == "REJECT") {
+			activity.code = "12";
+			activity.title = "menolak permintaan pembatalan.";
+			//add button for hubungi admin
+			result = await activityInstance.createButton(id, transaction_id, 9);
 
-            //button for batalkan ajuan pembatalan
-            result = await activityInstance.createButton(id, transaction_id, 8);
+			//button for batalkan ajuan pembatalan
+			result = await activityInstance.createButton(id, transaction_id, 8);
 
-            //response deadline 2 hari
-            activity.response_deadline = "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+			//response deadline 2 hari
+			activity.response_deadline =
+				"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
-            //change status to 7
-            this.changeStatus(transaction_id, 7);
+			//change status to 7
+			this.changeStatus(transaction_id, 7);
 
-            //create activity
-            result = await activityInstance.createActivity(activity);
+			//create activity
+			result = await activityInstance.createActivity(activity);
+		} else {
+			//if type == "ACCEPT"
+			activity.code = "13";
+			activity.title = "menerima permintaan pembatalan";
 
-        } else {
-            //if type == "ACCEPT"
-            activity.code = "13";
-            activity.title = "menerima permintaan pembatalan";
+			//change status to 5
+			this.changeStatus(transaction_id, 7);
 
-            //change status to 5
-            this.changeStatus(transaction_id, 7);
+			//create activity
+			result = await activityInstance.createActivity(activity);
 
-            //create activity
-            result = await activityInstance.createActivity(activity);
+			//create activity satu lagi for pembatalan
+			let newActivity = {};
+			newActivity.transaction_id = transaction_id;
+			newActivity.client_id = client_id;
+			newActivity.title =
+				"Pesanan dibatalkan dan dana berhasil dikembalikan kepada klien.";
+			newActivity.code = "18";
+			result = await activityInstance.createActivity(newActivity);
+		}
 
-            //create activity satu lagi for pembatalan
-            let newActivity = {};
-            newActivity.transaction_id = transaction_id;
-            newActivity.client_id = client_id;
-            newActivity.title = "Pesanan dibatalkan dan dana berhasil dikembalikan kepada klien.";
-            newActivity.code = "18";
-            result = await activityInstance.createActivity(newActivity);
-        }
-
-        return result;
-
-    }
+		return result;
+	}
 
 	// masuk activity
 	// Call Admin
@@ -1005,10 +1008,66 @@ module.exports = class Transaction {
 	// Send Feedback
 	async sendFeedback(payment_id) {
 		try {
+			// update di payment
+			console.log("Transaction Model ");
+
+			let date = new Date();
+
+			console.log("DATE : " + date.toISOString());
+
+			// update di transac
+			let SPU = `
+			update
+			public.transaction
+			set
+			payment_date = '${date.toISOString()}'
+			where
+			transaction_id 
+			in
+			(
+			select
+			transaction_id
+			from 
+			public.payment
+			where
+			payment_id = '${payment_id}'
+			)
+			`;
+			let update_result = await db.any(SPU);
+
 			let SP = `
-            `;
+			select
+			transaction_id
+			from 
+			public.payment
+			where
+			payment_id = '${payment_id}'
+			`;
+
+			console.log("SP : " + SP);
+
+			let result = await db.any(SP);
+
+			console.log("result : ");
+			console.log(result);
+
+			try {
+				let paymentInstance = new Payment();
+				let payment_update_result = await paymentInstance.updatePaymentStatus(
+					payment_id
+				);
+				console.log("Payment Instance Gagal");
+
+				if (payment_update_result instanceof Error) {
+					return new Error("Gagal Pada Payment Model.");
+				}
+			} catch (error) {
+				console.log("PAYMENT GAGAL");
+			}
+
+			return result[0];
 		} catch (error) {
-			return new Error("Update Status Payment Gagal.");
+			return new Error("Gagal Pada Transaction Model.");
 		}
 	}
 
@@ -1065,9 +1124,7 @@ module.exports = class Transaction {
                     '${project_id}',
                     '${client_id}',
                     '2',
-                    '${project.deadline.toLocaleString("en-UK", {
-											timeZone: "Asia/Jakarta",
-										})}',
+                    '${project.deadline.toLocaleString()}',
                     null,
                     null,
                     null,
@@ -1172,23 +1229,23 @@ module.exports = class Transaction {
 
 	//change status
 	async changeStatus(transaction_id, status) {
-        //get current status (sblm diupdate)
-        let oldStatus;
-        let SP1 = `
+		//get current status (sblm diupdate)
+		let oldStatus;
+		let SP1 = `
             SELECT status
             FROM public.transaction
             WHERE transaction_id = '${transaction_id}'
         `;
 
 		try {
-            console.log(SP1);
+			console.log(SP1);
 			let result = await db.any(SP1);
-            oldStatus = result[0].status;
+			oldStatus = result[0].status;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
 
-        //masukkin old status ke status_temp and new status dari param ke status
+		//masukkin old status ke status_temp and new status dari param ke status
 		let SP = `
             UPDATE transaction 
             SET status = '${status}', status_temp = '${oldStatus}'
@@ -1196,7 +1253,7 @@ module.exports = class Transaction {
         `;
 
 		try {
-            console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 			return null;
 		} catch (error) {
@@ -1224,36 +1281,32 @@ module.exports = class Transaction {
 		}
 	}
 
-    async editDeadline(transaction_id) {
+	async editDeadline(transaction_id) {}
 
-    }
+	async deleteActivityResponseDeadline(transaction_id) {
+		//update to null semua response deadline dari semua activity yang ada di transaction tersebut
+		//hiit this before creating new activity with response deadline karena hanya ada satu activity yang boleh punya active response deadline
+	}
 
-    async deleteActivityResponseDeadline(transaction_id) {
-        //update to null semua response deadline dari semua activity yang ada di transaction tersebut
-        //hiit this before creating new activity with response deadline karena hanya ada satu activity yang boleh punya active response deadline
-    }
-
-    async getPrevStatus(transaction_id) {
-        //cari activity paling baru
-        //liat code temp nya
-        //assign status dari code temp
-        let code;
-        let SP = `
+	async getPrevStatus(transaction_id) {
+		//cari activity paling baru
+		//liat code temp nya
+		//assign status dari code temp
+		let code;
+		let SP = `
             SELECT status_temp
             FROM transaction
             WHERE transaction_id = '${transaction_id}'
         `;
 
 		try {
-            console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 			code = result[0].status_temp;
-            console.log(code)
-            return code;
+			console.log(code);
+			return code;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
-		}		
-    }
-
-    
+		}
+	}
 };
