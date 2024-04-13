@@ -6,43 +6,91 @@ const uuid = require("uuid");
 
 module.exports = class Activity {
 	// Inquiry Activity Pesanan Client
-	async getClientActivity(transaction_id) {
+	async getClientActivity(transaction_id, client_id) {
 		let SP = `
-        `;
+		select 
+		a.date as timestamp,
+		a.code as code,
+		CASE 
+			WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
+			THEN CONCAT('Kamu ', a.title)
+			WHEN a.code not in ('15', '16', '18')
+			THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
+			ELSE a.title
+		END title,
+		a.content as description,
+		a.attachment as files,
+		a.response_deadline,
+		a.deadline_extension,
+		CASE
+			WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
+			THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) button)
+			ELSE null
+		END button
+		from 
+		public.activity a
+		where
+		transaction_id = '${transaction_id}'
+		order by 
+		timestamp asc
+    `;
 
 		try {
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			} else {
-				return result;
-			}
+			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
 
 	// Inquiry Activity Pesanan Freelancer
-	async getFreelancerActivity(transaction_id) {
+	async getFreelancerActivity(transaction_id, freelancer_id) {
 		let SP = `
-        `;
+			select 
+			a.date as timestamp,
+			a.code as code,
+			CASE 
+				WHEN a.client_id = '${freelancer_id}' AND a.code not in ('15', '16', '18')
+				THEN CONCAT('Kamu ', a.title)
+				WHEN a.code not in ('15', '16', '18')
+				THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
+				ELSE a.title
+			END title,
+			a.content as description,
+			a.attachment as files,
+			a.response_deadline,
+			a.deadline_extension,
+			CASE
+				WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
+				THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) button)
+				ELSE null
+			END button
+			from 
+			public.activity a
+			where
+			transaction_id = '${transaction_id}'
+			order by 
+			timestamp asc
+      `;
 
 		try {
+			console.log("SP : ");
+			console.log(SP);
+
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			} else {
-				return result;
-			}
+			console.log("RESULT : ");
+			console.log(result);
+
+			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
 
 	async getLatestActivityCode(transaction_id) {
-        //find latest activity, get the code, to use for code_temp in new activity
+		//find latest activity, get the code, to use for code_temp in new activity
 		let SP = `
 			SELECT code
 			FROM activity
@@ -61,10 +109,10 @@ module.exports = class Activity {
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-    }
+	}
 
 	async updateResponseDeadline(transaction_id) {
-        //delete all response deadline in that transaction so we can add a new one
+		//delete all response deadline in that transaction so we can add a new one
 		let SP = `
 			UPDATE activity
 			SET response_deadline = NULL
@@ -72,13 +120,13 @@ module.exports = class Activity {
 		`;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 			return null;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-    }
+	}
 
 	// Send Requirement
 	// Send Message
@@ -95,17 +143,28 @@ module.exports = class Activity {
 	// Manage Return
 	async createActivity(activity) {
 		// let id = uuid.v4()
-		let id = activity.activity_id === undefined ? uuid.v4() : `${activity.activity_id}`;
-		let transaction_id = activity.transaction_id === undefined ? null : `'${activity.transaction_id}'`;
-		let client_id = activity.client_id === undefined ? null : `'${activity.client_id}'`;
+		let id =
+			activity.activity_id === undefined
+				? uuid.v4()
+				: `${activity.activity_id}`;
+		let transaction_id =
+			activity.transaction_id === undefined
+				? null
+				: `'${activity.transaction_id}'`;
+		let client_id =
+			activity.client_id === undefined ? null : `'${activity.client_id}'`;
 		let title = activity.title === undefined ? null : `'${activity.title}'`;
-		let content = activity.content === undefined ? null : `'${activity.content}'`;
+		let content =
+			activity.content === undefined ? null : `'${activity.content}'`;
 		let code = activity.code === undefined ? null : `'${activity.code}'`;
 		let code_temp = await this.getLatestActivityCode(transaction_id);
 		let response_deadline;
-		if(activity.response_deadline === undefined) {
+		if (activity.response_deadline === undefined) {
 			response_deadline = null;
-		} else if (activity.response_deadline == "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'") {
+		} else if (
+			activity.response_deadline ==
+			"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'"
+		) {
 			response_deadline = activity.response_deadline;
 		} else {
 			const parsedDate = new Date(activity.response_deadline);
@@ -113,17 +172,20 @@ module.exports = class Activity {
 		}
 
 		let deadline_extension;
-		if(activity.deadline_extension === undefined) {
+		if (activity.deadline_extension === undefined) {
 			deadline_extension = null;
-		} else if (activity.deadline_extension == "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '3 days'") {
+		} else if (
+			activity.deadline_extension ==
+			"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '3 days'"
+		) {
 			deadline_extension = activity.deadline_extension;
 		} else {
 			const parsedDate = new Date(activity.deadline_extension);
 			deadline_extension = `'${parsedDate.toISOString()}'`;
 		}
 
-		let file_array = activity.file === undefined ? null : `ARRAY['${activity.file}']`;
-
+		let file_array =
+			activity.file === undefined ? null : `ARRAY['${activity.file}']`;
 
 		let SP = `
             INSERT INTO public.activity(
@@ -145,14 +207,13 @@ module.exports = class Activity {
 		try {
 			console.log(SP);
 			let result = await db.any(SP);
-            return "Data telah dimasukkan";
+			return "Data telah dimasukkan";
 		} catch (error) {
 			return new Error("Gagal Memasukkan Data.");
 		}
 	}
 
 	async createButton(activity_id, transaction_id, code) {
-
 		// 1 = Minta Revisi (${revision-count})
 		// 2 = Selesaikan Pesanan
 		// 3 = Tolak Permintaan Pengembalian
@@ -163,10 +224,10 @@ module.exports = class Activity {
 		// 8 = Batalkan Ajuan Pembatalan
 		// 9 = Hubungi Admin
 
-		let id = uuid.v4()
+		let id = uuid.v4();
 		let name;
 		let revision_count;
-		if(code == 1) {
+		if (code == 1) {
 			//get remaining revision
 			let SP = `
 				SELECT remaining_revision
@@ -177,7 +238,7 @@ module.exports = class Activity {
 			try {
 				let result = await db.any(SP);
 				revision_count = result[0].remaining_revision;
-				if(revision_count == 0) {
+				if (revision_count == 0) {
 					return null;
 				}
 			} catch (error) {
@@ -190,34 +251,34 @@ module.exports = class Activity {
 				name = `Minta Revisi (${revision_count})`;
 				break;
 			case 2:
-				name = 'Selesaikan Pesanan';
+				name = "Selesaikan Pesanan";
 				break;
 			case 3:
-				name = 'Tolak Permintaan Pengembalian';
+				name = "Tolak Permintaan Pengembalian";
 				break;
 			case 4:
-				name = 'Terima Permintaan Pengembalian';
+				name = "Terima Permintaan Pengembalian";
 				break;
 			case 5:
-				name = 'Batalkan Ajuan Pengembalian';
+				name = "Batalkan Ajuan Pengembalian";
 				break;
 			case 6:
-				name = 'Tolak Permintaan Pembatalan';
+				name = "Tolak Permintaan Pembatalan";
 				break;
 			case 7:
-				name = 'Terima Permintaan Pembatalan';
+				name = "Terima Permintaan Pembatalan";
 				break;
 			case 8:
-				name = 'Batalkan Ajuan Pembatalan';
+				name = "Batalkan Ajuan Pembatalan";
 				break;
 			case 9:
-				name = 'Hubungi Admin';
+				name = "Hubungi Admin";
 				break;
 			default:
-				name = 'Invalid action code';
+				name = "Invalid action code";
 		}
-		
-        //create button for activity
+
+		//create button for activity
 		let SP = `
 			INSERT INTO public.button(
 			button_id, activity_id, name, code)
@@ -230,16 +291,16 @@ module.exports = class Activity {
 		`;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 			return null;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-    }
+	}
 
 	async deleteButton(transaction_id) {
-        //delete all button to all activity in a transaction
+		//delete all button to all activity in a transaction
 		let SP = `
 			DELETE FROM button
 			WHERE activity_id IN (
@@ -250,12 +311,11 @@ module.exports = class Activity {
 		`;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 			return null;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-    }
-	
+	}
 };

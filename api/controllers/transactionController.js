@@ -240,38 +240,46 @@ app.getClientTransactionActivity = async (req, res) => {
 
 		console.log(curr_session + "2");
 		if (transaction_client.username == curr_session.session_data.username) {
+			let client_id = curr_session.session_data.client_id;
+
 			let transaction_result =
-				await transactionInstance.getTransactionActivityClient(transaction_id);
+				await transactionInstance.getTransactionActivityClient(
+					transaction_id,
+					client_id
+				);
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
 					error_message: errorMessages.DATA_NOT_FOUND,
 				};
-				result.output_schema = null;
+				res.status(400).send(result);
+				return;
 			} else {
 				result.error_schema = {
 					error_code: "200",
 					error_message: errorMessages.QUERY_SUCCESSFUL,
 				};
 				result.output_schema.activity = transaction_result;
+				res.send(result);
+				return;
 			}
 		} else {
 			result.error_schema = {
 				error_code: "403",
 				error_message: errorMessages.NOT_PROJECT_OWNER,
 			};
-			result.output_schema = null;
+			res.status(400).send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
 		};
-		result.output_schema = null;
+		res.status(400).send(result);
+		return;
 	}
-
-	res.send(result);
 };
 
 app.getTransactionDetailsClientService = async (req, res) => {
@@ -360,30 +368,34 @@ app.getTransactionDetailsFreelancerService = async (req, res) => {
 					error_code: "999",
 					error_message: errorMessages.DATA_NOT_FOUND,
 				};
-				result.output_schema = null;
+				res.status(400).send(result);
+				return;
 			} else {
 				result.error_schema = {
 					error_code: "200",
 					error_message: errorMessages.QUERY_SUCCESSFUL,
 				};
 				result.output_schema.transaction_detail = transaction_result;
+				res.send(result);
+				return;
 			}
 		} else {
 			result.error_schema = {
 				error_code: "403",
 				error_message: errorMessages.NOT_PROJECT_OWNER,
 			};
-			result.output_schema = null;
+			res.status(400).send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
 		};
-		result.output_schema = null;
-	}
 
-	res.send(result);
+		res.status(400).send(result);
+		return;
+	}
 };
 
 app.getFreelancerTransactionActivity = async (req, res) => {
@@ -396,47 +408,64 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 	let UserInstance = new User();
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
-	if (curr_session.session_id == x_token) {
+	if (curr_session.session_id == x_token && x_token) {
+		console.log("Current Session : ");
+		console.log(curr_session);
 		let transaction_id = req.params.transactionId;
 
 		let transactionInstance = new Transaction();
-		let transaction_client = await transactionInstance.getTransactionClient(
-			transaction_id
-		);
+		let transaction_freelancer =
+			await transactionInstance.getTransactionFreelancer(transaction_id);
 
-		if (transaction_client.username == curr_session.session_data.username) {
+		console.log("Transaction Freelancer : ");
+		console.log(transaction_freelancer);
+
+		if (transaction_freelancer.username == curr_session.session_data.username) {
+			let freelancer_id = curr_session.session_data.freelancer_id;
+
+			console.log("Freelancer ID : " + freelancer_id);
+
 			let transaction_result =
-				await transactionInstance.getTransactionActivityClient(transaction_id);
+				await transactionInstance.getTransactionActivityFreelancer(
+					transaction_id,
+					freelancer_id
+				);
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
 					error_message: errorMessages.INSERT_ERROR,
 				};
-				result.output_schema = null;
+
+				res.status(400).send(result);
+				return;
 			} else {
 				result.error_schema = {
 					error_code: "200",
 					error_message: errorMessages.QUERY_SUCCESSFUL,
 				};
 				result.output_schema.activity = transaction_result;
+
+				res.send(result);
 			}
 		} else {
 			result.error_schema = {
 				error_code: "403",
 				error_message: errorMessages.NOT_PROJECT_OWNER,
 			};
-			result.output_schema = null;
+
+			res.status(400).send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
 		};
-		result.output_schema = null;
-	}
 
-	res.send(result);
+		res.status(400).send(result);
+		return;
+	}
 };
 
 app.sendRequirement = async (req, res) => {
@@ -950,22 +979,22 @@ app.callAdmin = async (req, res) => {
 		let transactionInstance = new Transaction();
 		let insert = await transactionInstance.callAdmin(transaction_id, x_token);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 

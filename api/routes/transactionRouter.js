@@ -14,12 +14,9 @@ const freelancerController = require("../controllers/freelancerController");
 const reviewController = require("../controllers/reviewController");
 const transactionController = require("../controllers/transactionController");
 const multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-
-
 
 //inquiry invoice transaksi client
 router.get(
@@ -72,24 +69,17 @@ router.get(
 //send requirement
 router.post(
 	"/send-requirement",
-	upload.fields([
-		{ name: "supporting_file", maxCount: 1 }
-	]),
+	upload.fields([{ name: "supporting_file", maxCount: 1 }]),
 	transactionController.sendRequirement
 );
 
 //send message
-router.post(
-	"/send-message",
-	transactionController.sendMessage
-);
+router.post("/send-message", transactionController.sendMessage);
 
 //send additional file
 router.post(
 	"/send-file",
-	upload.fields([
-		{ name: "additional_file", maxCount: 1 }
-	]),
+	upload.fields([{ name: "additional_file", maxCount: 1 }]),
 	transactionController.sendAdditionalFile
 );
 
@@ -99,69 +89,39 @@ router.post(
 	upload.fields([
 		{ name: "result_1", maxCount: 1 },
 		{ name: "result_2", maxCount: 1 },
-		{ name: "result_3", maxCount: 1 }
+		{ name: "result_3", maxCount: 1 },
 	]),
 	transactionController.sendResult
 );
 
 //ask return
-router.post(
-	"/ask-return",
-	transactionController.askReturn
-);
+router.post("/ask-return", transactionController.askReturn);
 
 //cancel return
-router.put(
-	"/cancel-return",
-	transactionController.cancelReturn
-);
+router.put("/cancel-return", transactionController.cancelReturn);
 
 //ask revision
-router.post(
-	"/ask-revision",
-	transactionController.askRevision
-);
+router.post("/ask-revision", transactionController.askRevision);
 
 //complete transaksi
-router.put(
-	"/complete",
-	transactionController.completeTransaction
-);
+router.put("/complete", transactionController.completeTransaction);
 
 //ask cancellation
-router.post(
-	"/ask-cancellation",
-	transactionController.askCancellation
-);
+router.post("/ask-cancellation", transactionController.askCancellation);
 
 //manage cancellation
-router.post(
-	"/manage-cancellation",
-	transactionController.manageCancellation
-);
+router.post("/manage-cancellation", transactionController.manageCancellation);
 
 //call admin
-router.put(
-	"/call-admin",
-	transactionController.callAdmin
-);
+router.put("/call-admin", transactionController.callAdmin);
 
 //cancel cancellation
-router.put(
-	"/cancel-cancellation",
-	transactionController.cancelCancellation
-);
+router.put("/cancel-cancellation", transactionController.cancelCancellation);
 
 //manage return
-router.post(
-	"/manage-return",
-	transactionController.manageReturn
-);
+router.post("/manage-return", transactionController.manageReturn);
 
 //send feedback - transaction
-router.put(
-	"/:paymentId/send-feedback",
-	transactionController.sendFeedback
-);
+router.put("/:paymentId/send-feedback", transactionController.sendFeedback);
 
 module.exports = router;

@@ -3,7 +3,13 @@ const db = require("../../db");
 const uuid = require("uuid");
 const User = require("../models/userModel");
 const Activity = require("../models/activityModel.js");
-const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
+const {
+	authorize,
+	listFiles,
+	uploadFile,
+	getDownloadLink,
+	getFileName,
+} = require("../utils/googleUtil.js");
 const Payment = require("./paymentModel.js");
 
 module.exports = class Transaction {
@@ -541,15 +547,43 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Inquiry Activity Pesanan Freelancer
-	async getTransactionActivityFreelancer(transaction_id) {
+	async getTransactionActivityFreelancer(transaction_id, freelancer_id) {
 		// getFreelancerActivity(transaction_id) activitymodel
 		//if code 15 then dont add author di depan title
 		//if code 18 then dont add author di depan title
 		//if code 16 then dont add author di depan title
+		try {
+			let activityInstance = new Activity();
+
+			let result = await activityInstance.getFreelancerActivity(
+				transaction_id,
+				freelancer_id
+			);
+
+			// Map Files dari Result
+
+			return result;
+		} catch (error) {
+			return new Error("Gagal Fetch Data Transaction Activity");
+		}
 	}
 
-	async getTransactionActivityClient(transaction_id) {
+	async getTransactionActivityClient(transaction_id, client_id) {
 		// getClientActivity(transaction_id) di activity model
+		try {
+			let activityInstance = new Activity();
+
+			let result = await activityInstance.getClientActivity(
+				transaction_id,
+				client_id
+			);
+
+			// Map Files dari Result
+
+			return result;
+		} catch (error) {
+			return new Error("Gagal Fetch Data Transaction Activity");
+		}
 	}
 
 	// masuk activity
