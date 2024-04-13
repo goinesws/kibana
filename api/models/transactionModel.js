@@ -545,6 +545,7 @@ module.exports = class Transaction {
 		// getFreelancerActivity(transaction_id) activitymodel
 		//if code 15 then dont add author di depan title
 		//if code 18 then dont add author di depan title
+		//if code 16 then dont add author di depan title
 	}
 
 	async getTransactionActivityClient(transaction_id) {
@@ -728,7 +729,7 @@ module.exports = class Transaction {
 		activity.transaction_id = transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
-		activity.code = "11";
+		activity.code = "7";
 
 		//no buttons -> no activity id
 		console.log(activity);
@@ -975,7 +976,7 @@ module.exports = class Transaction {
 			activity.title = "menerima permintaan pembatalan";
 
 			//change status to 5
-			this.changeStatus(transaction_id, 7);
+			this.changeStatus(transaction_id, 5);
 
 			//create activity
 			result = await activityInstance.createActivity(activity);
@@ -995,15 +996,133 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Call Admin
-	async callAdmin(transaction_id) {}
+	async callAdmin(transaction_id, x_token) {
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+		let title = "Admin berhasil dihubungi dan investigasi sedang dilakukan";
+
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.code = "16";
+
+		console.log(activity);
+		let activityInstance = new Activity();
+
+		//apus response deadline sebelumnya
+		let result = await activityInstance.updateResponseDeadline(transaction_id);
+
+		//change status to 9
+		this.changeStatus(transaction_id, 9);
+
+		//create activity
+		result = await activityInstance.createActivity(activity);
+
+		//delete all previous buttons
+		result = await activityInstance.deleteButton(transaction_id);
+
+		return result;
+	}
 
 	// masuk activity
 	// Cancel Cancellation
-	async cancelCancellation(transaction_id) {}
+	async cancelCancellation(transaction_id, x_token) {
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+		let title = "membatalkan permintaan pembatalan.";
+
+		let activity = {};
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+		activity.title = title;
+		activity.code = "11";
+
+		//no buttons -> no activity id
+		console.log(activity);
+		let activityInstance = new Activity();
+
+		//delete all previous buttons + no new buttons
+		let result = await activityInstance.deleteButton(transaction_id);
+
+		//apus response deadline yang pas pengajuan pengembalian
+		result = await activityInstance.updateResponseDeadline(transaction_id);
+
+		//get old transaction_code
+		let code = await this.getPrevStatus(transaction_id);
+
+		//change transaction status to prev code before pengajuan pengembalian
+		code = await this.changeStatus(transaction_id, code);
+
+		//create activity
+		result = await activityInstance.createActivity(activity);
+
+		return result;
+	}
 
 	// masuk activity
 	// Manage Return
-	async manageReturn(transaction_id, type) {}
+	async manageReturn(transaction_id, type, x_token) {
+		let UserInstance = new User();
+		let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+
+		let id = uuid.v4();
+		let activity = {};
+		activity.activity_id = id;
+		activity.transaction_id = transaction_id;
+		activity.client_id = client_id;
+
+		console.log(activity);
+		let activityInstance = new Activity();
+
+		//delete all prev button
+		let result = await activityInstance.deleteButton(transaction_id);
+
+		//delete all prev response deadline
+		result = await activityInstance.updateResponseDeadline(transaction_id);
+
+		if (type == "REJECT") {
+			activity.code = "8";
+			activity.title = "menolak permintaan pengembalian dana.";
+			//add button for hubungi admin
+			result = await activityInstance.createButton(id, transaction_id, 9);
+
+			//button for batalkan ajuan pengembalian
+			result = await activityInstance.createButton(id, transaction_id, 5);
+
+			//response deadline 2 hari
+			activity.response_deadline =
+				"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
+
+			//change status to 7
+			this.changeStatus(transaction_id, 7);
+
+			//create activity
+			result = await activityInstance.createActivity(activity);
+		} else {
+			//if type == "ACCEPT"
+			activity.code = "9";
+			activity.title = "menerima permintaan pengembalian dana.";
+
+			//change status to 5
+			this.changeStatus(transaction_id, 5);
+
+			//create activity
+			result = await activityInstance.createActivity(activity);
+
+			//create activity satu lagi for pembatalan
+			let newActivity = {};
+			newActivity.transaction_id = transaction_id;
+			newActivity.client_id = client_id;
+			newActivity.title =
+				"Pesanan dibatalkan dan dana berhasil dikembalikan kepada klien.";
+			newActivity.code = "18";
+			result = await activityInstance.createActivity(newActivity);
+		}
+	}
 
 	// Send Feedback
 	async sendFeedback(payment_id) {
