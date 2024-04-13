@@ -128,6 +128,12 @@ router.put(
 	transactionController.completeTransaction
 );
 
+//ask cancellation
+router.post(
+	"/ask-cancellation",
+	transactionController.askCancellation
+);
+
 //manage cancellation
 router.post(
 	"/manage-cancellation",
@@ -138,12 +144,6 @@ router.post(
 router.put(
 	"/call-admin",
 	transactionController.callAdmin
-);
-
-//ask cancellation
-router.post(
-	"/ask-cancellation",
-	transactionController.askCancellation
 );
 
 //cancel cancellation

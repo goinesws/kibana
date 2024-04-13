@@ -621,28 +621,29 @@ app.sendResult = async (req, res) => {
 		//upload the file(s) to google docs
 
 		let file = [];
-		file = await authorize()
-			.then((auth) => {
-				if (req.files && req.files["result_1"]) {
-					let result = req.files["result_1"][0];
-					file.push(uploadFile(auth, result));
-					if (req.files["result_2"]) result = req.files["result_2"][0];
-					file.push(uploadFile(auth, result));
-					if (req.files["result_3"]) result = req.files["result_3"][0];
-					file.push(uploadFile(auth, result));
-					return file;
-				} else {
-					console.log("No file has been uploaded");
+		let auth;
+		try {
+			auth = await authorize();
+			if (req.files && req.files["result_1"]) {
+				console.log("MASUK1");
+				let result = await req.files["result_1"][0];
+				file.push(await uploadFile(auth, result));
+				if (req.files["result_2"]) {
+					result = await req.files["result_2"][0];
+					file.push(await uploadFile(auth, result));
 				}
-			})
-			.then((resultCode) => {
-				const id = resultCode;
-				return id;
-			})
-			.catch((err) => {
-				console.error("Error:", err);
-				return null;
-			});
+				if (req.files["result_3"]) {
+					result = await req.files["result_3"][0];
+					file.push(await uploadFile(auth, result));
+				}
+			} else {
+				console.log("No file has been uploaded");
+			}
+		} catch (err) {
+			console.error("Error:", err);
+			return null;
+		}
+
 		console.log(file);
 		let data = JSON.parse(req.body.data);
 		const transaction_id = data.transaction_id;
@@ -679,30 +680,260 @@ app.sendResult = async (req, res) => {
 };
 
 app.askReturn = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+		const message = req.body.message;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.askReturn(
+			transaction_id,
+			message,
+			x_token
+		);
+
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.cancelReturn = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.cancelReturn(
+			transaction_id,
+			x_token
+		);
+
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.askRevision = async (req, res) => {
-	res.send("Good");
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+		const message = req.body.message;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.askRevision(
+			transaction_id,
+			message,
+			x_token
+		);
+
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.completeTransaction = async (req, res) => {
-	res.send("Good");
-};
+	let result = {};
 
-app.manageCancellation = async (req, res) => {
-	res.send("Good");
-};
+	result.error_schema = {};
+	result.output_schema = {};
 
-app.callAdmin = async (req, res) => {
-	res.send("Good");
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.completeTransaction(
+			transaction_id,
+			x_token
+		);
+
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
 };
 
 app.askCancellation = async (req, res) => {
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+		const message = req.body.message;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.askCancellation(
+			transaction_id,
+			message,
+			x_token
+		);
+
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
+};
+
+app.manageCancellation = async (req, res) => {
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.body.transaction_id;
+		const type = req.body.type;
+
+		let transactionInstance = new Transaction();
+		let insert = await transactionInstance.manageCancellation(
+			transaction_id,
+			type,
+			x_token
+		);
+
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+
+	res.send(result);
+};
+
+app.callAdmin = async (req, res) => {
 	res.send("Good");
 };
 
