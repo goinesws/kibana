@@ -9,7 +9,9 @@ const clientController = require("../controllers/clientController");
 const freelancerController = require("../controllers/freelancerController");
 const multer = require("multer");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+	destination: '/tmp',
+  });
 const upload = multer({ storage: storage });
 
 router.get("/profile/:userId", userController.getOtherProfile);

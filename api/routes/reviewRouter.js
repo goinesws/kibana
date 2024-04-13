@@ -7,7 +7,9 @@ const fs = require("fs");
 const reviewController = require("../controllers/reviewController");
 const multer = require("multer");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+	destination: '/tmp',
+  });
 const upload = multer({ storage: storage });
 
 router.post("/client", reviewController.insertReviewClient);
