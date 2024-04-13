@@ -231,13 +231,13 @@ app.getClientTransactionActivity = async (req, res) => {
 
 	if (curr_session.session_id == x_token) {
 		let transaction_id = req.params.transactionId;
-		console.log(curr_session+"1")
+		console.log(curr_session + "1");
 		let transactionInstance = new Transaction();
 		let transaction_client = await transactionInstance.getTransactionClient(
 			transaction_id
 		);
 
-		console.log(curr_session+"2")
+		console.log(curr_session + "2");
 		if (transaction_client.username == curr_session.session_data.username) {
 			let transaction_result =
 				await transactionInstance.getTransactionActivityClient(transaction_id);
@@ -472,25 +472,30 @@ app.sendRequirement = async (req, res) => {
 		const description = data.description;
 
 		let transactionInstance = new Transaction();
-		console.log(file + "CONTROLLER")
-		let insert = await transactionInstance.sendRequirement(transaction_id, file, description, x_token);
+		console.log(file + "CONTROLLER");
+		let insert = await transactionInstance.sendRequirement(
+			transaction_id,
+			file,
+			description,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -512,24 +517,28 @@ app.sendMessage = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.sendMessage(transaction_id, message, x_token);
+		let insert = await transactionInstance.sendMessage(
+			transaction_id,
+			message,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -565,29 +574,33 @@ app.sendAdditionalFile = async (req, res) => {
 				console.error("Error:", err);
 				return null;
 			});
-			console.log(req.body);
+		console.log(req.body);
 		let data = JSON.parse(req.body.data);
 		const transaction_id = data.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.sendAdditionalFile(transaction_id, file, x_token);
+		let insert = await transactionInstance.sendAdditionalFile(
+			transaction_id,
+			file,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.DATA_NOT_FOUND,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -612,7 +625,7 @@ app.sendResult = async (req, res) => {
 		try {
 			auth = await authorize();
 			if (req.files && req.files["result_1"]) {
-				console.log("MASUK1")
+				console.log("MASUK1");
 				let result = await req.files["result_1"][0];
 				file.push(await uploadFile(auth, result));
 				if (req.files["result_2"]) {
@@ -631,30 +644,35 @@ app.sendResult = async (req, res) => {
 			return null;
 		}
 
-			console.log(file);
+		console.log(file);
 		let data = JSON.parse(req.body.data);
 		const transaction_id = data.transaction_id;
 		const description = data.description;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.sendResult(transaction_id, file, description, x_token);
+		let insert = await transactionInstance.sendResult(
+			transaction_id,
+			file,
+			description,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.DATA_NOT_FOUND,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -676,24 +694,28 @@ app.askReturn = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.askReturn(transaction_id, message, x_token);
+		let insert = await transactionInstance.askReturn(
+			transaction_id,
+			message,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -714,24 +736,27 @@ app.cancelReturn = async (req, res) => {
 		const transaction_id = req.body.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.cancelReturn(transaction_id, x_token);
+		let insert = await transactionInstance.cancelReturn(
+			transaction_id,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -753,24 +778,28 @@ app.askRevision = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.askRevision(transaction_id, message, x_token);
+		let insert = await transactionInstance.askRevision(
+			transaction_id,
+			message,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -791,24 +820,27 @@ app.completeTransaction = async (req, res) => {
 		const transaction_id = req.body.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.completeTransaction(transaction_id, x_token);
+		let insert = await transactionInstance.completeTransaction(
+			transaction_id,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -830,24 +862,28 @@ app.askCancellation = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.askCancellation(transaction_id, message, x_token);
+		let insert = await transactionInstance.askCancellation(
+			transaction_id,
+			message,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -869,24 +905,28 @@ app.manageCancellation = async (req, res) => {
 		const type = req.body.type;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.manageCancellation(transaction_id, type, x_token);
+		let insert = await transactionInstance.manageCancellation(
+			transaction_id,
+			type,
+			x_token
+		);
 
-			if (insert instanceof Error) {
-				result.error_schema = {
-					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
-				};
-			} else {
-				result.error_schema = {
-					error_code: "200",
-					error_message: errorMessages.QUERY_SUCCESSFUL,
-				};
-			}
+		if (insert instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: errorMessages.INSERT_ERROR,
+			};
+		} else {
+			result.error_schema = {
+				error_code: "200",
+				error_message: errorMessages.QUERY_SUCCESSFUL,
+			};
+		}
 	} else {
 		result.error_schema = {
 			error_code: "403",
 			error_message: errorMessages.NOT_LOGGED_IN,
-		};  
+		};
 		result.output_schema = null;
 	}
 
@@ -940,7 +980,31 @@ app.manageReturn = async (req, res) => {
 };
 
 app.sendFeedback = async (req, res) => {
-	res.send("Good");
+	// ini buat process payment
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token && x_token) {
+		let payment_id = req.params.paymentId;
+
+		let transactionInstance = new Transaction();
+
+		let trx_result = transactionInstance.sendFeedback(payment_id);
+	} else {
+		result.error_schema = {
+			error_code: "400",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+
+		res.status(400).send(result);
+		return;
+	}
 };
 
 module.exports = app;

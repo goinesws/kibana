@@ -1033,7 +1033,14 @@ module.exports = class Transaction {
 	async manageReturn(transaction_id, type) {}
 
 	// Send Feedback
-	async sendFeedback(payment_id) {}
+	async sendFeedback(payment_id) {
+		try {
+			let SP = `
+            `;
+		} catch (error) {
+			return new Error("Update Status Payment Gagal.");
+		}
+	}
 
 	// Create Transac Buat Payment
 	async createTransaction(project_id, client_id, freelancer_id, project_type) {
