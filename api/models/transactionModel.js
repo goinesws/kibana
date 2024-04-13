@@ -726,7 +726,7 @@ module.exports = class Transaction {
         activity.transaction_id = transaction_id;
         activity.client_id = client_id;
         activity.title = title;
-        activity.code = "11";
+        activity.code = "7";
 
         //no buttons -> no activity id
         console.log(activity);
@@ -1019,14 +1019,46 @@ module.exports = class Transaction {
 
         //delete all previous buttons
         result = await activityInstance.deleteButton(transaction_id);
-        
+
         return result;
 
     }
 
 	// masuk activity
 	// Cancel Cancellation
-	async cancelCancellation(transaction_id) {}
+	async cancelCancellation(transaction_id, x_token) {
+        let UserInstance = new User();
+        let curr_session = await UserInstance.getUserSessionData(x_token);
+		let client_id = curr_session.session_data.client_id;
+        let title = "membatalkan permintaan pembatalan.";
+
+        let activity = {};
+        activity.transaction_id = transaction_id;
+        activity.client_id = client_id;
+        activity.title = title;
+        activity.code = "11";
+
+        //no buttons -> no activity id
+        console.log(activity);
+        let activityInstance = new Activity();
+
+        //delete all previous buttons + no new buttons
+        let result = await activityInstance.deleteButton(transaction_id);
+
+        //apus response deadline yang pas pengajuan pengembalian
+        result = await activityInstance.updateResponseDeadline(transaction_id);
+
+        //get old transaction_code
+        let code = await this.getPrevStatus(transaction_id);
+
+        //change transaction status to prev code before pengajuan pengembalian
+        code = await this.changeStatus(transaction_id, code);
+
+        //create activity
+        result = await activityInstance.createActivity(activity);
+
+        return result;
+    }
 
 	// masuk activity
 	// Manage Return
