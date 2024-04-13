@@ -7,10 +7,7 @@ const fs = require("fs");
 const taskController = require("../controllers/taskController");
 const subcategoryController = require("../controllers/subcategoryController");
 const categoryController = require("../controllers/categoryController");
-const multer = require("multer");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 router.get("/new", taskController.getNewTask);
 router.get("/new/:categoryId", taskController.getNewTaskByCategory);

@@ -1,9 +1,6 @@
 const express = require("express");
 const app = express();
 const apiRouter = require("./routes/apiRouter");
-const multer = require("multer");
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 const port = 3000;
 const cors = require("cors");
 

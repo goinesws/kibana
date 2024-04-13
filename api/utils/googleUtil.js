@@ -1,7 +1,6 @@
 const express = require("express");
 const db = require("../../db");
 const app = express();
-const multer = require("multer");
 const { google } = require("googleapis");
 const fs = require("fs").promises;
 const path = require("path");

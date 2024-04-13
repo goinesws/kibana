@@ -5,10 +5,7 @@ const dotenv = require("dotenv");
 const { google } = require("googleapis");
 const fs = require("fs");
 const reviewController = require("../controllers/reviewController");
-const multer = require("multer");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 router.post("/client", reviewController.insertReviewClient);
 router.post("/freelancer", reviewController.insertReviewFreelancer);
