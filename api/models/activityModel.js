@@ -153,6 +153,47 @@ module.exports = class Activity {
 				: `'${activity.transaction_id}'`;
 		let client_id =
 			activity.client_id === undefined ? null : `'${activity.client_id}'`;
+		//if client_id = transaction.client_id
+		//then client_id == client_id
+		//if not
+		//client_id = client_id.freelancer_id
+
+		//get client_id dari transaction
+		let SP1 = `
+			SELECT client_id
+			FROM transaction
+			WHERE transaction_id = ${transaction_id}
+		`;
+
+		try {
+			console.log(SP1);
+			let result = await db.any(SP1);
+			let transacClientID = `'${result[0].client_id}'`;
+			//if di transac client ini bukan client dari transactionnya
+			console.log(client_id + "client ID");
+			console.log(transacClientID + "transac client ID");
+			if (client_id != transacClientID) {
+				//get freelancer id nya sang client id
+				console.log("masuk");
+				let SP2 = `
+					SELECT freelancer_id
+					FROM freelancer
+					WHERE user_id = ${client_id};
+				`;
+
+				try {
+					console.log(SP2);
+					let result = await db.any(SP2);
+					//set client id to be the client's freelancer id
+					client_id = `'${result[0].freelancer_id}'`;
+				} catch (error) {
+					throw new Error("Gagal Mendapatkan Data.");
+				}
+			}
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+
 		let title = activity.title === undefined ? null : `'${activity.title}'`;
 		let content =
 			activity.content === undefined ? null : `'${activity.content}'`;
