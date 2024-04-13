@@ -4,7 +4,8 @@ const uuid = require("uuid");
 const User = require("../models/userModel");
 const Activity = require("../models/activityModel.js");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
-const Payment = require("./paymentModel.js");
+const Payment = require("../models/paymentModel.js");
+
 
 module.exports = class Transaction {
 	// Utilities
@@ -1170,22 +1171,16 @@ module.exports = class Transaction {
 			console.log("result : ");
 			console.log(result);
 
-			try {
-				let paymentInstance = new Payment();
-				let payment_update_result = await paymentInstance.updatePaymentStatus(
-					payment_id
-				);
-				console.log("Payment Instance Gagal");
+			let paymentInstance = new (require("../models/paymentModel"))();
+			let payment_update_result = await paymentInstance.updatePaymentStatus(payment_id);
 
-				if (payment_update_result instanceof Error) {
-					return new Error("Gagal Pada Payment Model.");
-				}
-			} catch (error) {
-				console.log("PAYMENT GAGAL");
+			if (payment_update_result instanceof Error) {
+				return new Error("Gagal Pada Payment Model.");
 			}
 
 			return result[0];
 		} catch (error) {
+			console.log(error)
 			return new Error("Gagal Pada Transaction Model.");
 		}
 	}

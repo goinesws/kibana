@@ -1,10 +1,10 @@
-// paymentModel.js
 const db = require("../../db");
 const Midtrans = require("../utils/midtransUtil");
 const Transaction = require("../models/transactionModel");
 const uuid = require("uuid");
 
-class Payment {
+
+module.exports = class Payment {
 	constructor() {
 		console.log("BERHASIL INIT PAYMENT");
 	}
@@ -145,6 +145,4 @@ class Payment {
 			return new Error("Gagal Update Payment Status.");
 		}
 	}
-}
-
-module.exports = Payment;
+};
