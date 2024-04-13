@@ -572,12 +572,12 @@ app.activateService = async (req, res) => {
 		let service_result = await serviceInstance.activateService(serviceId);
 
 		if (service_result instanceof Error) {
-			result.error_schema.error_code = 400;
+			result.error_schema.error_code = "400";
 			result.error_schema.error_message = errorMessages.ERROR;
 			res.status(400).send(result);
 			return;
 		} else {
-			result.error_schema.error_code = 200;
+			result.error_schema.error_code = "200";
 			result.error_schema.error_message = errorMessages.QUERY_SUCCESSFUL;
 			res.send(result);
 			return;
