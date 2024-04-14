@@ -79,7 +79,6 @@ app.registerAsFreelancer = async (req, res) => {
 	if (curr_session.session_id == x_token) {
 		// get file cv
 		let cv_id = "";
-		let cv_url = "";
 		if (req.files["cv"]) {
 			cv_id = await authorize()
 				.then((auth) => {
@@ -97,13 +96,10 @@ app.registerAsFreelancer = async (req, res) => {
 				.catch((err) => {
 					console.error("Error:", err);
 				});
-
-			cv_url = await Google.getPreviewLink(cv_id);
 		}
 
 		// get portfolio
 		let port_id = "";
-		let port_url = "";
 		if (req.files["portfolio"]) {
 			port_id = await authorize()
 				.then((auth) => {
@@ -121,8 +117,6 @@ app.registerAsFreelancer = async (req, res) => {
 				.catch((err) => {
 					console.error("Error:", err);
 				});
-
-			port_url = await Google.getPreviewLink(port_id);
 		}
 
 		let data = "";
@@ -140,8 +134,8 @@ app.registerAsFreelancer = async (req, res) => {
 		let clientInstance = new Client();
 		let reg_result = await clientInstance.register(
 			data,
-			cv_url,
-			port_url,
+			cv_id,
+			port_id,
 			userID
 		);
 

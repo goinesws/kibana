@@ -163,7 +163,7 @@ module.exports = class User {
 		let SPGetClientDetails = `
 		select 
 		c.client_id as id, 
-		c.profile_image as profile_image_url, 
+		c.profile_image as profile_image_url,
 		c.name, 
 		c.username,
 		CASE

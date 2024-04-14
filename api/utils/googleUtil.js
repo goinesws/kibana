@@ -178,7 +178,7 @@ async function uploadFile(authClient, file) {
 		},
 	});
 	//console.log('permission changed to all');
-
+	console.log(file_id);
 	//console.log("done")
 	return file_id;
 }
