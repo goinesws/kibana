@@ -187,9 +187,14 @@ module.exports = class User {
 		c.client_id = '${clientId}'
 		or f.freelancer_id = '${clientId}';`;
 
+		let SP = `
+			SELECT EXISTS(SELECT 1 FROM freelancer WHERE user_id = '${clientId}');
+		`;
+
 		try {
 			let result = await db.any(SPGetClientDetails);
-
+			let isFreelancer = await db.any(SP);
+			result[0].is_freelancer = isFreelancer;
 			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");

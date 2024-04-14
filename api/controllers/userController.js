@@ -187,7 +187,6 @@ app.getOtherProfile = async (req, res) => {
 	result.output_schema = {};
 
 	const userInstance = new User();
-	const freelancerInstance = new Freelancer();
 	let clientDetails = await userInstance.getOtherProfile(userId);
 
 	if (clientDetails == null) {
@@ -201,7 +200,6 @@ app.getOtherProfile = async (req, res) => {
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = clientDetails;
-		result.output_schema.is_freelancer = isFreelancer;
 	}
 
 	res.send(result);
