@@ -69,11 +69,7 @@ class Service {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
             jsonb_build_object('image_url', client.profile_image, 'name', client.name) as freelancer,
-            (SELECT AVG(rating)
-            FROM
-              review
-            WHERE
-            destination_id = service.service_id) as average_rating,
+            COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
             review
@@ -107,11 +103,7 @@ class Service {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
             jsonb_build_object('image_url', client.profile_image, 'name', client.name) as freelancer,
-            (SELECT AVG(rating)
-            FROM
-              review
-            WHERE
-            destination_id = service.service_id) as average_rating,
+            COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
             review
@@ -158,11 +150,7 @@ class Service {
 
 		let SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
         jsonb_build_object('profile_image_url', client.profile_image, 'name', client.name) as freelancer,
-        (SELECT AVG(rating)
-        FROM
-          review
-        WHERE
-        destination_id = service.service_id) as average_rating,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
         (SELECT COUNT(rating)
         FROM 
         review
@@ -191,50 +179,77 @@ class Service {
 			SP += ` service.subcategory_id = '${subcategory}'`;
 		}
 
-		if (budget !== "" && budget) {
-			const budgetObject = JSON.parse(budget);
-			const budgetStart = budgetObject.budget_start;
-			const budgetEnd = budgetObject.budget_end;
-
+		if (budget !== "" && budget && budget.length >= 1) {
 			if (
-				searchText !== "" ||
-				searchText !== null ||
-				subcategory !== "" ||
-				subcategory !== null
-			)
-				SP += ` AND`;
-			else SP += ` WHERE`;
-			if (budget.budget_end !== null) {
-				SP += ` price BETWEEN '${budgetStart}' AND '${budgetEnd}'`;
+				(searchText !== "" && searchText) ||
+				(subcategory !== "" && subcategory)
+			) {
+				SP += ` AND `;
 			} else {
-				SP += ` price > '${budgetStart}'`;
+				SP += ` WHERE `;
 			}
+
+			SP += "(";
+
+			budget.map((curr, i) => {
+				const budgetObject = curr;
+				const budgetStart = budgetObject.budget_start;
+				const budgetEnd = budgetObject.budget_end;
+
+				if (i > 0) {
+					SP += " OR ";
+				}
+
+				if (curr.budget_end != null || curr.budget_end != undefined) {
+					SP += ` price BETWEEN '${budgetStart}' AND '${budgetEnd}'`;
+				} else {
+					SP += ` price > '${budgetStart}'`;
+				}
+			});
+
+			SP += ")";
 		}
 
-		if (workingTime !== "" && workingTime) {
-			const workingTimeObject = JSON.parse(workingTime);
-			const workingTimeStart = workingTimeObject.working_time_start;
-			const workingTimeEnd = workingTimeObject.working_time_end;
-
+    if (workingTime !== "" && workingTime && workingTime.length >= 1) {
 			if (
-				searchText !== "" ||
-				subcategory !== "" ||
-				budget !== "" ||
-				searchText !== null ||
-				subcategory !== null ||
-				budget !== null
-			)
-				SP += ` AND`;
-			else SP += ` WHERE`;
-			if (workingTimeEnd !== null) {
-				SP += ` working_time BETWEEN '${workingTimeStart}' AND '${workingTimeEnd}'`;
+				(searchText !== "" && searchText) ||
+				(budget!== "" && budget) ||
+				(subcategory !== "" && subcategory)
+			) {
+				SP += ` AND `;
 			} else {
-				SP += ` working_time > '${workingTimeStart}'`;
+				SP += ` WHERE `;
 			}
+
+			SP += "(";
+
+			workingTime.map((curr, i) => {
+				const workingTimeObject = curr;
+				const workingTimeStart = workingTimeObject.working_time_start;
+				const workingTimeEnd = workingTimeObject.working_time_end;
+
+				if (i > 0) {
+					SP += " OR ";
+				}
+
+				if (curr.workingTimeEnd != null || curr.workingTimeEnd != undefined) {
+					SP += ` working_time BETWEEN '${workingTimeStart}' AND '${workingTimeEnd}'`;
+				} else {
+					SP += ` working_time > '${workingTimeStart}'`;
+				}
+			});
+
+			SP += ")";
 		}
 
 		SP += ` ORDER BY service.created_date DESC`;
-		let result = await db.any(SP);
+    let result;
+
+    try {
+      result = await db.any(SP);
+    }  catch (error) {
+			return new Error("Gagal Mendapatkan Data.");
+		}
 
 		return result;
 	}
@@ -295,11 +310,7 @@ class Service {
 
 			let SP2 = `
       SELECT 
-            (SELECT AVG(rating)
-            FROM
-              review
-            WHERE
-            destination_id = service.service_id) as average_rating,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
             review
@@ -379,7 +390,7 @@ class Service {
 			"','"
 		)}'], ${price}, ${workingTime}, ARRAY['${images.join(
 			"','"
-		)}'], ${revisionCount}, TRUE, CURRENT_TIMESTAMP);
+		)}'], ${revisionCount}, TRUE, CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta');
     `;
 
 		await db.any(SP);
@@ -431,11 +442,7 @@ class Service {
       tags,
       images as image_url,
       price,
-      (SELECT AVG(rating)
-      FROM
-        review
-      WHERE
-      destination_id = service.service_id) as average_rating,
+      COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
       (SELECT COUNT(rating)
       FROM 
       review
@@ -475,11 +482,7 @@ class Service {
       service.tags,
       service.price,
     jsonb_build_object(
-      'average_rating', (SELECT AVG(rating)
-                FROM
-                review
-                WHERE
-                destination_id = service.service_id),
+      'average_rating', COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0),
       'rating_amount', (SELECT COUNT(rating)
                 FROM 
                 review
@@ -643,11 +646,7 @@ class Service {
           'name', client.name,
           'profile_image_url', client.profile_image
       ) as freelancer,
-      (SELECT AVG(rating)
-      FROM
-          review
-      WHERE
-      destination_id = service.service_id) as average_rating,
+      COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
       (SELECT COUNT(rating)
       FROM 
       review
