@@ -225,6 +225,8 @@ module.exports = class Freelancer extends User {
 
 	// Edit Freelancer Education
 	async editFreelancerEducation(userId, education) {
+		console.log("edit freelancer education")
+		console.log(education)
 		let EducationInstance = new Education();
 
 		try {
@@ -331,6 +333,7 @@ module.exports = class Freelancer extends User {
 
 	// Register As Freelancer
 	async insertFreelancerEducation(userId, education) {
+		console.log(education);
 		let EducationInstance = new Education();
 
 		try {
@@ -375,5 +378,16 @@ module.exports = class Freelancer extends User {
 			});
 
 		return link;
+	}
+
+	async removeEducation(userId) {
+		console.log("remove old education")
+		let SP = `DELETE FROM education WHERE freelancer_id = (select freelancer_id from public.freelancer where user_id = '${userId}');`;
+		try {
+			let result = await db.any(SP);
+			return result;
+		} catch (error) {
+			return new Error("Gagal menghapus data edukasi.");
+		}
 	}
 };

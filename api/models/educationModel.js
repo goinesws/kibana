@@ -29,6 +29,7 @@ module.exports = class Education {
 
 	// Edit Freelancer Education
 	async editEducation(userId, education) {
+		console.log(education)
 		// ini SP buat insert educationHistory
 		let SP_insert = `
 		insert 
@@ -38,7 +39,7 @@ module.exports = class Education {
 		values
 		(CONCAT('EDU', (select nextval('education_id_sequence'))), 
 		(select freelancer_id from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}'), 
-		'${education.degree}', '${education.major}', '${education.university}', '${education.country}', ${education.graducation_year});`;
+		'${education.degree}', '${education.major}', '${education.university}', '${education.country}', ${education.graduation_year});`;
 
 		// ini SP buat edit
 		let SP_edit = `
@@ -51,11 +52,12 @@ module.exports = class Education {
 		country = '${education.country}',
 		year = ${education.year}
 		where 
-		freelancer_id = (select frelancer_id from public.freelancer where userId = '${userId}' or freelancer_id = '${userId}')
+		freelancer_id = (select freelancer_id from public.freelancer where userId = '${userId}' or freelancer_id = '${userId}')
 		`;
 
 		try {
-			let result = await db.any(SP_edit);
+			console.log(SP_insert)
+			let result = await db.any(SP_insert);
 
 			return result;
 		} catch (error) {
@@ -73,11 +75,12 @@ module.exports = class Education {
 		public.education
 		(education_id, freelancer_id, degree, major, university, country, year)
 		values
-		'${ed_uuid}', 
+		('${ed_uuid}', 
 		(select freelancer_id from public.freelancer where user_id = '${userId}' ), 
-		'${education.degree}', '${education.major}', '${education.university}', '${education.country}', ${education.graducation_year});`;
+		'${education.degree}', '${education.major}', '${education.university}', '${education.country}', ${education.graduation_year});`;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 			return result;
 		} catch (error) {

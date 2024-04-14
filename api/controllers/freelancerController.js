@@ -316,6 +316,7 @@ app.editFreelancerSkills = async (req, res) => {
 };
 
 app.editFreelancerEducation = async (req, res) => {
+	console.log("MASUK KE EDIT")
 	let result = {};
 
 	result.error_schema = {};
@@ -333,8 +334,10 @@ app.editFreelancerEducation = async (req, res) => {
 	) {
 		let userId = curr_session.session_data.client_id;
 		let freelancerInstance = new Freelancer();
+		await freelancerInstance.removeEducation(userId);
 
 		education.map((education) => {
+			console.log(education)
 			let ed_result = freelancerInstance.editFreelancerEducation(
 				userId,
 				education
