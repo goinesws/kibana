@@ -69,11 +69,7 @@ class Service {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
             jsonb_build_object('image_url', client.profile_image, 'name', client.name) as freelancer,
-            (SELECT AVG(rating)
-            FROM
-              review
-            WHERE
-            destination_id = service.service_id) as average_rating,
+            COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
             review
@@ -107,11 +103,7 @@ class Service {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
             jsonb_build_object('image_url', client.profile_image, 'name', client.name) as freelancer,
-            (SELECT AVG(rating)
-            FROM
-              review
-            WHERE
-            destination_id = service.service_id) as average_rating,
+            COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
             review
@@ -158,11 +150,7 @@ class Service {
 
 		let SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
         jsonb_build_object('profile_image_url', client.profile_image, 'name', client.name) as freelancer,
-        (SELECT AVG(rating)
-        FROM
-          review
-        WHERE
-        destination_id = service.service_id) as average_rating,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
         (SELECT COUNT(rating)
         FROM 
         review
@@ -322,11 +310,7 @@ class Service {
 
 			let SP2 = `
       SELECT 
-            (SELECT AVG(rating)
-            FROM
-              review
-            WHERE
-            destination_id = service.service_id) as average_rating,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
             review
@@ -458,11 +442,7 @@ class Service {
       tags,
       images as image_url,
       price,
-      (SELECT AVG(rating)
-      FROM
-        review
-      WHERE
-      destination_id = service.service_id) as average_rating,
+      COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
       (SELECT COUNT(rating)
       FROM 
       review
@@ -502,11 +482,7 @@ class Service {
       service.tags,
       service.price,
     jsonb_build_object(
-      'average_rating', (SELECT AVG(rating)
-                FROM
-                review
-                WHERE
-                destination_id = service.service_id),
+      'average_rating', COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0),
       'rating_amount', (SELECT COUNT(rating)
                 FROM 
                 review
@@ -670,11 +646,7 @@ class Service {
           'name', client.name,
           'profile_image_url', client.profile_image
       ) as freelancer,
-      (SELECT AVG(rating)
-      FROM
-          review
-      WHERE
-      destination_id = service.service_id) as average_rating,
+      COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
       (SELECT COUNT(rating)
       FROM 
       review
