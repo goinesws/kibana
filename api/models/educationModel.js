@@ -21,10 +21,6 @@ module.exports = class Education {
 		try {
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");

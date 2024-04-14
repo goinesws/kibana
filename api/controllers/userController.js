@@ -141,6 +141,8 @@ app.logout = async (req, res) => {
 	const userInstance = new User();
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
+	// Walaupun X-Token ga dikasih jangan kasih logout return error karena ntr gagal di FEnya
+
 	if (curr_session.session_id == x_token) {
 		req.session.destroy();
 
@@ -152,23 +154,25 @@ app.logout = async (req, res) => {
 
 		if (logout_result instanceof Error) {
 			result.error_schema = {
-				error_code: "999",
+				error_code: "903",
 				error_message: "Logout Failed.",
 			};
-			result.output_schema = null;
-			res.status(400).send(result);
+			result.output_schema = {};
+			res.send(result);
 			return;
 		}
 
 		result.error_schema = { error_code: "200", error_message: "Success" };
 		result.output_schema = {};
 	} else {
+		req.session.destroy();
+
 		result.error_schema = {
-			error_code: "999",
+			error_code: "903",
 			error_message: "Logout Failed.",
 		};
-		result.output_schema = null;
-		res.status(400).send(result);
+		result.output_schema = {};
+		res.send(result);
 		return;
 	}
 
@@ -264,7 +268,7 @@ app.getMyBankDetails = async (req, res) => {
 		bank = await userInstance.getBankDetails(
 			curr_session.session_data.client_id
 		);
-		if (bank == null || bank instanceof Error) {
+		if (bank instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
 				error_message: "Tidak ada data yang ditemukan.",

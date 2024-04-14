@@ -136,9 +136,6 @@ module.exports = class Freelancer extends User {
 				result[i].rating_amount = amt_placeholder[0].count;
 			}
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");

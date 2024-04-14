@@ -9,12 +9,13 @@ module.exports = class Midtrans {
 			});
 
 			let date = new Date();
-			console.log("Midtrans Date : ");
-			console.log(date.valueOf());
+			// console.log("Midtrans Date : ");
+			// console.log(date.valueOf());
 
 			let parameter = {
 				transaction_details: {
-					order_id: "KIBANA-" + type + "-" + date.valueOf() + "-" + project_id,
+					order_id:
+						"KIBANA-" + type + "-" + date.valueOf() + "-" + project_id.trim(),
 					gross_amount: price,
 				},
 				credit_card: {
@@ -28,13 +29,13 @@ module.exports = class Midtrans {
 				},
 			};
 
-			console.log("MIDTRANS PARAMS : ");
-			console.log(parameter);
+			// console.log("MIDTRANS PARAMS : ");
+			// console.log(parameter);
 
 			let trx = await snap.createTransaction(parameter);
 
-			console.log("TRX HASIL MID TRANS:");
-			console.log(trx);
+			// console.log("TRX HASIL MID TRANS:");
+			// console.log(trx);
 
 			return trx.token;
 		} catch (error) {

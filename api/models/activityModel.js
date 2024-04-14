@@ -3,6 +3,13 @@ const db = require("../../db");
 const crypto = require("crypto");
 const FormData = require("form-data");
 const uuid = require("uuid");
+const {
+	authorize,
+	listFiles,
+	uploadFile,
+	getDownloadLink,
+	getFileName,
+} = require("../utils/googleUtil.js");
 
 module.exports = class Activity {
 	// Inquiry Activity Pesanan Client
@@ -75,13 +82,10 @@ module.exports = class Activity {
       `;
 
 		try {
-			console.log("SP : ");
-			console.log(SP);
+			// console.log("SP : ");
+			// console.log(SP);
 
 			let result = await db.any(SP);
-
-			console.log("RESULT : ");
-			console.log(result);
 
 			return result;
 		} catch (error) {

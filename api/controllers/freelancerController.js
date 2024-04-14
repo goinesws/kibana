@@ -15,7 +15,7 @@ app.getFreelancerDescription = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let desc = await freelancerInstance.getDescription(userId);
 
-	if (desc == null || desc instanceof Error) {
+	if (desc instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -43,7 +43,7 @@ app.getFreelancerEducationHistory = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let edu = await freelancerInstance.getFreelancerEducation(userId);
 
-	if (edu == null || edu instanceof Error) {
+	if (edu instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -70,7 +70,7 @@ app.getFreelancerSkill = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let skills = await freelancerInstance.getSkill(userId);
 
-	if (skills == null || skills instanceof Error) {
+	if (skills instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -97,7 +97,7 @@ app.getFreelancerCV = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let CV = await freelancerInstance.getCV(userId);
 
-	if (CV == null || CV instanceof Error) {
+	if (CV instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -124,7 +124,7 @@ app.getPortfolio = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let portfolio = await freelancerInstance.getPortfolio(userId);
 
-	if (portfolio == null || portfolio instanceof Error) {
+	if (portfolio instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -151,7 +151,7 @@ app.getOwnedService = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let owned_service = await freelancerInstance.getOwnedService(userId);
 
-	if (owned_service == null || owned_service instanceof Error) {
+	if (owned_service instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -161,6 +161,9 @@ app.getOwnedService = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	} else {
+		if (owned_service.length < 1) {
+			owned_service = null;
+		}
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.services = owned_service;
 		res.send(result);
@@ -187,7 +190,7 @@ app.getFreelancerProjectHistory = async (req, res) => {
 	let freelancerInstance = new Freelancer();
 	let projects = await freelancerInstance.getProjectHistory(userId);
 
-	if (projects == null || projects instanceof Error) {
+	if (projects instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
 			error_message: "Tidak ada data yang ditemukan.",
@@ -197,6 +200,12 @@ app.getFreelancerProjectHistory = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	} else {
+		if (projects.project_amount < 1) {
+			projects.average_rating = 0;
+			projects.project_list = null;
+		} else if ((projects.project_list = {})) {
+			projects.project_list = null;
+		}
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = projects;
 		res.send(result);

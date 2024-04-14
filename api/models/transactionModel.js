@@ -560,8 +560,6 @@ module.exports = class Transaction {
 				freelancer_id
 			);
 
-			// Map Files dari Result
-
 			return result;
 		} catch (error) {
 			return new Error("Gagal Fetch Data Transaction Activity");
@@ -1205,15 +1203,19 @@ module.exports = class Transaction {
 			console.log(result);
 
 			let paymentInstance = new (require("../models/paymentModel"))();
-			let payment_update_result = await paymentInstance.updatePaymentStatus(payment_id);
+			let payment_update_result = await paymentInstance.updatePaymentStatus(
+				payment_id
+			);
 
 			if (payment_update_result instanceof Error) {
 				return new Error("Gagal Pada Payment Model.");
 			}
 
+			// Create Activity Setelah Bayar (Karena Transaksi Di buat)
+
 			return result[0];
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 			return new Error("Gagal Pada Transaction Model.");
 		}
 	}

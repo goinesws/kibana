@@ -5,7 +5,13 @@ const Service = require("../models/serviceModel.js");
 const Task = require("../models/taskModel.js");
 const User = require("../models/userModel.js");
 const Payment = require("../models/paymentModel.js");
-const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
+const {
+	authorize,
+	listFiles,
+	uploadFile,
+	getDownloadLink,
+	getFileName,
+} = require("../utils/googleUtil.js");
 
 const errorMessages = require("../messages/errorMessages");
 
@@ -256,6 +262,30 @@ app.getClientTransactionActivity = async (req, res) => {
 				res.status(400).send(result);
 				return;
 			} else {
+				await Promise.all(
+					transaction_result.map(async (item) => {
+						if (item.files != null) {
+							item.files = item.files[0].split(",");
+
+							await Promise.all(
+								item.files.map(async (file_id, index) => {
+									let auth = await authorize();
+
+									let filename = await getFileName(auth, file_id);
+
+									let link = await getDownloadLink(file_id);
+									// create JSON
+									let json = {
+										download_link: link,
+										file_name: filename,
+									};
+
+									item.files[index] = json;
+								})
+							);
+						}
+					})
+				);
 				result.error_schema = {
 					error_code: "200",
 					error_message: errorMessages.QUERY_SUCCESSFUL,
@@ -409,16 +439,16 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
 	if (curr_session.session_id == x_token && x_token) {
-		console.log("Current Session : ");
-		console.log(curr_session);
+		// console.log("Current Session : ");
+		// console.log(curr_session);
 		let transaction_id = req.params.transactionId;
 
 		let transactionInstance = new Transaction();
 		let transaction_freelancer =
 			await transactionInstance.getTransactionFreelancer(transaction_id);
 
-		console.log("Transaction Freelancer : ");
-		console.log(transaction_freelancer);
+		// console.log("Transaction Freelancer : ");
+		// console.log(transaction_freelancer);
 
 		if (transaction_freelancer.username == curr_session.session_data.username) {
 			let freelancer_id = curr_session.session_data.freelancer_id;
@@ -440,6 +470,31 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 				res.status(400).send(result);
 				return;
 			} else {
+				await Promise.all(
+					transaction_result.map(async (item) => {
+						if (item.files != null) {
+							item.files = item.files[0].split(",");
+
+							await Promise.all(
+								item.files.map(async (file_id, index) => {
+									let auth = await authorize();
+
+									let filename = await getFileName(auth, file_id);
+
+									let link = await getDownloadLink(file_id);
+									// create JSON
+									let json = {
+										download_link: link,
+										file_name: filename,
+									};
+
+									item.files[index] = json;
+								})
+							);
+						}
+					})
+				);
+
 				result.error_schema = {
 					error_code: "200",
 					error_message: errorMessages.QUERY_SUCCESSFUL,

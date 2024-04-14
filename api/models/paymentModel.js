@@ -3,31 +3,10 @@ const Midtrans = require("../utils/midtransUtil");
 const Transaction = require("../models/transactionModel");
 const uuid = require("uuid");
 
-
 module.exports = class Payment {
 	constructor() {
 		console.log("BERHASIL INIT PAYMENT");
 	}
-
-	async processPayment(paymentDetails) {
-		// Implement the logic to process the payment
-		// This could involve interacting with a payment gateway, database, etc.
-
-		try {
-			// Example: Perform payment processing logic
-			// For simplicity, this example just logs the payment details
-			//console.log('Processing payment:', paymentDetails);
-
-			// Return a success message or relevant data
-			return { success: true, message: "Payment processed successfully" };
-		} catch (error) {
-			// Handle any errors that occur during payment processing
-			console.error("Error processing payment:", error.message);
-			return { success: false, message: "Payment processing failed" };
-		}
-	}
-	// Add more methods as needed for your payment-related operations
-
 	async createPayment(
 		projectId,
 		type,
@@ -103,13 +82,9 @@ module.exports = class Payment {
 				);
 			`;
 
-			console.log("SP PAYMENT : ");
-			console.log(query);
-
 			let payment_result = await db.any(query);
 
-			console.log("PAYMENT ID:");
-			console.log(payment_id);
+			// create Activity With Deadline H+1 buat bayar
 
 			let result = {};
 
@@ -124,7 +99,7 @@ module.exports = class Payment {
 
 	async updatePaymentStatus(paymentId) {
 		try {
-			console.log("Payment ID Payment Model : " + paymentId);
+			// console.log("Payment ID Payment Model : " + paymentId);
 
 			let SP = `
 				UPDATE
@@ -135,8 +110,8 @@ module.exports = class Payment {
 				payment_id = '${paymentId}';
 			`;
 
-			console.log("SP UPDATE PAYMENT:");
-			console.log(SP);
+			// console.log("SP UPDATE PAYMENT:");
+			// console.log(SP);
 
 			let result = await db.any(SP);
 

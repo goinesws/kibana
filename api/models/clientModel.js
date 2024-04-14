@@ -25,10 +25,6 @@ module.exports = class Client extends User {
 		try {
 			let result = await taskInstance.getTaskByClientId(userId);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
