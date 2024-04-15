@@ -15,10 +15,6 @@ module.exports = class Freelancer extends User {
 		try {
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-
 			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -45,10 +41,6 @@ module.exports = class Freelancer extends User {
 		try {
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-
 			return result[0].skills;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -64,10 +56,6 @@ module.exports = class Freelancer extends User {
 		try {
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-
 			return Google.getPreviewLink(result[0].cv_url);
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -82,9 +70,7 @@ module.exports = class Freelancer extends User {
 
 		try {
 			let result = await db.any(SP);
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
+
 			return Google.getPreviewLink(result[0].portfolio_url);
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -225,8 +211,8 @@ module.exports = class Freelancer extends User {
 
 	// Edit Freelancer Education
 	async editFreelancerEducation(userId, education) {
-		console.log("edit freelancer education")
-		console.log(education)
+		console.log("edit freelancer education");
+		console.log(education);
 		let EducationInstance = new Education();
 
 		try {
@@ -381,7 +367,7 @@ module.exports = class Freelancer extends User {
 	}
 
 	async removeEducation(userId) {
-		console.log("remove old education")
+		console.log("remove old education");
 		let SP = `DELETE FROM education WHERE freelancer_id = (select freelancer_id from public.freelancer where user_id = '${userId}');`;
 		try {
 			let result = await db.any(SP);
@@ -389,5 +375,42 @@ module.exports = class Freelancer extends User {
 		} catch (error) {
 			return new Error("Gagal menghapus data edukasi.");
 		}
+	}
+
+	// Register As Freelancer
+	async register(data, cv_url, port_url, userId) {
+		// manggil freelancer buat create freelancer instance
+
+		let freelancerInstance = new Freelancer();
+		// bikin freelancer based on data
+
+		let skills = data.skills.toString();
+		// console.log(skills);
+		let create_result = await freelancerInstance.createFreelancer(
+			userId,
+			data.description,
+			cv_url,
+			port_url,
+			skills
+		);
+
+		if (create_result instanceof Error) {
+			return new Error("Gagal Mendaftar.");
+		}
+
+		// bikin education and link it to freelancer
+		data.education_history.forEach(async (ed) => {
+			//console.log("Insert ED");
+			let education_result = await freelancerInstance.insertFreelancerEducation(
+				userId,
+				ed
+			);
+
+			if (education_result instanceof Error) {
+				return new Error("Gagal Mendaftar.");
+			}
+		});
+
+		return create_result;
 	}
 };

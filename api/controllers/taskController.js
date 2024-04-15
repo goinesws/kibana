@@ -18,7 +18,7 @@ app.getNewTask = async (req, res) => {
 	if (task_result instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 		res.status(400).send(result);
@@ -46,10 +46,10 @@ app.getNewTaskByCategory = async (req, res) => {
 
 	// console.log(taskResult);
 
-	if (taskResult == null) {
+	if (taskResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 		res.status(400).send(result);
@@ -57,10 +57,10 @@ app.getNewTaskByCategory = async (req, res) => {
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.tasks = taskResult;
-	}
 
-	res.send(result);
-	return;
+		res.send(result);
+		return;
+	}
 };
 
 app.getTaskDetails = async (req, res) => {
@@ -74,10 +74,10 @@ app.getTaskDetails = async (req, res) => {
 
 	// console.log(taskDetailResult);
 
-	if (taskDetailResult == null) {
+	if (taskDetailResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 		res.status(400).send(result);
@@ -85,10 +85,10 @@ app.getTaskDetails = async (req, res) => {
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = taskDetailResult;
-	}
 
-	res.send(result);
-	return;
+		res.send(result);
+		return;
+	}
 };
 
 app.getTaskList = async (req, res) => {
@@ -107,7 +107,7 @@ app.getTaskList = async (req, res) => {
 	if (taskListResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 		res.status(400).send(result);
@@ -134,10 +134,10 @@ app.getTaskList = async (req, res) => {
 			else has_next_page = false;
 		}
 
-		if (taskListResult == "" || taskListResult == null) {
+		if (taskListResult instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Tidak ada data yang ditemukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -182,7 +182,7 @@ app.createTask = async (req, res) => {
 		if (create_task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal membuat tugas baru.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -229,7 +229,7 @@ app.getOwnedTask = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal Mendapatkan Data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -240,6 +240,8 @@ app.getOwnedTask = async (req, res) => {
 				error_message: "Sukses.",
 			};
 			result.output_schema.tasks = task_result;
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -250,8 +252,6 @@ app.getOwnedTask = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-	res.send(result);
-	return;
 };
 
 app.getOwnedTaskDetails = async (req, res) => {
@@ -274,7 +274,7 @@ app.getOwnedTaskDetails = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal Mengambil Data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -286,6 +286,8 @@ app.getOwnedTaskDetails = async (req, res) => {
 				error_message: "Sukses.",
 			};
 			result.output_schema.task_detail = task_result;
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -293,13 +295,10 @@ app.getOwnedTaskDetails = async (req, res) => {
 			error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
 		};
 		result.output_schema = null;
-		result.output_schema = null;
 
 		res.status(400).send(result);
 		return;
 	}
-	res.send(result);
-	return;
 };
 
 app.getRegisteredFreelancer = async (req, res) => {
@@ -325,7 +324,7 @@ app.getRegisteredFreelancer = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal Mendapatkan Data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -337,6 +336,8 @@ app.getRegisteredFreelancer = async (req, res) => {
 				error_message: "Sukses.",
 			};
 			result.output_schema = task_result;
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -348,8 +349,6 @@ app.getRegisteredFreelancer = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-	res.send(result);
-	return;
 };
 
 app.deleteTask = async (req, res) => {
@@ -372,7 +371,7 @@ app.deleteTask = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal Menghapus Data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -384,6 +383,8 @@ app.deleteTask = async (req, res) => {
 				error_message: "Sukses.",
 			};
 			result.output_schema = {};
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -395,9 +396,6 @@ app.deleteTask = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getTaskHistory = async (req, res) => {
@@ -423,7 +421,7 @@ app.getTaskHistory = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Gagal mendapatkan data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -435,6 +433,8 @@ app.getTaskHistory = async (req, res) => {
 				error_message: "Sukses.",
 			};
 			result.output_schema = task_result;
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -446,9 +446,6 @@ app.getTaskHistory = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getTaskHistoryDetails = async (req, res) => {
@@ -474,7 +471,7 @@ app.getTaskHistoryDetails = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Terjadi Kegagalan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -486,6 +483,9 @@ app.getTaskHistoryDetails = async (req, res) => {
 				error_message: "Sukses.",
 			};
 			result.output_schema.task_detail = task_result;
+
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -497,9 +497,6 @@ app.getTaskHistoryDetails = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getRequestToken = async (req, res) => {
@@ -525,7 +522,7 @@ app.getRequestToken = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: task_result.message,
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -576,7 +573,7 @@ app.registerForTask = async (req, res) => {
 
 	if (task_result instanceof Error) {
 		result.error_schema.error_code = 403;
-		result.error_schema.error_message = task_result.message;
+		result.error_schema.error_message = errorMessages.ERROR;
 
 		res.status(400).send(result);
 	} else {

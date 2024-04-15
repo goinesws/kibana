@@ -210,10 +210,10 @@ class Service {
 			SP += ")";
 		}
 
-    if (workingTime !== "" && workingTime && workingTime.length >= 1) {
+		if (workingTime !== "" && workingTime && workingTime.length >= 1) {
 			if (
 				(searchText !== "" && searchText) ||
-				(budget!== "" && budget) ||
+				(budget !== "" && budget) ||
 				(subcategory !== "" && subcategory)
 			) {
 				SP += ` AND `;
@@ -243,11 +243,11 @@ class Service {
 		}
 
 		SP += ` ORDER BY service.created_date DESC`;
-    let result;
+		let result;
 
-    try {
-      result = await db.any(SP);
-    }  catch (error) {
+		try {
+			result = await db.any(SP);
+		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
 
@@ -351,51 +351,55 @@ class Service {
 
 	// Create Layanan
 	async createNewService(images, data_incoming, clientId) {
-		const serviceId = uuidv4();
-		const data = JSON.parse(data_incoming);
-		const name = data.name;
-		const subCategory = data.sub_category;
-		const workingTime = data.working_time;
-		const revisionCount = data.revision_count;
-		const description = data.description;
-		const price = data.price;
-		const tags = data.tags;
-		const additionalInfo = data.additional_info;
-		const freelancerId = clientId;
+		try {
+			const serviceId = uuidv4();
+			const data = JSON.parse(data_incoming);
+			const name = data.name;
+			const subCategory = data.sub_category;
+			const workingTime = data.working_time;
+			const revisionCount = data.revision_count;
+			const description = data.description;
+			const price = data.price;
+			const tags = data.tags;
+			const additionalInfo = data.additional_info;
+			const freelancerId = clientId;
 
-		//console.log(clientId);
+			//console.log(clientId);
 
-		// console.log(tags)
-		additionalInfo.forEach((item, index) => {
-			Requirement.createNewRequirement(item.id, serviceId, item.is_supported);
-		});
+			// console.log(tags)
+			additionalInfo.forEach((item, index) => {
+				Requirement.createNewRequirement(item.id, serviceId, item.is_supported);
+			});
 
-		if (
-			!name ||
-			!subCategory ||
-			!workingTime ||
-			!revisionCount ||
-			!description ||
-			!price ||
-			!tags ||
-			!additionalInfo ||
-			!freelancerId
-		)
-			return "";
+			if (
+				!name ||
+				!subCategory ||
+				!workingTime ||
+				!revisionCount ||
+				!description ||
+				!price ||
+				!tags ||
+				!additionalInfo ||
+				!freelancerId
+			)
+				return "";
 
-		let SP = `
-    INSERT INTO service (service_id, subcategory_id, freelancer_id, name, description, tags, price, working_time, images, revision_count, is_active, created_date)
-    VALUES
-    ('${serviceId}', '${subCategory}', '${freelancerId}', '${name}', '${description}', ARRAY['${tags.join(
-			"','"
-		)}'], ${price}, ${workingTime}, ARRAY['${images.join(
-			"','"
-		)}'], ${revisionCount}, TRUE, CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta');
-    `;
+			let SP = `
+      INSERT INTO service (service_id, subcategory_id, freelancer_id, name, description, tags, price, working_time, images, revision_count, is_active, created_date)
+      VALUES
+      ('${serviceId}', '${subCategory}', '${freelancerId}', '${name}', '${description}', ARRAY['${tags.join(
+				"','"
+			)}'], ${price}, ${workingTime}, ARRAY['${images.join(
+				"','"
+			)}'], ${revisionCount}, TRUE, CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta');
+      `;
 
-		await db.any(SP);
+			await db.any(SP);
 
-		return serviceId;
+			return serviceId;
+		} catch (error) {
+			return new Error("Gagal Membuat Service");
+		}
 	}
 
 	// Utitlities

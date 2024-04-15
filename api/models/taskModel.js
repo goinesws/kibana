@@ -25,10 +25,6 @@ module.exports = class Task {
 		try {
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
-			}
-
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -151,10 +147,6 @@ module.exports = class Task {
 			console.log("Get Task List SP : " + SP);
 			let result = await db.any(SP);
 
-			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data");
-			}
-
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data");
@@ -169,8 +161,6 @@ module.exports = class Task {
 			categoryId
 		);
 
-		// console.log(subcat_list);
-
 		let SPGetTask = `
     select 
     t.task_id as id, 
@@ -181,24 +171,12 @@ module.exports = class Task {
     t.difficulty, 
     t.price 
     from public.task t
-    join
-    public.transaction tr
-    on
-    t.task_id = tr.project_id
     where 
     t.sub_category_id 
     in 
-    ${subcat_list} and tr.status = '1' 
+    ${subcat_list}
     order by t.deadline ASC 
     limit 4;`;
-
-		// console.log(SPGetTask);
-
-		// let result = await db.any(SPGetTask);
-
-		// // console.log(result);
-		// // dari resultnya dijadiin ke constructornya dlu
-		// return result;
 
 		try {
 			let result = await db.any(SPGetTask);
@@ -211,11 +189,12 @@ module.exports = class Task {
 
 	// Inquiry Detail Tugas
 	async getTaskDetails(taskId) {
-		let result = {};
-
-		let task_details;
 		try {
-			let SP = `
+			let result = {};
+
+			let task_details;
+			try {
+				let SP = `
 		  select
 		  task_id as id,
 		  name as name,
@@ -229,14 +208,14 @@ module.exports = class Task {
 		  where
 		  task_id = '${taskId}'
 		  `;
-			task_details = await db.any(SP);
-		} catch (error) {
-			return new Error("Gagal Mengambil Data.");
-		}
+				task_details = await db.any(SP);
+			} catch (error) {
+				return new Error("Gagal Mengambil Data.");
+			}
 
-		let client_details;
-		try {
-			let SP = `
+			let client_details;
+			try {
+				let SP = `
 		  select
 		  c.client_id as id,
 		  profile_image as profile_image_url,
@@ -251,14 +230,14 @@ module.exports = class Task {
 		  task_id = '${taskId}';
 		  `;
 
-			client_details = await db.any(SP);
-		} catch (error) {
-			return new Error("Gagal Mengambil Data.");
-		}
+				client_details = await db.any(SP);
+			} catch (error) {
+				return new Error("Gagal Mengambil Data.");
+			}
 
-		let reg_freelancer_details;
-		try {
-			let SP = `
+			let reg_freelancer_details;
+			try {
+				let SP = `
 		  select
 		  f.freelancer_id as id,
 		  c.profile_image as profile_image_url,
@@ -281,18 +260,18 @@ module.exports = class Task {
 		  t.task_id = '${taskId}';
 		  `;
 
-			reg_freelancer_details = await db.any(SP);
+				reg_freelancer_details = await db.any(SP);
 
-			if (reg_freelancer_details.length < 1) {
-				reg_freelancer_details = null;
+				if (reg_freelancer_details.length < 1) {
+					reg_freelancer_details = null;
+				}
+			} catch (error) {
+				return new Error("Gagal Mengambil Data.");
 			}
-		} catch (error) {
-			return new Error("Gagal Mengambil Data.");
-		}
 
-		let review_details;
-		try {
-			let SP = `
+			let review_details;
+			try {
+				let SP = `
 		  select
 		  round(avg(rating), 1) as average_rating,
 		  count(*) as rating_amount,
@@ -327,17 +306,20 @@ module.exports = class Task {
 		  destination_id = '${taskId}'
 		  `;
 
-			review_details = await db.any(SP);
+				review_details = await db.any(SP);
+			} catch (error) {
+				return new Error("Gagal Mengambil Data.");
+			}
+
+			result.task_detail = task_details[0];
+			result.client = client_details[0];
+			result.registered_freelancer = reg_freelancer_details;
+			result.review = review_details[0];
+
+			return result;
 		} catch (error) {
-			return new Error("Gagal Mengambil Data.");
+			return new Error("Gagal Mendapatkan Detail Tugas.");
 		}
-
-		result.task_detail = task_details[0];
-		result.client = client_details[0];
-		result.registered_freelancer = reg_freelancer_details;
-		result.review = review_details[0];
-
-		return result;
 	}
 
 	// Inquiry Owned Task

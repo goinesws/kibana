@@ -4,6 +4,7 @@ const Freelancer = require("../models/freelancerModel.js");
 const User = require("../models/userModel.js");
 var multer = require("multer");
 const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
+const errorMessages = require("../messages/errorMessages.js");
 
 app.getFreelancerDescription = async (req, res) => {
 	let result = {};
@@ -18,7 +19,7 @@ app.getFreelancerDescription = async (req, res) => {
 	if (desc instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -46,7 +47,7 @@ app.getFreelancerEducationHistory = async (req, res) => {
 	if (edu instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -73,7 +74,7 @@ app.getFreelancerSkill = async (req, res) => {
 	if (skills instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -100,7 +101,7 @@ app.getFreelancerCV = async (req, res) => {
 	if (CV instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -108,7 +109,7 @@ app.getFreelancerCV = async (req, res) => {
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
-		result.output_schema = CV;
+		result.output_schema.cv_url = CV;
 		res.send(result);
 		return;
 	}
@@ -127,7 +128,7 @@ app.getPortfolio = async (req, res) => {
 	if (portfolio instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -135,7 +136,7 @@ app.getPortfolio = async (req, res) => {
 		return;
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
-		result.output_schema = portfolio;
+		result.output_schema.portfolio_url = portfolio;
 		res.send(result);
 		return;
 	}
@@ -154,7 +155,7 @@ app.getOwnedService = async (req, res) => {
 	if (owned_service instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -193,7 +194,7 @@ app.getFreelancerProjectHistory = async (req, res) => {
 	if (projects instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -238,7 +239,7 @@ app.editFreelancerDescription = async (req, res) => {
 		if (edit_result == null) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Edit tidak dapat dilakukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -257,11 +258,9 @@ app.editFreelancerDescription = async (req, res) => {
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = null;
-		res.send(result);
+		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
 };
 
 app.editFreelancerSkills = async (req, res) => {
@@ -292,7 +291,7 @@ app.editFreelancerSkills = async (req, res) => {
 		if (edit_result == null) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Edit tidak dapat dilakukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -301,6 +300,8 @@ app.editFreelancerSkills = async (req, res) => {
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
 			result.output_schema = {};
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -308,15 +309,13 @@ app.editFreelancerSkills = async (req, res) => {
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = null;
-		res.send(result);
+		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
 };
 
 app.editFreelancerEducation = async (req, res) => {
-	console.log("MASUK KE EDIT")
+	console.log("MASUK KE EDIT");
 	let result = {};
 
 	result.error_schema = {};
@@ -336,9 +335,9 @@ app.editFreelancerEducation = async (req, res) => {
 		let freelancerInstance = new Freelancer();
 		await freelancerInstance.removeEducation(userId);
 
-		education.map((education) => {
-			console.log(education)
-			let ed_result = freelancerInstance.editFreelancerEducation(
+		education.map(async (education) => {
+			console.log(education);
+			let ed_result = await freelancerInstance.editFreelancerEducation(
 				userId,
 				education
 			);
@@ -346,11 +345,11 @@ app.editFreelancerEducation = async (req, res) => {
 			if (ed_result == null) {
 				result.error_schema = {
 					error_code: "903",
-					error_message: "Edit tidak dapat dilakukan.",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 
-				res.send(result);
+				res.status(400).send(result);
 				return;
 			}
 		});
@@ -365,7 +364,7 @@ app.editFreelancerEducation = async (req, res) => {
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = null;
-		res.send(result);
+		res.status(400).send(result);
 		return;
 	}
 };
@@ -408,10 +407,10 @@ app.editFreelancerCV = async (req, res) => {
 		if (cv_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Edit tidak dapat dilakukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
-			res.send(result);
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
@@ -425,7 +424,7 @@ app.editFreelancerCV = async (req, res) => {
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = null;
-		res.send(result);
+		res.status(400).send(result);
 		return;
 	}
 };
@@ -471,10 +470,10 @@ app.editFreelancerPortfolio = async (req, res) => {
 		if (port_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Edit tidak dapat dilakukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
-			res.send(result);
+			res.status(400).send(result);
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
@@ -488,7 +487,139 @@ app.editFreelancerPortfolio = async (req, res) => {
 			error_message: "Anda Tidak Memiliki Hak Akses untuk hal tersebut.",
 		};
 		result.output_schema = null;
+		res.status(400).send(result);
+		return;
+	}
+};
+
+app.register = async (req, res) => {
+	let result = {};
+
+	result.error_schema = {};
+	result.output_schema = {};
+
+	let x_token = req.get("X-Token");
+	let userInstance = new User();
+	let curr_session = await userInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		// get file cv
+		let cv_id = "";
+		if (req.files["cv"]) {
+			cv_id = await authorize()
+				.then((auth) => {
+					if (req.files && req.files["cv"]) {
+						const file = req.files["cv"][0];
+						return uploadFile(auth, file);
+					} else {
+						//console.log("No file has been uploaded");
+					}
+				})
+				.then((resultCode) => {
+					const cv_id = resultCode;
+					return cv_id;
+				})
+				.catch((err) => {
+					console.error("Error:", err);
+				});
+		}
+
+		// get portfolio
+		let port_id = "";
+		if (req.files["portfolio"]) {
+			port_id = await authorize()
+				.then((auth) => {
+					if (req.files && req.files["portfolio"]) {
+						const file = req.files["portfolio"][0];
+						return uploadFile(auth, file);
+					} else {
+						//console.log("No file has been uploaded");
+					}
+				})
+				.then((resultCode) => {
+					const port_id = resultCode;
+					return port_id;
+				})
+				.catch((err) => {
+					console.error("Error:", err);
+				});
+		}
+
+		let data = "";
+		if (req.files["data"]) {
+			data = JSON.parse(req.files["data"][0].buffer.toString());
+		} else {
+			result.error_schema = { error_code: "999", error_message: "Gagal." };
+			result.output_schema = null;
+			res.status(400).send(result);
+			return;
+		}
+
+		const userID = curr_session.session_data.client_id;
+
+		let freelancerInstance = new Freelancer();
+		let reg_result = await freelancerInstance.register(
+			data,
+			cv_id,
+			port_id,
+			userID
+		);
+
+		if (reg_result instanceof Error) {
+			result.error_schema = {
+				error_code: "999",
+				error_message: "Registrasi Gagal.",
+			};
+			result.output_schema = null;
+
+			res.status(400).send(result);
+			return;
+		} else {
+			// set session data terbaru
+			let session_data = JSON.stringify({
+				client_id: curr_session.session_data.client_id,
+				is_freelancer: true,
+				freelancer_id: reg_result,
+				username: curr_session.session_data.username,
+			});
+
+			console.log("Updated Session Data : ");
+			console.log(session_data);
+
+			let write_session_result = await userInstance.setUserSessionData(
+				curr_session.session_data.client_id,
+				x_token,
+				session_data
+			);
+
+			if (write_session_result instanceof Error) {
+				result.error_schema = {
+					error_code: "903",
+					error_message: errorMessages.ERROR,
+				};
+				result.output_schema = null;
+
+				res.status(400).send(result);
+				return;
+			}
+
+			result.error_schema = {
+				error_code: "200",
+				error_message: "Sukses.",
+			};
+			result.output_schema = {};
+		}
+
 		res.send(result);
+		return;
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: "Anda tidak memiliki hak untuk melakukan hal tersebut.",
+		};
+		result.output_schema = null;
+
+		res.status(400).send(result);
 		return;
 	}
 };

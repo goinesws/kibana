@@ -4,6 +4,7 @@ const User = require("../models/userModel");
 const Client = require("../models/clientModel.js");
 const Freelancer = require("../models/freelancerModel.js");
 const BankInformation = require("../models/bankInformationModel.js");
+const errorMessages = require("../messages/errorMessages.js");
 
 app.login = async (req, res) => {
 	const username = req.body.username_email;
@@ -20,7 +21,10 @@ app.login = async (req, res) => {
 		login_info == null ||
 		login_info == undefined
 	) {
-		result.error_schema = { error_code: "903", error_message: "Login Gagal." };
+		result.error_schema = {
+			error_code: "903",
+			error_message: errorMessages.ERROR,
+		};
 		result.output_schema = null;
 
 		res.status(400).send(result);
@@ -92,7 +96,7 @@ app.register = async (req, res) => {
 	if (register_result instanceof Error) {
 		result.error_schema = {
 			error_code: "999",
-			error_message: "Registrasi Gagal.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -122,7 +126,7 @@ app.register = async (req, res) => {
 		if (write_session_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Registrasi Gagal.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -155,7 +159,7 @@ app.logout = async (req, res) => {
 		if (logout_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Logout Failed.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = {};
 			res.send(result);
@@ -169,7 +173,7 @@ app.logout = async (req, res) => {
 
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Logout Failed.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = {};
 		res.send(result);
@@ -189,10 +193,10 @@ app.getOtherProfile = async (req, res) => {
 	const userInstance = new User();
 	let clientDetails = await userInstance.getOtherProfile(userId);
 
-	if (clientDetails == null) {
+	if (clientDetails instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 		res.status(400).send(result);
@@ -200,10 +204,10 @@ app.getOtherProfile = async (req, res) => {
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = clientDetails;
-	}
 
-	res.send(result);
-	return;
+		res.send(result);
+		return;
+	}
 };
 
 app.getMyProfile = async (req, res) => {
@@ -225,10 +229,10 @@ app.getMyProfile = async (req, res) => {
 
 	if (x_token == curr_session.session_id) {
 		me = await userInstance.getMyProfile(curr_session.session_data.client_id);
-		if (me == null) {
+		if (me instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Tidak ada data yang ditemukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -269,7 +273,7 @@ app.getMyBankDetails = async (req, res) => {
 		if (bank instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Tidak ada data yang ditemukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -311,7 +315,7 @@ app.editMyProfile = async (req, res) => {
 			} catch (error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: "Gagal. Terjadi Kesalahan Saat Upload Gambar.",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 				res.status(400).send(result);
@@ -326,7 +330,7 @@ app.editMyProfile = async (req, res) => {
 		} else {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal. Tidak ada data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -338,7 +342,7 @@ app.editMyProfile = async (req, res) => {
 		if (user_edit instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal. Terjadi Kesalahan Saat Merubah Data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -380,7 +384,7 @@ app.editBankDetails = async (req, res) => {
 		} catch (error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal. Terjadi Kesalahan Saat Merubah Data.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);

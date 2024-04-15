@@ -30,41 +30,4 @@ module.exports = class Client extends User {
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
-
-	// Register As Freelancer
-	async register(data, cv_url, port_url, userId) {
-		// manggil freelancer buat create freelancer instance
-
-		let freelancerInstance = new Freelancer();
-		// bikin freelancer based on data
-
-		let skills = data.skills.toString();
-		// console.log(skills);
-		let create_result = await freelancerInstance.createFreelancer(
-			userId,
-			data.description,
-			cv_url,
-			port_url,
-			skills
-		);
-
-		if (create_result instanceof Error) {
-			return new Error("Gagal Mendaftar.");
-		}
-
-		// bikin education and link it to freelancer
-		data.education_history.forEach(async (ed) => {
-			//console.log("Insert ED");
-			let education_result = await freelancerInstance.insertFreelancerEducation(
-				userId,
-				ed
-			);
-
-			if (education_result instanceof Error) {
-				return new Error("Gagal Mendaftar.");
-			}
-		});
-
-		return create_result;
-	}
 };

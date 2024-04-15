@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const Category = require("../models/categoryModel.js");
+const errorMessages = require("../messages/errorMessages.js");
 
 app.getAllCategorySubcategory = async (req, res) => {
 	var result = {};
@@ -10,10 +11,10 @@ app.getAllCategorySubcategory = async (req, res) => {
 	const catInstance = new Category();
 	var subcatResult = await catInstance.getAllCategorySubcategory();
 
-	if (Array.isArray(subcatResult) && subcatResult.length === 0) {
+	if (subcatResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -39,10 +40,10 @@ app.getAllCategorySubcategoryTask = async (req, res) => {
 
 	// console.log(taskResult);
 
-	if (category == null || category instanceof Error) {
+	if (category instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 

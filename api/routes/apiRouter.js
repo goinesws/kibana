@@ -11,8 +11,9 @@ const reviewRouter = require("./reviewRouter");
 const transactionRouter = require("./transactionRouter");
 const userController = require("../controllers/userController");
 const clientController = require("../controllers/clientController");
+const freelancerController = require("../controllers/freelancerController.js");
 const multer = require("multer");
-const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");;
+const { authorize, listFiles, uploadFile } = require("../utils/googleUtil.js");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -26,7 +27,7 @@ router.post(
 		{ name: "portfolio", maxCount: 1 },
 		{ name: "data", maxCount: 1 },
 	]),
-	clientController.registerAsFreelancer
+	freelancerController.register
 );
 router.get("/logout", userController.logout);
 

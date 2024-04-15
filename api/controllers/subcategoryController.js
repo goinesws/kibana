@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const Subcategory = require("../models/subcategoryModel.js");
 const User = require("../models/userModel.js");
+const errorMessages = require("../messages/errorMessages.js");
 
 module.exports = app;
 
@@ -15,10 +16,10 @@ app.getSubcategoryByCategory = async (req, res) => {
 	const subcatInstance = new Subcategory();
 	var subcatResult = await subcatInstance.getSubcatByCategoryID(category_id);
 
-	if (Array.isArray(subcatResult) && subcatResult.length === 0) {
+	if (subcatResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -27,10 +28,9 @@ app.getSubcategoryByCategory = async (req, res) => {
 	} else {
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.sub_categories = subcatResult;
+		res.send(result);
+		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getadditionalInfoBySubcategoryId = async (req, res) => {
@@ -51,10 +51,10 @@ app.getadditionalInfoBySubcategoryId = async (req, res) => {
 		subcatResult = await subcatInstance.getadditionalInfoBySubcategoryId(
 			subcategory_id
 		);
-		if (subcatResult == null) {
+		if (subcatResult instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Tidak ada data yang ditemukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 

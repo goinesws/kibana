@@ -1297,8 +1297,8 @@ module.exports = class Transaction {
                 service_id = '${project_id}'
                 `;
 
-				console.log("SPP : ");
-				console.log(SPP);
+				// console.log("SPP : ");
+				// console.log(SPP);
 
 				project = await db.any(SPP);
 				project = project[0];
@@ -1306,25 +1306,25 @@ module.exports = class Transaction {
 				// harus set deadline via get dari service terus
 				// ditambahin working days
 
-				console.log("PROJECT SERVICE : ");
-				console.log(project);
+				// console.log("PROJECT SERVICE : ");
+				// console.log(project);
 
 				let remaining_revision = project.revision_count;
-				console.log("REMAINING REVISION: ");
-				console.log(remaining_revision);
+				// console.log("REMAINING REVISION: ");
+				// console.log(remaining_revision);
 
 				let working_time = project.working_time * 24 * 60 * 60 * 1000;
-				console.log("WORKING TIME : ");
-				console.log(working_time);
+				// console.log("WORKING TIME : ");
+				// console.log(working_time);
 
 				let date = new Date();
-				console.log("DATE : ");
-				console.log(date.valueOf());
+				// console.log("DATE : ");
+				// console.log(date.valueOf());
 
 				let deadlinems = Math.round(date.valueOf() + working_time);
 				let deadline = new Date(deadlinems);
-				console.log("DEADLINE : ");
-				console.log(deadline);
+				// console.log("DEADLINE : ");
+				// console.log(deadline);
 
 				// SP Buat create transaction
 				SP = `
@@ -1364,8 +1364,8 @@ module.exports = class Transaction {
                 )
                 `;
 
-				console.log("SP SERVICE : ");
-				console.log(SP);
+				// console.log("SP SERVICE : ");
+				// console.log(SP);
 			}
 
 			let insert_result = await db.any(SP);

@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const Review = require("../models/reviewModel.js");
 const User = require("../models/userModel.js");
+const errorMessages = require("../messages/errorMessages.js");
 
 app.insertReviewClient = async (req, res) => {
 	let result = {};
@@ -28,7 +29,7 @@ app.insertReviewClient = async (req, res) => {
 		if (review_insert_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_mesage: "Insert Gagal.",
+				error_mesage: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -77,7 +78,7 @@ app.insertReviewFreelancer = async (req, res) => {
 		if (review_insert_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_mesage: "Insert Gagal.",
+				error_mesage: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -126,7 +127,7 @@ app.insertReviewService = async (req, res) => {
 		if (review_insert_result instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_mesage: "Insert Gagal.",
+				error_mesage: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 

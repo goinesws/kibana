@@ -1,7 +1,7 @@
 const midtransClient = require("midtrans-client");
 
 module.exports = class Midtrans {
-	async getToken(project_id, type, price, customer) {
+	async getToken(transaction_id, type, price, customer) {
 		try {
 			let snap = new midtransClient.Snap({
 				isProduction: false,
@@ -14,8 +14,7 @@ module.exports = class Midtrans {
 
 			let parameter = {
 				transaction_details: {
-					order_id:
-						"KIBANA-" + type + "-" + date.valueOf() + "-" + project_id.trim(),
+					order_id: "KIBANA-" + transaction_id,
 					gross_amount: price,
 				},
 				credit_card: {

@@ -73,10 +73,10 @@ app.getTransactionInvoice = async (req, res) => {
 			var fee = projectResult.price * 0.01;
 			//console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
 
-			if (projectResult == null) {
+			if (projectResult instanceof Error) {
 				result.error_schema = {
 					error_code: "903",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 			} else {
@@ -141,8 +141,8 @@ app.getTransactionDetailsClientTask = async (req, res) => {
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
-					error_code: "403",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_code: "903",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 			} else {
@@ -198,7 +198,7 @@ app.getTransactionDetailsFreelancerTask = async (req, res) => {
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 			} else {
@@ -257,7 +257,7 @@ app.getClientTransactionActivity = async (req, res) => {
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.ERROR,
 				};
 				res.status(400).send(result);
 				return;
@@ -339,7 +339,7 @@ app.getTransactionDetailsClientService = async (req, res) => {
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 			} else {
@@ -396,7 +396,7 @@ app.getTransactionDetailsFreelancerService = async (req, res) => {
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.DATA_NOT_FOUND,
+					error_message: errorMessages.ERROR,
 				};
 				res.status(400).send(result);
 				return;
@@ -464,7 +464,7 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
 					error_code: "999",
-					error_message: errorMessages.INSERT_ERROR,
+					error_message: errorMessages.ERROR,
 				};
 
 				res.status(400).send(result);
@@ -568,7 +568,7 @@ app.sendRequirement = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -611,7 +611,7 @@ app.sendMessage = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -673,7 +673,7 @@ app.sendAdditionalFile = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.DATA_NOT_FOUND,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -745,7 +745,7 @@ app.sendResult = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.DATA_NOT_FOUND,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -788,7 +788,7 @@ app.askReturn = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -829,7 +829,7 @@ app.cancelReturn = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -872,7 +872,7 @@ app.askRevision = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -913,7 +913,7 @@ app.completeTransaction = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -956,7 +956,7 @@ app.askCancellation = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -999,7 +999,7 @@ app.manageCancellation = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -1037,7 +1037,7 @@ app.callAdmin = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -1078,7 +1078,7 @@ app.cancelCancellation = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {
@@ -1121,7 +1121,7 @@ app.manageReturn = async (req, res) => {
 		if (insert instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.INSERT_ERROR,
+				error_message: errorMessages.ERROR,
 			};
 		} else {
 			result.error_schema = {

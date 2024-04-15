@@ -1,6 +1,7 @@
 const db = require("../../db");
 const Midtrans = require("../utils/midtransUtil");
 const Transaction = require("../models/transactionModel");
+const Activity = require("../models/activityModel");
 const uuid = require("uuid");
 
 module.exports = class Payment {
@@ -19,20 +20,6 @@ module.exports = class Payment {
 			let midtransUtil = new Midtrans();
 			let transactionInstance = new Transaction();
 
-			let token = await midtransUtil.getToken(
-				projectId,
-				type,
-				nominal,
-				customer
-			);
-
-			if (token instanceof Error) {
-				return new Error(token.message);
-			}
-
-			console.log("Token : ");
-			console.log(token);
-
 			let transaction_id = "";
 			if (type == "TASK") {
 				transaction_id = await transactionInstance.createTransaction(
@@ -50,11 +37,19 @@ module.exports = class Payment {
 				);
 			}
 
-			console.log("TRX ID : ");
-			console.log(transaction_id);
-
 			if (transaction_id instanceof Error) {
 				return new Error(transaction_id.message);
+			}
+
+			let token = await midtransUtil.getToken(
+				transaction_id,
+				type,
+				nominal,
+				customer
+			);
+
+			if (token instanceof Error) {
+				return new Error(token.message);
 			}
 
 			let payment_id = uuid.v4();
@@ -85,6 +80,17 @@ module.exports = class Payment {
 			let payment_result = await db.any(query);
 
 			// create Activity With Deadline H+1 buat bayar
+
+			let activity_uuid = uuid.v4();
+			let activity = {};
+			activity.activity_id = activity_uuid;
+			activity.transaction_id = transaction_id;
+			activity.client_id = customer.client_id;
+			activity.title = "membuat Pesanan.";
+			activity.code = 1;
+
+			let activityInstance = new Activity();
+			let activity_result = await activityInstance.createActivity(activity);
 
 			let result = {};
 

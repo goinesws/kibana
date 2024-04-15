@@ -27,10 +27,10 @@ app.getNewService = async (req, res) => {
 		serviceResult = await serviceInstance.getNewService(category_id);
 	else serviceResult = await serviceInstance.getNewServiceNoCat();
 
-	if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+	if (serviceResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -54,10 +54,10 @@ app.getServiceByCategory = async (req, res) => {
 	const serviceInstance = new Service();
 	var serviceResult = await serviceInstance.getServiceByCategory(category_id);
 
-	if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+	if (serviceResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -104,10 +104,10 @@ app.getServiceList = async (req, res) => {
 	// console.log(req.body)
 	// console.log(serviceListResult);
 
-	if (serviceListResult == "" || serviceListResult == null) {
+	if (serviceListResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -136,10 +136,10 @@ app.getServiceDetail = async (req, res) => {
 	let serviceInstance = new Service();
 	var serviceResult = await serviceInstance.getServiceDetail(service_id);
 
-	if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+	if (serviceResult instanceof Error) {
 		result.error_schema = {
 			error_code: "903",
-			error_message: "Tidak ada data yang ditemukan.",
+			error_message: errorMessages.ERROR,
 		};
 		result.output_schema = null;
 
@@ -188,10 +188,10 @@ app.createNewService = async (req, res) => {
 
 		result = {};
 
-		if (newServiceId == "") {
+		if (newServiceId instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: "Gagal membuat service baru",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -233,10 +233,10 @@ app.getOwnedService = async (req, res) => {
 		var serviceInstance = new Service();
 		var serviceResult = await serviceInstance.getOwnedService(freelancer_id);
 
-		if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+		if (serviceResult instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Tidak ada data yang ditemukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -288,10 +288,10 @@ app.getOwnedServiceDetail = async (req, res) => {
 				service_id
 			);
 
-			if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+			if (serviceResult instanceof Error) {
 				result.error_schema = {
 					error_code: "903",
-					error_message: "Tidak ada data yang ditemukan.",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 
@@ -300,6 +300,9 @@ app.getOwnedServiceDetail = async (req, res) => {
 			} else {
 				result.error_schema = { error_code: "200", error_message: "Sukses" };
 				result.output_schema.service_detail = serviceResult;
+
+				res.send(result);
+				return;
 			}
 		} else {
 			result.error_schema = {
@@ -321,9 +324,6 @@ app.getOwnedServiceDetail = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.getOwnedServiceOrders = async (req, res) => {
@@ -348,10 +348,10 @@ app.getOwnedServiceOrders = async (req, res) => {
 				service_id
 			);
 
-			if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+			if (serviceResult instanceof Error) {
 				result.error_schema = {
 					error_code: "903",
-					error_message: "Tidak ada data yang ditemukan.",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 
@@ -406,10 +406,10 @@ app.deactivateService = async (req, res) => {
 		if (serviceOwner == freelancer_id) {
 			var serviceResult = await serviceInstance.deactivateService(service_id);
 
-			if (serviceResult == null) {
+			if (serviceResult instanceof Error) {
 				result.error_schema = {
 					error_code: "903",
-					error_message: "Deactivate gagal.",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 
@@ -418,6 +418,9 @@ app.deactivateService = async (req, res) => {
 			} else {
 				result.error_schema = { error_code: "200", error_message: "Sukses" };
 				result.output_schema.transactions = serviceResult;
+
+				res.send(result);
+				return;
 			}
 		} else {
 			result.error_schema = {
@@ -439,9 +442,6 @@ app.deactivateService = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 app.deleteService = async (req, res) => {
@@ -464,10 +464,10 @@ app.deleteService = async (req, res) => {
 		if (serviceOwner == freelancer_id) {
 			var serviceResult = await serviceInstance.deleteService(service_id);
 
-			if (serviceResult == null) {
+			if (serviceResult instanceof Error) {
 				result.error_schema = {
 					error_code: "903",
-					error_message: "Delete gagal.",
+					error_message: errorMessages.ERROR,
 				};
 				result.output_schema = null;
 
@@ -476,6 +476,9 @@ app.deleteService = async (req, res) => {
 			} else {
 				result.error_schema = { error_code: "200", error_message: "Sukses" };
 				result.output_schema.transactions = serviceResult;
+
+				res.send(result);
+				return;
 			}
 		} else {
 			result.error_schema = {
@@ -497,9 +500,6 @@ app.deleteService = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
-	return;
 };
 
 //from client
@@ -521,10 +521,10 @@ app.getServiceHistory = async (req, res) => {
 			client_id
 		);
 
-		if (Array.isArray(serviceResult) && serviceResult.length === 0) {
+		if (serviceResult instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
-				error_message: "Tidak ada data yang ditemukan.",
+				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
 
@@ -533,6 +533,9 @@ app.getServiceHistory = async (req, res) => {
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
 			result.output_schema.service_detail = serviceResult;
+
+			res.send(result);
+			return;
 		}
 	} else {
 		result.error_schema = {
@@ -544,8 +547,6 @@ app.getServiceHistory = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	}
-
-	res.send(result);
 };
 
 app.activateService = async (req, res) => {

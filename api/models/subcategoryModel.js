@@ -34,21 +34,28 @@ module.exports = class Subcategory {
 
 	// Utilities
 	async getSubcatByCategoryID(categoryId) {
-		let SPGetCategories = `select subcategory_id as id, name, description as desc, image as image_url from subcategory where category_id = '${categoryId}'`;
+		try {
+			let SPGetCategories = `select subcategory_id as id, name, description as desc, image as image_url from subcategory where category_id = '${categoryId}'`;
 
-		let result = await db.any(SPGetCategories);
+			let result = await db.any(SPGetCategories);
 
-		return result;
+			return result;
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Subcategory By Category ID.");
+		}
 	}
 
 	// Inquiry Additional Info
 	async getadditionalInfoBySubcategoryId(subcategoryId) {
-		const AdditionalInfoInstance = new AdditionalInfo();
+		try {
+			const AdditionalInfoInstance = new AdditionalInfo();
 
-		let additionalInfo_result = await AdditionalInfoInstance.getAdditionalInfo(
-			subcategoryId
-		);
+			let additionalInfo_result =
+				await AdditionalInfoInstance.getAdditionalInfo(subcategoryId);
 
-		return additionalInfo_result;
+			return additionalInfo_result;
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Additional Info By Subcategory ID");
+		}
 	}
 };
