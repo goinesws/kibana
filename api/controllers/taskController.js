@@ -145,8 +145,8 @@ app.getTaskList = async (req, res) => {
 		} else {
 			if (taskListResult.length < 1) {
 				result.error_schema = { error_code: "200", error_message: "Sukses" };
-				result.output_schema.tasks = [];
-				result.output_schema.total_amount = 0;
+				result.output_schema.tasks = taskListResult;
+				result.output_schema.total_amount = total_amount;
 				result.output_schema.has_next_page = false;
 				result.output_schema.last_id = null;
 			} else {

@@ -114,12 +114,20 @@ app.getServiceList = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	} else {
-		result.error_schema = { error_code: "200", error_message: "Sukses" };
-		result.output_schema.services = serviceListResult;
-		result.output_schema.total_amount = total_amount;
-		result.output_schema.has_next_page = has_next_page;
-		result.output_schema.last_id =
-			serviceListResult[serviceListResult.length - 1].id;
+		if (serviceListResult.length < 1) {
+			result.error_schema = { error_code: "200", error_message: "Sukses" };
+			result.output_schema.services = serviceListResult;
+			result.output_schema.total_amount = total_amount;
+			result.output_schema.has_next_page = false;
+			result.output_schema.last_id = null;
+		} else {
+			result.error_schema = { error_code: "200", error_message: "Sukses" };
+			result.output_schema.services = serviceListResult;
+			result.output_schema.total_amount = total_amount;
+			result.output_schema.has_next_page = has_next_page;
+			result.output_schema.last_id =
+				serviceListResult[serviceListResult.length - 1].id;
+		}
 	}
 
 	res.send(result);
