@@ -140,15 +140,23 @@ app.getTaskList = async (req, res) => {
 				error_message: errorMessages.ERROR,
 			};
 			result.output_schema = null;
-			res.status(400).send(result);
+			res.send(result);
 			return;
 		} else {
-			result.error_schema = { error_code: "200", error_message: "Sukses" };
-			result.output_schema.tasks = taskListResult;
-			result.output_schema.total_amount = total_amount;
-			result.output_schema.has_next_page = has_next_page;
-			result.output_schema.last_id =
-				taskListResult[taskListResult.length - 1].id;
+			if (taskListResult.length < 1) {
+				result.error_schema = { error_code: "200", error_message: "Sukses" };
+				result.output_schema.tasks = [];
+				result.output_schema.total_amount = 0;
+				result.output_schema.has_next_page = false;
+				result.output_schema.last_id = null;
+			} else {
+				result.error_schema = { error_code: "200", error_message: "Sukses" };
+				result.output_schema.tasks = taskListResult;
+				result.output_schema.total_amount = total_amount;
+				result.output_schema.has_next_page = has_next_page;
+				result.output_schema.last_id =
+					taskListResult[taskListResult.length - 1].id;
+			}
 		}
 	}
 
@@ -313,13 +321,9 @@ app.getRegisteredFreelancer = async (req, res) => {
 
 	if (curr_session.session_id == x_token) {
 		let taskId = req.params.taskId;
-		let userId = curr_session.session_data.client_id;
 
 		let taskInstance = new Task();
-		let task_result = await taskInstance.getRegisteredFreelancer(
-			taskId,
-			userId
-		);
+		let task_result = await taskInstance.getRegisteredFreelancer(taskId);
 
 		if (task_result instanceof Error) {
 			result.error_schema = {

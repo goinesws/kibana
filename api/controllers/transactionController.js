@@ -68,7 +68,10 @@ app.getTransactionInvoice = async (req, res) => {
 				projectResult = await taskInstance.getAllTaskDetail(
 					transactionDetail.project_id
 				);
+				additional_data = null;
 			}
+
+			// console.log(projectResult);
 
 			var fee = projectResult.price * 0.01;
 			//console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
@@ -129,9 +132,11 @@ app.getTransactionDetailsClientTask = async (req, res) => {
 		let transactionInstance = new Transaction();
 
 		// get client dari transaction tersebut
-		let transaction_client = await transactionInstance.getTransactionFreelancer(
+		let transaction_client = await transactionInstance.getTransactionClient(
 			transaction_id
 		);
+
+		console.log(transaction_client);
 
 		if (transaction_client.username == curr_session.session_data.username) {
 			let transaction_result =
@@ -276,7 +281,7 @@ app.getClientTransactionActivity = async (req, res) => {
 									let link = await getDownloadLink(file_id);
 									// create JSON
 									let json = {
-										download_link: link,
+										id: link,
 										file_name: filename,
 									};
 
@@ -484,7 +489,7 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 									let link = await getDownloadLink(file_id);
 									// create JSON
 									let json = {
-										download_link: link,
+										id: link,
 										file_name: filename,
 									};
 
@@ -552,7 +557,8 @@ app.sendRequirement = async (req, res) => {
 				console.error("Error:", err);
 				return null;
 			});
-		let data = JSON.parse(req.body.data);
+
+		data = JSON.parse(req.files["data"][0].buffer.toString());
 		const transaction_id = data.transaction_id;
 		const description = data.description;
 
@@ -660,7 +666,7 @@ app.sendAdditionalFile = async (req, res) => {
 				return null;
 			});
 		console.log(req.body);
-		let data = JSON.parse(req.body.data);
+		let data = JSON.parse(req.files["data"][0].buffer.toString());
 		const transaction_id = data.transaction_id;
 
 		let transactionInstance = new Transaction();

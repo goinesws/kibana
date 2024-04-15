@@ -69,7 +69,10 @@ router.get(
 //send requirement
 router.post(
 	"/send-requirement",
-	upload.fields([{ name: "supporting_file", maxCount: 1 }]),
+	upload.fields([
+		{ name: "supporting_file", maxCount: 1 },
+		{ name: "data", maxCount: 1 },
+	]),
 	transactionController.sendRequirement
 );
 
@@ -79,7 +82,10 @@ router.post("/send-message", transactionController.sendMessage);
 //send additional file
 router.post(
 	"/send-file",
-	upload.fields([{ name: "additional_file", maxCount: 1 }]),
+	upload.fields([
+		{ name: "additional_file", maxCount: 1 },
+		{ name: "data", maxCount: 1 },
+	]),
 	transactionController.sendAdditionalFile
 );
 

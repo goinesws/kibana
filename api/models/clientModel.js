@@ -13,6 +13,9 @@ module.exports = class Client extends User {
 		try {
 			let review = await reviewInstance.getClientReviewByUserId(userId);
 
+			console.log("Review : ");
+			console.log(review);
+
 			return review;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");

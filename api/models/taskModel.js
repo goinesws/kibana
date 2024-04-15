@@ -37,7 +37,7 @@ module.exports = class Task {
       task_id,
       sub_category_id,
       client_id,
-      freelancer_id
+      freelancer_id,
       name,
       description,
       price,
@@ -48,7 +48,7 @@ module.exports = class Task {
 		try {
 			let result = await db.any(SP);
 
-			return result;
+			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data");
 		}
@@ -272,38 +272,38 @@ module.exports = class Task {
 			let review_details;
 			try {
 				let SP = `
-		  select
-		  round(avg(rating), 1) as average_rating,
-		  count(*) as rating_amount,
-		  (
-		    select json_agg(t)
-		    from
-		    (
-		      select
-		      c.name,
-		      r.rating as star,
-		      r.content as description,
-		      TO_CHAR(r.date, 'DD Mon YYYY') as timestamp
-		      from
-		      public.review r
-		      join
-		      public.freelancer f
-		      on
-		      r.writer_id = f.freelancer_id
-		      join
-		      public.client c
-		      on
-		      f.user_id = c.client_id
-		      where
-		      destination_id = (select client_id from public.task where task_id = '${taskId}')
-		    ) t
-		  ) as review_list
-		  from
-		  public.review
-		  where
-		  destination_id = (select client_id from public.task where task_id = '${taskId}')
-		  or
-		  destination_id = '${taskId}'
+				select
+				round(avg(rating), 1) as average_rating,
+				count(*) as rating_amount,
+				(
+					select json_agg(t)
+					from
+					(
+						select
+						c.name,
+						r.rating as star,
+						r.content as description,
+						TO_CHAR(r.date, 'DD Mon YYYY') as timestamp
+						from
+						public.review r
+						join
+						public.freelancer f
+						on
+						r.writer_id = f.freelancer_id
+						join
+						public.client c
+						on
+						f.user_id = c.client_id
+						where
+						destination_id = (select client_id from public.task where task_id = '${taskId}')
+					) t
+				) as review_list
+				from
+				public.review
+				where
+				destination_id = (select client_id from public.task where task_id = '${taskId}')
+				or
+				destination_id = '${taskId}'
 		  `;
 
 				review_details = await db.any(SP);
@@ -311,6 +311,12 @@ module.exports = class Task {
 				return new Error("Gagal Mengambil Data.");
 			}
 
+			// map review details dulu
+
+			if (review_details[0].rating_amount == 0) {
+				review_details[0].average_rating = 0;
+				review_details[0].review_list = null;
+			}
 			result.task_detail = task_details[0];
 			result.client = client_details[0];
 			result.registered_freelancer = reg_freelancer_details;
@@ -335,22 +341,30 @@ module.exports = class Task {
     t.price
     from 
     public.task t
+		left join
+		public.transaction trx
+		on
+		t.task_id = trx.project_id
     where
-    t.client_id = '${userId}'
-    or
-    t.client_id = 
-    (
-      select 
-      client_id 
-      from
-      public.client c
-      join
-      public.freelancer f
-      on
-      c.client_id = f.user_id
-      where
-      f.freelancer_id = '${userId}'
-    )
+		(
+			t.client_id = '${userId}'
+			or
+			t.client_id = 
+			(
+				select 
+				client_id 
+				from
+				public.client c
+				join
+				public.freelancer f
+				on
+				c.client_id = f.user_id
+				where
+				f.freelancer_id = '${userId}'
+			)
+		)
+		and
+		trx.status IS NULL
 		;
     `;
 
@@ -366,17 +380,18 @@ module.exports = class Task {
 	// Create Tugas
 	async createTask(data, userId) {
 		let task_uuid = uuid.v4();
-		let subcat = data.subcategory;
+		let subcat = data.sub_category;
 		let name = data.name;
 		let price = data.price;
 		let difficulty = data.difficulty;
 		let tags = data.tags;
 		let deadline = data.deadline;
+		let description = data.description;
 
 		let SP = `
 		insert into
 		public.task
-		(task_id, sub_category_id, client_id, name, price, difficulty, tags, deadline)
+		(task_id, sub_category_id, client_id, name, price, difficulty, tags, deadline, description)
 		values
 		(
 		'${task_uuid}',
@@ -386,7 +401,8 @@ module.exports = class Task {
 		${price},
 		'${difficulty}',
 		'{${tags}}',
-		'${deadline}'
+		'${deadline}',
+		'${description}'
 		)
 		`;
 
@@ -408,7 +424,11 @@ module.exports = class Task {
     t.tags as tags,
     TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.price as price,
-    tr.status as status,
+   	CASE
+			WHEN tr.status IS NULL
+			THEN '1'
+			ELSE tr.status 
+		END status,
     TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as delivery_date,
     CASE 
       WHEN (select status from public.transaction where project_id = t.task_id) = '1' 
@@ -495,10 +515,14 @@ module.exports = class Task {
     TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
     t.difficulty as difficulty,
     t.price as price,
-    tr.status as status
+    CASE 
+			WHEN tr.status IS NULL
+			THEN '1'
+			ELSE tr.status
+		END status
     from 
     public.task t
-    join
+    left join
     public.transaction tr
     on
     t.task_id = tr.project_id
@@ -528,17 +552,17 @@ module.exports = class Task {
 		try {
 			let result = await db.any(SP);
 
-			return result;
+			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mengambil Task.");
 		}
 	}
 
 	// Inquiry Pemilihan Freelancer
-	async getRegisteredFreelancer(taskId, userId) {
+	async getRegisteredFreelancer(taskId) {
 		let SP = `
     select 
-    TO_CHAR(deadline, 'DD Mon YYYY') as choose_due_date,
+    TO_CHAR(ta.deadline, 'DD Mon YYYY HH:mm') as choose_due_date,
     (
       select json_agg(t)
       from 
@@ -560,33 +584,21 @@ module.exports = class Task {
         public.client c 
         on
         c.client_id = f.user_id
+				where
+				te.task_id = '${taskId}'
         group by id, name, profile_image_url
       ) t
     ) registered_freelancer
     from 
-    public.task
-    where
-    task_id = '${taskId}'
-    and
-    client_id = '${userId}'
-    or
-    client_id = 
-    (
-      select 
-      client_id 
-      from
-      public.client c
-      join
-      public.freelancer f
-      on
-      c.client_id = f.user_id
-      where
-      f.freelancer_id = '${userId}'
-    )
+		public.task ta
+		where
+		ta.task_id = '${taskId}'
     `;
 
 		try {
 			let result = await db.any(SP);
+
+			console.log(result);
 
 			return result[0];
 		} catch (error) {
@@ -833,7 +845,30 @@ module.exports = class Task {
 	async registerForTask(taskId, freelancerId) {
 		// insert task enrollment
 		try {
+			// console.log("TASK ID: " + taskId + " FREELANCER ID: " + freelancerId);
 			let te_uuid = uuid.v4();
+
+			let SPC = `
+				select 
+				count(*)
+				from
+				public.task_enrollment
+				where
+				task_id = '${taskId}'
+				and
+				freelancer_id = '${freelancerId}'
+			`;
+
+			console.log(SPC);
+
+			let check_result = await db.any(SPC);
+
+			console.log(check_result);
+
+			if (check_result[0].count > 0) {
+				return new Error("Sudah Mendaftar.");
+			}
+
 			let SP = `
 				INSERT 
 				INTO 

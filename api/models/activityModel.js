@@ -16,7 +16,7 @@ module.exports = class Activity {
 	async getClientActivity(transaction_id, client_id) {
 		let SP = `
 		select 
-		a.date as timestamp,
+		TO_CHAR(a.date, 'DD Mon YYYY HH:mm') as timestamp,
 		a.code as code,
 		CASE 
 			WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
@@ -27,8 +27,8 @@ module.exports = class Activity {
 		END title,
 		a.content as description,
 		a.attachment as files,
-		a.response_deadline,
-		a.deadline_extension,
+		TO_CHAR(a.response_deadline, 'DD Mon YYYY HH:mm'),
+		TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH:mm'),
 		CASE
 			WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
 			THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) button)
@@ -55,7 +55,7 @@ module.exports = class Activity {
 	async getFreelancerActivity(transaction_id, freelancer_id) {
 		let SP = `
 			select 
-			a.date as timestamp,
+			TO_CHAR(a.date, 'DD Mon YYYY HH:mm') as timestamp,
 			a.code as code,
 			CASE 
 				WHEN a.client_id = '${freelancer_id}' AND a.code not in ('15', '16', '18')
@@ -66,8 +66,8 @@ module.exports = class Activity {
 			END title,
 			a.content as description,
 			a.attachment as files,
-			a.response_deadline,
-			a.deadline_extension,
+			TO_CHAR(a.response_deadline, 'DD Mon YYYY HH:mm'),
+			TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH:mm'),
 			CASE
 				WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
 				THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) button)
