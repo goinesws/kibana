@@ -281,7 +281,7 @@ app.getClientTransactionActivity = async (req, res) => {
 									let link = await getDownloadLink(file_id);
 									// create JSON
 									let json = {
-										id: link,
+										download_url: link,
 										file_name: filename,
 									};
 
@@ -489,7 +489,7 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 									let link = await getDownloadLink(file_id);
 									// create JSON
 									let json = {
-										id: link,
+										download_url: link,
 										file_name: filename,
 									};
 
