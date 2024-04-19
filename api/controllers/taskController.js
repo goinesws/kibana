@@ -282,7 +282,7 @@ app.getOwnedTaskDetails = async (req, res) => {
 		if (task_result instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.ERROR,
+				error_message: Error,
 			};
 			result.output_schema = null;
 

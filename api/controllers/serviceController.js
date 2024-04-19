@@ -163,6 +163,7 @@ app.getServiceDetail = async (req, res) => {
 };
 
 app.createNewService = async (req, res) => {
+	console.log("TAPI MASUK KAN")
 	var serviceInstance = new Service();
 	let result = {};
 
@@ -183,14 +184,17 @@ app.createNewService = async (req, res) => {
 		if (req.files["image_5"])
 			images.push(await serviceInstance.addServiceImage(req.files["image_5"]));
 
+		console.log(images + "IMAGES on CONTROLLER")
+		let data = JSON.parse(req.files["data"][0].buffer.toString());
 		images = images.map((link) => link.replace(/"/g, ""));
 
 		var freelancerId = curr_session.session_data.freelancer_id;
 
+
 		//process data
 		var newServiceId = await serviceInstance.createNewService(
 			images,
-			req.body.data,
+			data,
 			freelancerId
 		);
 

@@ -497,6 +497,7 @@ module.exports = class Task {
     `;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			return result;

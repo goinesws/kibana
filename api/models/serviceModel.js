@@ -278,7 +278,7 @@ class Service {
             JOIN 
               requirement on additionalInfo.additional_info_id = requirement.additional_info_id
             WHERE 
-              requirement.service_id = 'S1'
+              requirement.service_id = '${service_id}'
             ) AS additional_info,
             service.description
             FROM service
@@ -290,6 +290,7 @@ class Service {
               service.service_id = '${service_id}'
             GROUP BY 
               service.service_id`;
+              console.log(SP)
 			let service_result = await db.any(SP);
 
 			let SP1 = `
@@ -351,9 +352,12 @@ class Service {
 
 	// Create Layanan
 	async createNewService(images, data_incoming, clientId) {
+    console.log(images)
+    console.log(data_incoming)
+    console.log("MASUK KE MODE CREATE SERVICE")
 		try {
 			const serviceId = uuidv4();
-			const data = JSON.parse(data_incoming);
+			const data = data_incoming;
 			const name = data.name;
 			const subCategory = data.sub_category;
 			const workingTime = data.working_time;
@@ -364,13 +368,18 @@ class Service {
 			const additionalInfo = data.additional_info;
 			const freelancerId = clientId;
 
-			//console.log(clientId);
+			//console.log(clientId);/
 
 			// console.log(tags)
+      let requirementInstance = new Requirement();
+
+      console.log(additionalInfo+"ADD IFOOOO")
 			additionalInfo.forEach((item, index) => {
-				Requirement.createNewRequirement(item.id, serviceId, item.is_supported);
+        console.log(item)
+				requirementInstance.createNewRequirement(item.id, serviceId, item.is_supported);
 			});
 
+      console.log("lewat dari addino")
 			if (
 				!name ||
 				!subCategory ||
@@ -394,6 +403,7 @@ class Service {
 			)}'], ${revisionCount}, TRUE, CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta');
       `;
 
+      console.log(SP)
 			await db.any(SP);
 
 			return serviceId;

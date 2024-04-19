@@ -30,6 +30,7 @@ router.post(
 		{ name: "image_3", maxCount: 1 },
 		{ name: "image_4", maxCount: 1 },
 		{ name: "image_5", maxCount: 1 },
+		{ name: "data", maxCount: 1 }
 	]),
 	serviceController.createNewService
 );
