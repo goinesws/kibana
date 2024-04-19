@@ -179,13 +179,16 @@ module.exports = class User {
 		END is_freelancer
 		from 
 		public.client c
-		join
-		public.freelancer f
-		on 
-		f.user_id = c.client_id
     where 
 		c.client_id = '${clientId}'
-		or f.freelancer_id = '${clientId}';`;
+		or c.client_id = (
+			select 
+			user_id
+			from
+			public.freelancer f
+			where
+			f.freelancer_id = '${clientId}'
+		);`;
 
 		let SP = `
 			SELECT EXISTS(SELECT 1 FROM freelancer WHERE user_id = '${clientId}');
