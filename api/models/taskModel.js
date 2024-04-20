@@ -475,16 +475,16 @@ module.exports = class Task {
 		END status,
     TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
     CASE 
-      WHEN (select status from public.transaction where project_id = t.task_id) = '1' 
-      OR (select status from public.transaction where project_id = t.task_id) = '6'
+      WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) = '1' 
+      OR (select status from public.transaction where project_id = t.task_id LIMIT 1) = '6'
       THEN
       (select count(*) from public.task_enrollment where task_id in (select task_id from public.task 
       where client_id = t.client_id))
       ELSE null
     END registered_freelancer_amount,
     CASE 
-      WHEN (select status from public.transaction where project_id = t.task_id) != '1' 
-      OR (select status from public.transaction where project_id = t.task_id) != '6'
+      WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) != '1' 
+      OR (select status from public.transaction where project_id = t.task_id LIMIT 1) != '6'
       THEN
       (select row_to_json(t)
       from 
@@ -818,9 +818,8 @@ module.exports = class Task {
 			select
 				price,
 				client_id,
-				deadline,
-				freelancer_id
-			from
+				deadline
+				from
 				public.task
 			where
 				task_id = '${taskId}'
@@ -875,8 +874,13 @@ module.exports = class Task {
 				SET
 				FREELANCER_ID
 				=
-				'${freelancerId}';
+				'${freelancerId}'
+				WHERE
+				task_id = '${taskId}'
 			`;
+
+			console.log("SP UPDATE : ");
+			console.log(SP3);
 
 			let update_result = await db.any(SP3);
 

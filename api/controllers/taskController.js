@@ -347,20 +347,22 @@ app.getRegisteredFreelancer = async (req, res) => {
 				error_code: "200",
 				error_message: "Sukses.",
 			};
-			await Promise.all(
-				task_result.registered_freelancer.map(async (task) => {
-					if (task.cv_url && task.cv_url.length > 1) {
-						task.cv_url = await getPreviewLink(task.cv_url);
-					} else {
-						task.cv_url = null;
-					}
-					if (task.portfolio_url && task.portfolio_url.length > 1) {
-						task.portfolio_url = await getPreviewLink(task.portfolio_url);
-					} else {
-						task.portfolio_url = null;
-					}
-				})
-			);
+			if (task_result.registered_freelancer) {
+				await Promise.all(
+					task_result.registered_freelancer.map(async (task) => {
+						if (task.cv_url && task.cv_url.length > 1) {
+							task.cv_url = await getPreviewLink(task.cv_url);
+						} else {
+							task.cv_url = null;
+						}
+						if (task.portfolio_url && task.portfolio_url.length > 1) {
+							task.portfolio_url = await getPreviewLink(task.portfolio_url);
+						} else {
+							task.portfolio_url = null;
+						}
+					})
+				);
+			}
 			result.output_schema = task_result;
 			res.send(result);
 			return;

@@ -720,7 +720,6 @@ module.exports = class Transaction {
 		//change transaction to be has returned;
 		this.changeReturnStatus(transaction_id);
 
-
 		//create response deadline
 		activity.response_deadline =
 			"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
@@ -933,7 +932,6 @@ module.exports = class Transaction {
 		activity.title = title;
 		activity.content = message;
 		activity.code = "10";
-
 
 		//update can_cancel
 		this.changeCancelStatus(transaction_id);
@@ -1253,8 +1251,8 @@ module.exports = class Transaction {
 				project = await db.any(SPP);
 				project = project[0];
 
-				console.log("PROJECT : ");
-				console.log(project);
+				// console.log("PROJECT : ");
+				// console.log(project);
 
 				SP = `
                 INSERT
@@ -1293,8 +1291,8 @@ module.exports = class Transaction {
                 )
                 `;
 
-				console.log("SP");
-				console.log(SP);
+				// console.log("SP");
+				// console.log(SP);
 			} else if (project_type == "SERVICE") {
 				let SPP = `
                 select

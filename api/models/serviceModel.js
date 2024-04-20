@@ -491,16 +491,28 @@ class Service {
         transaction
       WHERE 
       transaction.project_id = service.service_id
- 			) as in_progress_transaction_amount,
+			and 
+			(
+				transaction.status = '2'
+				or
+				transaction.status = '3'
+				or
+				transaction.status = '7'
+				or
+				transaction.status = '9'
+
+			)
+		) as in_progress_transaction_amount,
       (SELECT 
          CASE
            WHEN is_active = TRUE THEN 1
            ELSE 2
        END AS status
       )
-    
     from service
     where freelancer_id = '${freelancer_id}'`;
+
+			console.log(SP);
 			const result = await db.any(SP);
 			return result;
 		} catch (error) {

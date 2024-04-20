@@ -43,12 +43,12 @@ module.exports = class Activity {
     `;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			return result;
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
@@ -88,7 +88,7 @@ module.exports = class Activity {
 			console.log(SP);
 
 			let result = await db.any(SP);
-			console.log(result)
+			console.log(result);
 
 			return result;
 		} catch (error) {
@@ -173,12 +173,12 @@ module.exports = class Activity {
 		`;
 
 		try {
-			console.log(SP1);
+			// console.log(SP1);
 			let result = await db.any(SP1);
 			let transacClientID = `'${result[0].client_id}'`;
 			//if di transac client ini bukan client dari transactionnya
-			console.log(client_id + "client ID");
-			console.log(transacClientID + "transac client ID");
+			// console.log(client_id + "client ID");
+			// console.log(transacClientID + "transac client ID");
 			if (client_id != transacClientID) {
 				//get freelancer id nya sang client id
 				console.log("masuk");
@@ -253,7 +253,7 @@ module.exports = class Activity {
             );
         `;
 		try {
-			console.log(SP);
+			// console.log(SP);
 			let result = await db.any(SP);
 			return "Data telah dimasukkan";
 		} catch (error) {
