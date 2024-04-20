@@ -12,25 +12,24 @@ const { v4: uuidv4 } = require("uuid");
 class Service {
 	constructor() {}
 
-	// Inquiry Invoice
-	async getAllServiceDetail(service_id) {
-		try {
-			var SP = `select service_id,
-      subcategory_id,
-      freelancer_id,
-      name,
-      description,
-      tags, price, working_time,
-      images,
-      revision_count,
-      is_active,
-      TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
-			const result = await db.any(SP);
-			return result[0];
-		} catch (error) {
-			throw new Error("Failed to fetch service");
-		}
-	}
+	// async getAllServiceDetail(service_id) {
+	// 	try {
+	// 		var SP = `select service_id,
+  //     subcategory_id,
+  //     freelancer_id,
+  //     name,
+  //     description,
+  //     tags, price, working_time,
+  //     images,
+  //     revision_count,
+  //     is_active,
+  //     TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
+	// 		const result = await db.any(SP);
+	// 		return result[0];
+	// 	} catch (error) {
+	// 		throw new Error("Failed to fetch service");
+	// 	}
+	// }
 
 	// Inquiry Invoice
 	async getAdditionalData(service_id) {
@@ -307,6 +306,8 @@ class Service {
               service.service_id`;
               console.log(SP)
 			let service_result = await db.any(SP);
+
+      //TODO ganti freelancer_id -> clientid
 
 			let SP1 = `
       select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name, freelancer.description

@@ -82,7 +82,11 @@ module.exports = class User {
 			console.log(SP_insert);
 			let insert_result = await db.any(SP_insert);
 		} catch (error) {
-			return new Error("Gagal Insert.");
+			if(error.code == '23505') {
+				return new Error(errorMessages.USERNAME_PASSWORD_ALREADY_USED)
+			} else {
+				return new Error("Gagal membuat user. Coba lagi dalam sesaat.");
+			}
 		}
 
 		let SP_return = `
