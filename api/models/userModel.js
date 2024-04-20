@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const FormData = require("form-data");
 const uuid = require("uuid");
 const BankInformation = require("./bankInformationModel");
+const errorMessages = require("../messages/errorMessages");
 
 module.exports = class User {
 	constructor() {}
@@ -51,10 +52,11 @@ module.exports = class User {
 		password = '${password}';`;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			if (result.length < 1) {
-				return new Error("Proses Login gagal");
+				return new Error(errorMessages.WRONG_LOGIN_CREDENTIAL);
 			} else {
 				return result[0];
 			}

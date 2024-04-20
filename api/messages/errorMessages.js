@@ -6,4 +6,5 @@ module.exports = {
 	INSERT_ERROR: "Data gagal dimasukkan.",
 	NOT_FREELANCER: "Anda Bukan Freelancer.",
 	ERROR: "Oops, Terjadi Kesalahan. Silahkan Coba Lagi.",
+	WRONG_LOGIN_CREDENTIAL: "Username atau password tidak sesuai."
 };

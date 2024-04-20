@@ -79,23 +79,26 @@ app.getServiceList = async (req, res) => {
 
 	const serviceInstance = new Service();
 	let serviceListResult = await serviceInstance.getServiceList(req.body);
+	console.log(serviceListResult)
 	let total_amount = serviceListResult.length;
 	let has_next_page = true;
 
 	if (req.body.last_id !== "") {
-		const indexOfTarget = serviceListResult.findIndex(
-			(obj) => obj.id === req.body.last_id
-		);
-		if (indexOfTarget !== -1) {
-			serviceListResult = serviceListResult.slice(
-				indexOfTarget + 1,
-				indexOfTarget + 13
+		if(serviceListResult && serviceListResult.length >=1) {
+			const indexOfTarget = serviceListResult.findIndex(
+				(obj) => obj.id == req.body.last_id
 			);
-		} else {
-			//console.log("Object with specified id not found.");
+			if (indexOfTarget !== -1) {
+				serviceListResult = serviceListResult.slice(
+					indexOfTarget + 1,
+					indexOfTarget + 13
+				);
+			} else {
+				//console.log("Object with specified id not found.");
+			}
+			if (total_amount - (indexOfTarget + 1) > 12) has_next_page = true;
+			else has_next_page = false;
 		}
-		if (total_amount - (indexOfTarget + 1) > 12) has_next_page = true;
-		else has_next_page = false;
 	} else {
 		serviceListResult = serviceListResult.slice(0, 12);
 		if (total_amount > 8) has_next_page = true;
@@ -105,6 +108,7 @@ app.getServiceList = async (req, res) => {
 	// console.log(serviceListResult);
 
 	if (serviceListResult instanceof Error) {
+		console.log(Error);
 		result.error_schema = {
 			error_code: "903",
 			error_message: errorMessages.ERROR,
