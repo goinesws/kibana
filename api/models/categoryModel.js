@@ -69,6 +69,7 @@ module.exports = class Category {
     ) as sub_categories
     from
     public.category c
+    ORDER BY id asc
     `;
 
 		try {

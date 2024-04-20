@@ -111,7 +111,11 @@ module.exports = class Task {
 				}
 
 				if (curr.budget_end != null || curr.budget_end != undefined) {
-					SP += ` price BETWEEN '${budgetStart}' AND '${budgetEnd}'`;
+					if (curr.budget_start === 0) {
+						SP += ` price >= '${budgetStart}' AND price < '${budgetEnd}'`;
+					} else {
+						SP += ` price BETWEEN '${budgetStart}' AND '${budgetEnd}'`;
+					}
 				} else {
 					SP += ` price > '${budgetStart}'`;
 				}
@@ -149,7 +153,7 @@ module.exports = class Task {
 
 			return result;
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 			return new Error("Gagal Mendapatkan Data");
 		}
 	}
@@ -498,7 +502,7 @@ module.exports = class Task {
     `;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			return result;
