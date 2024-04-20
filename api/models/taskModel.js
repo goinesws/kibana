@@ -155,6 +155,35 @@ module.exports = class Task {
 			SP += ")";
 		}
 
+		// add buat cek apakah dia sudah di ambil ato engga
+
+		if (
+			(searchText !== "" && searchText) ||
+			(subcategory !== "" && subcategory && subcategory.length >= 1) ||
+			(budget !== "" && budget && budget.length >= 1) ||
+			(difficulty !== "" && difficulty && difficulty.length >= 1)
+		) {
+			// SP sudah ada where jadi pakai and sekarang
+			SP += ` AND (
+				(select count(*)
+				from
+				public.transaction trx
+				where
+				trx.project_id = task_id
+				) = 0
+			);`;
+		} else {
+			// SP Masih Polos
+			SP += ` WHERE (
+				(select count(*)
+				from
+				public.transaction trx
+				where
+				trx.project_id = task_id
+				) = 0
+			)`;
+		}
+
 		try {
 			console.log("Get Task List SP : " + SP);
 			let result = await db.any(SP);
