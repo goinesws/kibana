@@ -37,6 +37,8 @@ module.exports = class Payment {
 				);
 			}
 
+			//todo add payment date
+
 			if (transaction_id instanceof Error) {
 				return new Error(transaction_id.message);
 			}

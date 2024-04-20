@@ -160,7 +160,7 @@ module.exports = class Transaction {
         status as status,
         TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         CASE
-            when status = '7' 
+            when can_return = false 
             then true
             else false
         END has_returned,
@@ -267,7 +267,7 @@ module.exports = class Transaction {
         status as status,
         TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         CASE
-            when status = '5' 
+            when can_cancel = false
             then true
             else false
         END has_cancelled,
@@ -433,7 +433,7 @@ module.exports = class Transaction {
             else null
         END review,
         CASE
-            when status = '7'
+            when can_return = false
             then true
             else false
         END has_returned
@@ -522,7 +522,7 @@ module.exports = class Transaction {
             else null
         END review,
         CASE
-            when status = '5'
+            when can_cancel = false
             then true
             else false
         END has_cancelled
@@ -716,6 +716,10 @@ module.exports = class Transaction {
 		activity.title = title;
 		activity.content = message;
 		activity.code = "6";
+
+		//change transaction to be has returned;
+		this.changeReturnStatus(transaction_id);
+
 
 		//create response deadline
 		activity.response_deadline =
@@ -929,6 +933,10 @@ module.exports = class Transaction {
 		activity.title = title;
 		activity.content = message;
 		activity.code = "10";
+
+
+		//update can_cancel
+		this.changeCancelStatus(transaction_id);
 
 		//create response deadline
 		activity.response_deadline =
@@ -1276,9 +1284,9 @@ module.exports = class Transaction {
                     '${project.deadline.toLocaleString()}',
                     null,
                     null,
-                    null,
-                    null,
-                    null,
+                    false,
+                    true,
+                    true,
                     null,
                     '${freelancer_id}',
                     '${project_type}'
@@ -1356,8 +1364,8 @@ module.exports = class Transaction {
                     null,
                     '${remaining_revision}',
                     false,
-                    false,
-                    false,
+                    true,
+                    true,
                     null,
                     '${freelancer_id}',
                     'SERVICE'
@@ -1454,6 +1462,46 @@ module.exports = class Transaction {
 			code = result[0].status_temp;
 			console.log(code);
 			return code;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+	}
+
+	async changeReturnStatus(transaction_id) {
+		//cari activity paling baru
+		//liat code temp nya
+		//assign status dari code temp
+		let code;
+		let SP = `
+			UPDATE public.transaction
+			SET can_return = false
+			WHERE transaction_id = '${transaction_id}'
+        `;
+
+		try {
+			console.log(SP);
+			let result = await db.any(SP);
+			return result;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+	}
+
+	async changeCancelStatus(transaction_id) {
+		//cari activity paling baru
+		//liat code temp nya
+		//assign status dari code temp
+		let code;
+		let SP = `
+			UPDATE public.transaction
+			SET can_cancel = false
+			WHERE transaction_id = '${transaction_id}'
+        `;
+
+		try {
+			console.log(SP);
+			let result = await db.any(SP);
+			return result;
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
