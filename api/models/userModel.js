@@ -79,6 +79,7 @@ module.exports = class User {
 		`;
 
 		try {
+			console.log(SP_insert);
 			let insert_result = await db.any(SP_insert);
 		} catch (error) {
 			return new Error("Gagal Insert.");
@@ -237,7 +238,7 @@ module.exports = class User {
 
 		try {
 			let bank_result = await BankInstance.editBankDetails(clientId, body);
-
+			console.log("keluar, inid di user cass")
 			return bank_result;
 		} catch (error) {
 			return new Error("Gagal Mengubah Data.");
