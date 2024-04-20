@@ -281,7 +281,7 @@ module.exports = class Task {
 			try {
 				let SP = `
 		  select
-		  f.freelancer_id as id,
+		  c.client_id as id,
 		  c.profile_image as profile_image_url,
 		  c.name as name
 		  from
