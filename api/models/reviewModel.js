@@ -13,7 +13,7 @@ module.exports = class Review {
       c.name,
       r.rating as star,
       r.content as description,
-      TO_CHAR(r.date, 'DD Mon YYYY') as timestamp
+      TO_CHAR(r.date, 'DD Mon YYYY HH24:MI:SS') as timestamp
       from public.review r
       join
       public.freelancer f 
