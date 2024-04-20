@@ -70,7 +70,7 @@ module.exports = class Activity {
 			TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
 			CASE
 				WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
-				THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) buttons)
+				THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id) buttons)
 				ELSE null
 			END buttons
 			from 
