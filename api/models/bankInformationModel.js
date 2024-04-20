@@ -29,17 +29,33 @@ module.exports = class BankInformation {
 
 	// Edit Bank Details
 	async editBankDetails(clientId, body) {
-		let SP = `
-    UPDATE
-    public.bank_information
-    set
-    bank_name = '${body.bank_name}',
-    beneficiary_name = '${body.beneficiary_name}',
-    account_number = '${body.account_number}'
-    where 
-    user_id = '${clientId}';`;
+		let bi_uuid = uuid.v4();
+		let SP_delete = `
+			DELETE
+			FROM bank_information
+			WHERE user_id = '${clientId}'
+    	`;
+		try {
+			console.log(SP_delete)
+			let res = await db.any(SP_delete);
+		} catch (error) {
+			return new Error("Gagal Mengubah Data.");
+		}
+
+		console.log(body)
+		let SP = 
+		`
+			INSERT INTO public.bank_information(
+			bank_information_id, user_id, bank_name, beneficiary_name, account_number)
+			VALUES ('${bi_uuid}', '${clientId}', '${body.bank_name}', '${body.beneficiary_name}', '${body.account_number}')
+    	`;
+		console.log(SP)
+		console.log("MASUK 2")
+		
 
 		try {
+			console.log("masuk ga")
+			console.log(SP)
 			let res = await db.any(SP);
 
 			return res;
