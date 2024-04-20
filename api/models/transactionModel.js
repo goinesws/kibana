@@ -664,11 +664,14 @@ module.exports = class Transaction {
 
 		//create activity
 		let UserInstance = new User();
+
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 		//date ambil dari query sql
 		let title = "mengirim hasil pekerjaan";
 		let activity = {};
+		let id = uuid.v4();
+		activity.activity_id = id;
 		activity.transaction_id = transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
@@ -814,6 +817,13 @@ module.exports = class Transaction {
 		activity.title = title;
 		activity.content = message;
 		activity.code = "14";
+
+		//delete delivery date
+		let SP_deldate = `
+            UPDATE transaction
+            SET delivery_date = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'
+            WHERE transaction_id = '${transaction_id}'
+        `;
 
 		//create deadline extension (3 hari)
 		let date = new Date(await this.getDeadline(transaction_id));
