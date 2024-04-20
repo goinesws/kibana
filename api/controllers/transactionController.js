@@ -71,8 +71,6 @@ app.getTransactionInvoice = async (req, res) => {
 				additional_data = null;
 			}
 
-			// console.log(projectResult);
-
 			var fee = projectResult.price * 0.01;
 			//console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
 
