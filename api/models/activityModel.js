@@ -15,38 +15,40 @@ module.exports = class Activity {
 	// Inquiry Activity Pesanan Client
 	async getClientActivity(transaction_id, client_id) {
 		let SP = `
-		select 
-		a.date
-		a.code as code,
-		CASE 
-			WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
-			THEN CONCAT('Kamu ', a.title)
-			WHEN a.code not in ('15', '16', '18')
-			THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
-			ELSE a.title
-		END title,
-		a.content as description,
-		a.attachment as files,
-		TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS'),
-		TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS'),
-		CASE
-			WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
-			THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) button)
-			ELSE null
-		END button
-		from 
-		public.activity a
-		where
-		transaction_id = '${transaction_id}'
-		order by 
-		timestamp asc
+		select
+                a.date,
+                a.code as code,
+                CASE
+                        WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
+                        THEN CONCAT('Kamu ', a.title)
+                        WHEN a.code not in ('15', '16', '18')
+                        THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
+                        ELSE a.title
+                END title,
+                a.content as description,
+                a.attachment as files,
+                TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS'),
+                TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS'),
+                CASE
+                        WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
+                        THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id) buttons)
+                        ELSE null
+                END buttons
+                from
+                public.activity a
+                where
+                transaction_id = '${transaction_id}'
+                order by
+                date asc
     `;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			return result;
 		} catch (error) {
+			console.log(error)
 			return new Error("Gagal Mendapatkan Data.");
 		}
 	}
@@ -78,12 +80,12 @@ module.exports = class Activity {
 			where
 			transaction_id = '${transaction_id}'
 			order by 
-			timestamp asc
+			date asc
       `;
 
 		try {
 			// console.log("SP : ");
-			// console.log(SP);
+			console.log(SP);
 
 			let result = await db.any(SP);
 			console.log(result)

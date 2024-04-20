@@ -300,6 +300,7 @@ module.exports = class User {
 	// Utilities
 	async getUserSessionData(session_id) {
 		let SP = `
+		
 			select
 			session_id,
 			session_data
