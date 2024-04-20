@@ -173,10 +173,24 @@ class Service {
 			SP += ` WHERE (service.name || service.description ILIKE '%${searchText}%'
           OR '${searchText}' ILIKE ANY (service.tags))`;
 		}
-		if (subcategory !== "" && subcategory) {
-			if (searchText !== "") SP += ` AND`;
-			else SP += ` WHERE`;
-			SP += ` service.subcategory_id = '${subcategory}'`;
+		if (subcategory !== "" && subcategory && subcategory.length >= 1) {
+			if (searchText !== "" && searchText) {
+				SP += ` AND `;
+			} else {
+				SP += ` WHERE `;
+			}
+
+			SP += "(";
+
+			subcategory.map((curr, i) => {
+				if (i > 0) {
+					SP += " OR ";
+				}
+
+				SP += ` subcategory_id = '${curr}'`;
+			});
+
+			SP += ")";
 		}
 
 		if (budget !== "" && budget && budget.length >= 1) {

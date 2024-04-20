@@ -149,6 +149,7 @@ module.exports = class Task {
 
 			return result;
 		} catch (error) {
+			console.log(error)
 			return new Error("Gagal Mendapatkan Data");
 		}
 	}
