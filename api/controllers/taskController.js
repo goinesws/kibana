@@ -3,6 +3,14 @@ const app = express();
 const Task = require("../models/taskModel.js");
 const User = require("../models/userModel.js");
 const errorMessages = require("../messages/errorMessages.js");
+const {
+	authorize,
+	listFiles,
+	uploadFile,
+	getDownloadLink,
+	getFileName,
+	getPreviewLink,
+} = require("../utils/googleUtil.js");
 
 app.getNewTask = async (req, res) => {
 	//console.log(req.params);
@@ -339,6 +347,16 @@ app.getRegisteredFreelancer = async (req, res) => {
 				error_code: "200",
 				error_message: "Sukses.",
 			};
+			await Promise.all(
+				task_result.registered_freelancer.map(async (task) => {
+					if (task.cv_url) {
+						task.cv_url = await getPreviewLink(task.cv_url);
+					}
+					if (task.portfolio_url) {
+						task.portfolio_url = await getPreviewLink(task.portfolio_url);
+					}
+				})
+			);
 			result.output_schema = task_result;
 			res.send(result);
 			return;
