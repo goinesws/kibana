@@ -19,8 +19,8 @@ router.get("/detail/:serviceId", serviceController.getServiceDetail);
 router.get("/owned", serviceController.getOwnedService);
 router.get("/owned/:serviceId", serviceController.getOwnedServiceDetail);
 router.get("/owned/:serviceId/orders", serviceController.getOwnedServiceOrders);
-router.put("/:serviceId/deactivate", serviceController.deactivateService);
-router.put("/:serviceId/delete", serviceController.deleteService);
+router.put("/owned/:serviceId/deactivate", serviceController.deactivateService);
+router.put("/owned/:serviceId/delete", serviceController.deleteService);
 router.get("/history", serviceController.getServiceHistory);
 router.post(
 	"/create",
@@ -43,7 +43,7 @@ router.get(
 	subcategoryController.getadditionalInfoBySubcategoryId
 );
 router.get("/category", categoryController.getAllCategorySubcategory);
-router.put("/:serviceId/activate", serviceController.activateService);
+router.put("/owned/:serviceId/activate", serviceController.activateService);
 router.post("/:serviceId/request-token", serviceController.getRequestToken);
 
 module.exports = router;
