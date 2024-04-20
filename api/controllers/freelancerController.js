@@ -54,6 +54,9 @@ app.getFreelancerEducationHistory = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	} else {
+		if (edu.length < 1) {
+			edu = null;
+		}
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.education_history = edu;
 		res.send(result);
