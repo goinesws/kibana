@@ -71,8 +71,6 @@ app.getTransactionInvoice = async (req, res) => {
 				additional_data = null;
 			}
 
-			// console.log(projectResult);
-
 			var fee = projectResult.price * 0.01;
 			//console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
 
@@ -745,7 +743,8 @@ app.sendResult = async (req, res) => {
 		}
 
 		console.log(file);
-		let data = JSON.parse(req.body.data);
+
+		let data = JSON.parse(req.files["data"][0].buffer.toString());
 		const transaction_id = data.transaction_id;
 		const description = data.description;
 
