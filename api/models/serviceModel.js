@@ -102,7 +102,7 @@ class Service {
 	async getNewServiceNoCat(category_id) {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
-            jsonb_build_object('image_url', client.profile_image, 'name', client.name) as freelancer,
+            jsonb_build_object('profile_image_url', client.profile_image, 'name', client.name) as freelancer,
             COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
             (SELECT COUNT(rating)
             FROM 
