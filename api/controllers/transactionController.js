@@ -737,7 +737,8 @@ app.sendResult = async (req, res) => {
 		}
 
 		console.log(file);
-		let data = JSON.parse(req.body.data);
+
+		let data = JSON.parse(req.files["data"][0].buffer.toString());
 		const transaction_id = data.transaction_id;
 		const description = data.description;
 

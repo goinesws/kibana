@@ -96,6 +96,7 @@ router.post(
 		{ name: "result_1", maxCount: 1 },
 		{ name: "result_2", maxCount: 1 },
 		{ name: "result_3", maxCount: 1 },
+		{ name: "data", maxCount: 1 },
 	]),
 	transactionController.sendResult
 );

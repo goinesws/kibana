@@ -12,24 +12,26 @@ const { v4: uuidv4 } = require("uuid");
 class Service {
 	constructor() {}
 
-	// async getAllServiceDetail(service_id) {
-	// 	try {
-	// 		var SP = `select service_id,
-	//     subcategory_id,
-	//     freelancer_id,
-	//     name,
-	//     description,
-	//     tags, price, working_time,
-	//     images,
-	//     revision_count,
-	//     is_active,
-	//     TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
-	// 		const result = await db.any(SP);
-	// 		return result[0];
-	// 	} catch (error) {
-	// 		throw new Error("Failed to fetch service");
-	// 	}
-	// }
+	async getAllServiceDetail(service_id) {
+		try {
+			var SP = `select service_id,
+	    subcategory_id,
+	    freelancer_id,
+	    name,
+	    description,
+	    tags, price, working_time,
+	    images,
+	    revision_count,
+	    is_active,
+	    TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
+			const result = await db.any(SP);
+      console.log(result)
+			return result[0];
+		} catch (error) {
+      console.log(error)
+			throw new Error("Failed to fetch service");
+		}
+	}
 
 	// Inquiry Invoice
 	async getAdditionalData(service_id) {
