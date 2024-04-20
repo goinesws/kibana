@@ -241,15 +241,14 @@ app.getClientTransactionActivity = async (req, res) => {
 	let UserInstance = new User();
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
-	if (curr_session.session_id == x_token) {
+	if (curr_session.session_id == x_token && x_token) {
 		let transaction_id = req.params.transactionId;
-		console.log(curr_session + "1");
+		console.log(curr_session);
 		let transactionInstance = new Transaction();
 		let transaction_client = await transactionInstance.getTransactionClient(
 			transaction_id
 		);
 
-		console.log(curr_session + "2");
 		if (transaction_client.username == curr_session.session_data.username) {
 			let client_id = curr_session.session_data.client_id;
 
@@ -260,6 +259,8 @@ app.getClientTransactionActivity = async (req, res) => {
 				);
 
 			if (transaction_result instanceof Error) {
+				console.log(transaction_result);
+
 				result.error_schema = {
 					error_code: "999",
 					error_message: errorMessages.ERROR,
