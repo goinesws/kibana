@@ -15,7 +15,8 @@ module.exports = class Education {
     p.freelancer_id = f.freelancer_id
     where
     f.user_id = '${userId}'
-		or f.freelancer_id = '${userId}';
+		or f.freelancer_id = '${userId}'
+		order by p.year desc
     `;
 
 		try {
