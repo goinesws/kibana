@@ -89,16 +89,17 @@ module.exports = class Freelancer extends User {
 	// rewrite buat get service dari service model terus di hit dari sini
 	async getOwnedService(userId) {
 		let SPGetService = `select s.service_id as id, s.images as image_url, s.name, s.tags, s.price, s.working_time from public.service s 
-    join 
-    public.freelancer f 
-    on 
-    f.freelancer_id = s.freelancer_id
-    where 
-    f.user_id = '${userId}'
-		or f.freelancer_id = '${userId}'; `;
+			join 
+			public.freelancer f 
+			on 
+			f.freelancer_id = s.freelancer_id
+			where 
+			f.user_id = '${userId}'
+			or f.freelancer_id = '${userId}'
+			and s.is_active = true; 
+		`;
 
-		try {
-			let SPGetFreelancer = `
+		let SPGetFreelancer = `
 			select profile_image 
 			as 
 			profile_image_url, 
@@ -111,14 +112,17 @@ module.exports = class Freelancer extends User {
 			c.client_id = f.user_id
 			where client_id = '${userId}'
 			or 
-			f.freelancer_id = '${userId}';`;
+			f.freelancer_id = '${userId}';
+		`;
+
+		try {
+			
 
 			let result = await db.any(SPGetService);
 
 			let resultFreelancer = await db.any(SPGetFreelancer);
 
 			for (var i = 0; i < result.length; i++) {
-				//console.log("hi");
 				let serviceId = result[i].id;
 
 				let SPGetReviewTotal = `select count(*) from public.review where destination_id = '${serviceId}';`;

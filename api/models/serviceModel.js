@@ -87,6 +87,7 @@ class Service {
             inner join client on
                             freelancer.user_id = client.client_id
             where category.category_id = '${category_id}'
+            and service.is_active = true;
             ORDER BY
             service.created_date DESC
             LIMIT 4`;
@@ -116,6 +117,7 @@ class Service {
                             service.freelancer_id = freelancer.freelancer_id
             inner join client on
                             freelancer.user_id = client.client_id
+            WHERE service.is_active = true
             ORDER BY
             service.created_date DESC
             LIMIT 4`;
@@ -166,7 +168,9 @@ class Service {
         inner join freelancer on
                         service.freelancer_id = freelancer.freelancer_id
         inner join client on
-                        freelancer.user_id = client.client_id`;
+                        freelancer.user_id = client.client_id
+        WHERE service.is_active = true;
+        `;
 
 		if (searchText !== "" && searchText) {
 			SP += ` WHERE (service.name || service.description ILIKE '%${searchText}%'
