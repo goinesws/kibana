@@ -687,6 +687,15 @@ module.exports = class Transaction {
             WHERE transaction_id = '${transaction_id}'
         `;
 
+		//add buttons
+		//tolak permintaan pengembalian
+		result = await activityInstance.createButton(id, transaction_id, 1);
+
+		//terima permintaan pengembalian
+		result = await activityInstance.createButton(id, transaction_id, 2);
+
+
+
 		try {
 			console.log(SP1);
 			let result = await db.any(SP1);
