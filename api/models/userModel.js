@@ -167,13 +167,13 @@ module.exports = class User {
 		c.name, 
 		c.username,
 		CASE
-			WHEN (
+			WHEN(
 				select 
 				count(*) 
 				from public.freelancer 
 				where user_id = '${clientId}' 
 				or freelancer_id = '${clientId}' 
-				) > 0
+				) = 1
 			THEN true
 			ELSE false
 		END is_freelancer
@@ -190,14 +190,8 @@ module.exports = class User {
 			f.freelancer_id = '${clientId}'
 		);`;
 
-		let SP = `
-			SELECT EXISTS(SELECT 1 FROM freelancer WHERE user_id = '${clientId}');
-		`;
-
 		try {
 			let result = await db.any(SPGetClientDetails);
-			let isFreelancer = await db.any(SP);
-			result[0].is_freelancer = isFreelancer;
 			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");

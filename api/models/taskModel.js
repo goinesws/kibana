@@ -9,17 +9,25 @@ module.exports = class Task {
 	async getNewTask() {
 		let SP = `
     select 
-    task_id as id,
-    name as name,
-    description as description,
-    tags as tags,
-    TO_CHAR(deadline, 'DD Mon YYYY') as due_date, 
-    difficulty as difficulty,
-    price as price 
+    t.task_id as id,
+    t.name as name,
+    t.description as description,
+    t.tags as tags,
+    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date, 
+    t.difficulty as difficulty,
+    t.price as price 
     from 
-    public.task
-    order by task_id desc
-    LIMIT 4
+    public.task t
+		where
+		(
+			select count(*)
+			from
+			public.transaction trx
+			where
+			trx.project_id = t.task_id
+		) = 0
+		order by t.created_date desc
+		LIMIT 4
     `;
 
 		try {
@@ -396,7 +404,7 @@ module.exports = class Task {
 		let SP = `
 		insert into
 		public.task
-		(task_id, sub_category_id, client_id, name, price, difficulty, tags, deadline, description)
+		(task_id, sub_category_id, client_id, name, price, difficulty, tags, deadline, description, created_date)
 		values
 		(
 		'${task_uuid}',
@@ -407,11 +415,13 @@ module.exports = class Task {
 		'${difficulty}',
 		'{${tags}}',
 		'${deadline}',
-		'${description}'
+		'${description}',
+		current_timestamp
 		)
 		`;
 
 		try {
+			console.log(SP);
 			let result = await db.any(SP);
 
 			return task_uuid;
