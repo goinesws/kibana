@@ -491,8 +491,7 @@ class Service {
         transaction
       WHERE 
       transaction.project_id = service.service_id
-      AND
-      status = 'Dalam Proses') as in_progress_transaction_amount,
+ 			) as in_progress_transaction_amount,
       (SELECT 
          CASE
            WHEN is_active = TRUE THEN 1
