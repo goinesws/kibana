@@ -339,7 +339,7 @@ class Service {
               'name', client.name,
               'star', review.rating,
               'description', review.content,
-              'timestamp', TO_CHAR(review.date, 'DD Mon YYYY')
+              'timestamp', TO_CHAR(review.date, 'DD Mon YYYY HH24:MI:SS')
                     )
                   )
                 FROM 
@@ -528,7 +528,7 @@ class Service {
                   'name', client.name,
                   'star', review.rating,
                   'description', review.content,
-                  'timestamp', TO_CHAR(review.date, 'DD Mon YYYY')
+                  'timestamp', TO_CHAR(review.date, 'DD Mon YYYY HH24:MI:SS')
                 )
               )
               FROM 
@@ -562,8 +562,8 @@ class Service {
 			var SP = `SELECT 
       transaction.transaction_id as id,
       transaction.status as status,
-      TO_CHAR(transaction.deadline, 'DD Mon YYYY') as due_date,
-      TO_CHAR(transaction.delivery_date, 'DD Mon YYYY') as delivery_date,
+      TO_CHAR(transaction.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+      TO_CHAR(transaction.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
       jsonb_build_object(
         'id', client.client_id,
         'name', client.name,
@@ -673,8 +673,8 @@ class Service {
       service.tags,
       service.price,
       transaction.status as status,
-      TO_CHAR(transaction.deadline, 'DD Mon YYYY') as due_date,
-      TO_CHAR(transaction.delivery_date, 'DD Mon YYYY') as delivery_date,
+      TO_CHAR(transaction.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+      TO_CHAR(transaction.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
       jsonb_build_object(
           'id', freelancer.freelancer_id,
           'name', client.name,

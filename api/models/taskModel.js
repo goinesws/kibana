@@ -13,7 +13,7 @@ module.exports = class Task {
     t.name as name,
     t.description as description,
     t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date, 
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date, 
     t.difficulty as difficulty,
     t.price as price 
     from 
@@ -51,7 +51,7 @@ module.exports = class Task {
       price,
       difficulty,
       tags,
-      TO_CHAR(created_date, 'DD Mon YYYY') from task where task_id = '${task_id}'`;
+      TO_CHAR(created_date, 'DD Mon YYYY HH24:MI:SS') from task where task_id = '${task_id}'`;
 
 		try {
 			let result = await db.any(SP);
@@ -72,7 +72,7 @@ module.exports = class Task {
 		const difficulty = body["difficulty"];
 		const lastId = body["last_id"];
 
-		let SP = `SELECT task_id as id, name, description, tags, TO_CHAR(deadline, 'DD Mon YYYY') as due_date, difficulty, price FROM public.task`;
+		let SP = `SELECT task_id as id, name, description, tags, TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date, difficulty, price FROM public.task`;
 
 		if (searchText !== "" && searchText) {
 			SP += ` WHERE (name || description ILIKE '%${searchText}%'
@@ -209,7 +209,7 @@ module.exports = class Task {
     t.name, 
     t.description, 
     t.tags, 
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,  
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,  
     t.difficulty, 
     t.price 
     from public.task t
@@ -241,7 +241,7 @@ module.exports = class Task {
 		  task_id as id,
 		  name as name,
 		  tags as tags,
-		  TO_CHAR(deadline, 'DD Mon YYYY') as due_date,
+		  TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
 		  difficulty as difficulty,
 		  price as price,
 		  description as description
@@ -325,7 +325,7 @@ module.exports = class Task {
 						c.name,
 						r.rating as star,
 						r.content as description,
-						TO_CHAR(r.date, 'DD Mon YYYY') as timestamp
+						TO_CHAR(r.date, 'DD Mon YYYY HH24:MI:SS') as timestamp
 						from
 						public.review r
 						join
@@ -378,7 +378,7 @@ module.exports = class Task {
     t.name,
     t.description,
     t.tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
     t.difficulty,
     t.price
     from 
@@ -466,14 +466,14 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
     t.price as price,
    	CASE
 			WHEN tr.status IS NULL
 			THEN '1'
 			ELSE tr.status 
 		END status,
-    TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as delivery_date,
+    TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
     CASE 
       WHEN (select status from public.transaction where project_id = t.task_id) = '1' 
       OR (select status from public.transaction where project_id = t.task_id) = '6'
@@ -557,7 +557,7 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
     t.difficulty as difficulty,
     t.price as price,
     CASE 
@@ -693,11 +693,11 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
     t.difficulty as difficulty,
     t.price as price,
     tr.status as status, 
-    TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as delivery_date,
+    TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
     CASE 
       WHEN tr.status = '1' or tr.status = '10'
       THEN (select count(*) from public.task_enrollment where task_id = t.task_id)
@@ -764,7 +764,7 @@ module.exports = class Task {
     t.task_id as id,
     t.name as name,
     t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY') as due_date,
+    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
     t.difficulty as difficulty,
     t.price as price,
     tr.status as status

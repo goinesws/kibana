@@ -20,7 +20,7 @@ module.exports = class Transaction {
         s.name as project_name,
         r.rating as star,
         s.description as description,
-        TO_CHAR(tr.delivery_date, 'DD Mon YYYY') as timestamp
+        TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as timestamp
         from 
         public.transaction tr
         join
@@ -60,13 +60,13 @@ module.exports = class Transaction {
                 project_id,
                 client_id,
                 status,
-                TO_CHAR(deadline, 'DD Mon YYYY') as deadline,
-                TO_CHAR(delivery_date, 'DD Mon YYYY') as delivery_date,
+                TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as deadline,
+                TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
                 remaining_revision,
                 is_need_admin,
                 can_cancel,
                 can_return,
-                TO_CHAR(payment_date, 'DD Mon YYYY') as payment_date,
+                TO_CHAR(payment_date, 'DD Mon YYYY HH24:MI:SS') as payment_date,
                 freelancer_id,
                 project_type
             FROM
@@ -361,7 +361,7 @@ module.exports = class Transaction {
                 s.service_id as id,
                 s.name as name,
                 s.tags as tags,
-                tr.deadline as due_date,
+                to_char(tr.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
                 s.price as price
                 from
                 public.transaction tr
@@ -374,7 +374,7 @@ module.exports = class Transaction {
             ) t
         ) service_detail,
         status as status,
-        delivery_date as delivery_date,
+        to_char(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         (
             select row_to_json(t)
             from

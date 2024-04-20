@@ -349,6 +349,14 @@ app.getTransactionDetailsClientService = async (req, res) => {
 				};
 				result.output_schema = null;
 			} else {
+				if (transaction_result) {
+					if (transaction_result.average_rating == null) {
+						transaction_result.average_rating = 0;
+					}
+					if (transaction_result.rating_amount == null) {
+						transaction_result.rating_amount = 0;
+					}
+				}
 				result.error_schema = {
 					error_code: "200",
 					error_message: errorMessages.QUERY_SUCCESSFUL,
