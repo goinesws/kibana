@@ -16,6 +16,17 @@ app.login = async (req, res) => {
 
 	result = {};
 
+	console.log(login_info)
+	if(login_info instanceof Error && login_info.message == errorMessages.WRONG_LOGIN_CREDENTIAL) {
+		result.error_schema = {
+			error_code: "406",
+			error_message: login_info.message,
+		};
+		result.output_schema = null;
+
+		res.status(400).send(result);
+		return;
+	}
 	if (
 		login_info instanceof Error ||
 		login_info == null ||
