@@ -79,12 +79,12 @@ app.getServiceList = async (req, res) => {
 
 	const serviceInstance = new Service();
 	let serviceListResult = await serviceInstance.getServiceList(req.body);
-	console.log(serviceListResult)
+	console.log(serviceListResult);
 	let total_amount = serviceListResult.length;
 	let has_next_page = true;
 
 	if (req.body.last_id !== "") {
-		if(serviceListResult && serviceListResult.length >=1) {
+		if (serviceListResult && serviceListResult.length >= 1) {
 			const indexOfTarget = serviceListResult.findIndex(
 				(obj) => obj.id == req.body.last_id
 			);
@@ -167,7 +167,7 @@ app.getServiceDetail = async (req, res) => {
 };
 
 app.createNewService = async (req, res) => {
-	console.log("TAPI MASUK KAN")
+	console.log("TAPI MASUK KAN");
 	var serviceInstance = new Service();
 	let result = {};
 
@@ -188,12 +188,11 @@ app.createNewService = async (req, res) => {
 		if (req.files["image_5"])
 			images.push(await serviceInstance.addServiceImage(req.files["image_5"]));
 
-		console.log(images + "IMAGES on CONTROLLER")
+		console.log(images + "IMAGES on CONTROLLER");
 		let data = JSON.parse(req.files["data"][0].buffer.toString());
 		images = images.map((link) => link.replace(/"/g, ""));
 
 		var freelancerId = curr_session.session_data.freelancer_id;
-
 
 		//process data
 		var newServiceId = await serviceInstance.createNewService(
@@ -316,6 +315,9 @@ app.getOwnedServiceDetail = async (req, res) => {
 			} else {
 				result.error_schema = { error_code: "200", error_message: "Sukses" };
 				result.output_schema.service_detail = serviceResult;
+				result.output_schema.review = serviceResult.review;
+
+				delete serviceResult["review"];
 
 				res.send(result);
 				return;
@@ -548,7 +550,7 @@ app.getServiceHistory = async (req, res) => {
 			return;
 		} else {
 			result.error_schema = { error_code: "200", error_message: "Sukses" };
-			result.output_schema.service_detail = serviceResult;
+			result.output_schema.services = serviceResult;
 
 			res.send(result);
 			return;
