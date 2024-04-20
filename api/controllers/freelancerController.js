@@ -167,6 +167,12 @@ app.getOwnedService = async (req, res) => {
 	} else {
 		if (owned_service.length < 1) {
 			owned_service = null;
+		} else {
+			owned_service.map((service) => {
+				if (service.average_rating == null) {
+					service.average_rating = 0;
+				}
+			});
 		}
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema.services = owned_service;
