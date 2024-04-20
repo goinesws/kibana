@@ -344,24 +344,25 @@ app.editFreelancerEducation = async (req, res) => {
 		let freelancerInstance = new Freelancer();
 		await freelancerInstance.removeEducation(userId);
 
-		education.map(async (education) => {
-			console.log(education);
-			let ed_result = await freelancerInstance.editFreelancerEducation(
-				userId,
-				education
-			);
+		await Promise.all(
+			education.map(async (education) => {
+				let ed_result = await freelancerInstance.editFreelancerEducation(
+					userId,
+					education
+				);
 
-			if (ed_result == null) {
-				result.error_schema = {
-					error_code: "903",
-					error_message: errorMessages.ERROR,
-				};
-				result.output_schema = null;
+				if (ed_result == null) {
+					result.error_schema = {
+						error_code: "903",
+						error_message: errorMessages.ERROR,
+					};
+					result.output_schema = null;
 
-				res.status(400).send(result);
-				return;
-			}
-		});
+					res.status(400).send(result);
+					return;
+				}
+			})
+		);
 
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = {};
