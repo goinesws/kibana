@@ -86,7 +86,7 @@ app.getServiceList = async (req, res) => {
 	if (req.body.last_id !== "") {
 		if(serviceListResult && serviceListResult.length >=1) {
 			const indexOfTarget = serviceListResult.findIndex(
-				(obj) => obj.id === req.body.last_id
+				(obj) => obj.id == req.body.last_id
 			);
 			if (indexOfTarget !== -1) {
 				serviceListResult = serviceListResult.slice(
