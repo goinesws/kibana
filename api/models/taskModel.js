@@ -92,7 +92,7 @@ module.exports = class Task {
 		if (budget !== "" && budget && budget.length >= 1) {
 			if (
 				(searchText !== "" && searchText) ||
-				(subcategory !== "" && subcategory)
+				(subcategory !== "" && subcategory && subcategory.length >= 1)
 			) {
 				SP += ` AND `;
 			} else {
@@ -127,8 +127,8 @@ module.exports = class Task {
 		if (difficulty !== "" && difficulty && difficulty.length >= 1) {
 			if (
 				(searchText !== "" && searchText) ||
-				(subcategory !== "" && subcategory) ||
-				(budget !== "" && budget)
+				(subcategory !== "" && subcategory && subcategory.length >= 1) ||
+				(budget !== "" && budget && budget.length >= 1)
 			) {
 				SP += ` AND `;
 			} else {
