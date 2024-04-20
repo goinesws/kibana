@@ -107,7 +107,7 @@ app.register = async (req, res) => {
 	if (register_result instanceof Error) {
 		result.error_schema = {
 			error_code: "999",
-			error_message: errorMessages.ERROR,
+			error_message: register_result.message,
 		};
 		result.output_schema = null;
 
