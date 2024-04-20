@@ -56,7 +56,11 @@ module.exports = class Freelancer extends User {
 		try {
 			let result = await db.any(SP);
 
-			return Google.getPreviewLink(result[0].cv_url);
+			if (result[0].cv_url.length > 1) {
+				return Google.getPreviewLink(result[0].cv_url);
+			} else {
+				return null;
+			}
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
@@ -71,7 +75,11 @@ module.exports = class Freelancer extends User {
 		try {
 			let result = await db.any(SP);
 
-			return Google.getPreviewLink(result[0].portfolio_url);
+			if (result[0].portfolio_url.length > 1) {
+				return Google.getPreviewLink(result[0].portfolio_url);
+			} else {
+				return null;
+			}
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}

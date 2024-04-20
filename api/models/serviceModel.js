@@ -15,15 +15,15 @@ class Service {
 	// async getAllServiceDetail(service_id) {
 	// 	try {
 	// 		var SP = `select service_id,
-  //     subcategory_id,
-  //     freelancer_id,
-  //     name,
-  //     description,
-  //     tags, price, working_time,
-  //     images,
-  //     revision_count,
-  //     is_active,
-  //     TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
+	//     subcategory_id,
+	//     freelancer_id,
+	//     name,
+	//     description,
+	//     tags, price, working_time,
+	//     images,
+	//     revision_count,
+	//     is_active,
+	//     TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
 	// 		const result = await db.any(SP);
 	// 		return result[0];
 	// 	} catch (error) {
@@ -259,7 +259,7 @@ class Service {
 		let result;
 
 		try {
-      console.log(SP)
+			console.log(SP);
 			result = await db.any(SP);
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -304,10 +304,10 @@ class Service {
               service.service_id = '${service_id}'
             GROUP BY 
               service.service_id`;
-              console.log(SP)
+			console.log(SP);
 			let service_result = await db.any(SP);
 
-      //TODO ganti freelancer_id -> clientid
+			//TODO ganti freelancer_id -> clientid
 
 			let SP1 = `
       select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name, freelancer.description
@@ -368,9 +368,9 @@ class Service {
 
 	// Create Layanan
 	async createNewService(images, data_incoming, clientId) {
-    console.log(images)
-    console.log(data_incoming)
-    console.log("MASUK KE MODE CREATE SERVICE")
+		console.log(images);
+		console.log(data_incoming);
+		console.log("MASUK KE MODE CREATE SERVICE");
 		try {
 			const serviceId = uuidv4();
 			const data = data_incoming;
@@ -387,15 +387,19 @@ class Service {
 			//console.log(clientId);/
 
 			// console.log(tags)
-      let requirementInstance = new Requirement();
+			let requirementInstance = new Requirement();
 
-      console.log(additionalInfo+"ADD IFOOOO")
+			console.log(additionalInfo + "ADD IFOOOO");
 			additionalInfo.forEach((item, index) => {
-        console.log(item)
-				requirementInstance.createNewRequirement(item.id, serviceId, item.is_supported);
+				console.log(item);
+				requirementInstance.createNewRequirement(
+					item.id,
+					serviceId,
+					item.is_supported
+				);
 			});
 
-      console.log("lewat dari addino")
+			console.log("lewat dari addino");
 			if (
 				!name ||
 				!subCategory ||
@@ -419,7 +423,7 @@ class Service {
 			)}'], ${revisionCount}, TRUE, CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta');
       `;
 
-      console.log(SP)
+			console.log(SP);
 			await db.any(SP);
 
 			return serviceId;
@@ -546,7 +550,7 @@ class Service {
   WHERE service.service_id = '${service_id}'
   GROUP BY service.service_id`;
 			const result = await db.any(SP);
-			return result;
+			return result[0];
 		} catch (error) {
 			throw new Error("Failed to fetch owned services detail");
 		}
