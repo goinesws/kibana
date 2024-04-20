@@ -607,7 +607,7 @@ module.exports = class Task {
 	async getRegisteredFreelancer(taskId) {
 		let SP = `
     select 
-    TO_CHAR(ta.deadline, 'DD Mon YYYY HH:mm') as choose_due_date,
+    TO_CHAR(ta.deadline, 'DD Mon YYYY HH24:MI:SS') as choose_due_date,
     (
       select json_agg(t)
       from 

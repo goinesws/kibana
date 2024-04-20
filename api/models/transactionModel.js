@@ -147,7 +147,7 @@ module.exports = class Transaction {
                 task_id as id,
                 name as name,
                 tags as tags,
-								TO_CHAR(deadline, 'DD Mon YYYY HH:mm') as due_date,
+								TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
                 difficulty as difficulty,
                 price as price
                 from
@@ -158,7 +158,7 @@ module.exports = class Transaction {
             ) t
         ) as task_detail,
         status as status,
-        TO_CHAR(delivery_date, 'DD Mon YYYY HH:mm') as delivery_date,
+        TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         CASE
             when status = '7' 
             then true
@@ -254,7 +254,7 @@ module.exports = class Transaction {
                 task_id as id,
                 name as name,
                 tags as tags,
-                deadline as due_date,
+                TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
                 difficulty as difficulty,
                 price as price
                 from
@@ -265,7 +265,7 @@ module.exports = class Transaction {
             ) t
         ) as task_detail,
         status as status,
-        delivery_date as delivery_date,
+        TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         CASE
             when status = '5' 
             then true
@@ -339,7 +339,7 @@ module.exports = class Transaction {
 				return new Error("Gagal Mendapatkan Data.");
 			}
 
-			return result;
+			return result[0];
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
 		}
