@@ -70,9 +70,9 @@ module.exports = class Activity {
 			TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH:mm'),
 			CASE
 				WHEN (select count(*) from public.button where activity_id = a.activity_id) > 1
-				THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) button)
+				THEN (select json_agg(button) from (select code, name from public.button where activity_id = a.activity_id) buttons)
 				ELSE null
-			END button
+			END buttons
 			from 
 			public.activity a
 			where
@@ -86,6 +86,7 @@ module.exports = class Activity {
 			// console.log(SP);
 
 			let result = await db.any(SP);
+			console.log(result)
 
 			return result;
 		} catch (error) {
