@@ -187,7 +187,7 @@ class Service {
 					SP += " OR ";
 				}
 
-				SP += ` subcategory_id = '${curr}'`;
+				SP += ` service.subcategory_id = '${curr}'`;
 			});
 
 			SP += ")";
@@ -260,6 +260,7 @@ class Service {
 		let result;
 
 		try {
+      console.log(SP)
 			result = await db.any(SP);
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
