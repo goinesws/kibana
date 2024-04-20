@@ -246,7 +246,7 @@ class Service {
 					SP += " OR ";
 				}
 
-				if (curr.workingTimeEnd != null || curr.workingTimeEnd != undefined) {
+				if (workingTimeEnd != null || workingTimeEnd != undefined) {
 					SP += ` working_time BETWEEN '${workingTimeStart}' AND '${workingTimeEnd}'`;
 				} else {
 					SP += ` working_time > '${workingTimeStart}'`;
