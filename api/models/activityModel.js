@@ -16,7 +16,7 @@ module.exports = class Activity {
 	async getClientActivity(transaction_id, client_id) {
 		let SP = `
 		select
-                a.date,
+								TO_CHAR(a.date, 'DD Mon YYYY HH24:MI:SS') as timestamp,
                 a.code as code,
                 CASE
                         WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
@@ -28,7 +28,7 @@ module.exports = class Activity {
                 a.content as description,
                 a.attachment as files,
                 TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS') as response_deadline,
-				TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
+								TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
                 CASE
                         WHEN (select count(*) from public.button where activity_id = a.activity_id) >= 1
                         THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id) buttons)
@@ -272,7 +272,7 @@ module.exports = class Activity {
 		// 8 = Batalkan Ajuan Pembatalan
 		// 9 = Hubungi Admin
 
-		console.log("CODE"+ code);
+		console.log("CODE" + code);
 		let id = uuid.v4();
 		let name;
 		let revision_count;
