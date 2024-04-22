@@ -276,57 +276,76 @@ module.exports = class Activity {
 		let id = uuid.v4();
 		let name;
 		let revision_count;
-		if (code == 1) {
-			//get remaining revision
-			let SP = `
-				SELECT remaining_revision
-				FROM transaction
-				WHERE transaction_id = '${transaction_id}';
-			`;
+		let project_type;
+ 
+		let SP1 = `
+			SELECT project_type
+			FROM transaction
+			WHERE transaction_id = '${transaction_id}';
+		`;
+	
+		try {
+			project_type = await db.any(SP1);
+			project_type = project_type[0].project_type;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
-			try {
-				let result = await db.any(SP);
-				revision_count = result[0].remaining_revision;
-				if (revision_count == 0) {
-					return null;
+		if(code == 1 && project_type=="TASK") {
+			name = "Minta Revisi";
+		} else {
+			if (code == 1) {
+				//get remaining revision
+				let SP = `
+					SELECT remaining_revision
+					FROM transaction
+					WHERE transaction_id = '${transaction_id}';
+				`;
+	
+				try {
+					let result = await db.any(SP);
+					revision_count = result[0].remaining_revision;
+					if (revision_count == 0) {
+						return null;
+					}
+				} catch (error) {
+					throw new Error("Gagal Mendapatkan Data.");
 				}
-			} catch (error) {
-				throw new Error("Gagal Mendapatkan Data.");
+			}
+	
+			switch (code) {
+				case 1:
+					name = `Minta Revisi (${revision_count})`;
+					break;
+				case 2:
+					name = "Selesaikan Pesanan";
+					break;
+				case 3:
+					name = "Tolak Permintaan Pengembalian";
+					break;
+				case 4:
+					name = "Terima Permintaan Pengembalian";
+					break;
+				case 5:
+					name = "Batalkan Ajuan Pengembalian";
+					break;
+				case 6:
+					name = "Tolak Permintaan Pembatalan";
+					break;
+				case 7:
+					name = "Terima Permintaan Pembatalan";
+					break;
+				case 8:
+					name = "Batalkan Ajuan Pembatalan";
+					break;
+				case 9:
+					name = "Hubungi Admin";
+					break;
+				default:
+					name = "Invalid action code";
 			}
 		}
-
-		switch (code) {
-			case 1:
-				name = `Minta Revisi (${revision_count})`;
-				break;
-			case 2:
-				name = "Selesaikan Pesanan";
-				break;
-			case 3:
-				name = "Tolak Permintaan Pengembalian";
-				break;
-			case 4:
-				name = "Terima Permintaan Pengembalian";
-				break;
-			case 5:
-				name = "Batalkan Ajuan Pengembalian";
-				break;
-			case 6:
-				name = "Tolak Permintaan Pembatalan";
-				break;
-			case 7:
-				name = "Terima Permintaan Pembatalan";
-				break;
-			case 8:
-				name = "Batalkan Ajuan Pembatalan";
-				break;
-			case 9:
-				name = "Hubungi Admin";
-				break;
-			default:
-				name = "Invalid action code";
-		}
-
+		
 		//create button for activity
 		let SP = `
 			INSERT INTO public.button(
