@@ -788,8 +788,25 @@ module.exports = class Transaction {
 		//apus response deadline yang pas pengajuan pengembalian
 		result = await activityInstance.updateResponseDeadline(transaction_id);
 
-		//get old transaction_code
-		let code = await this.getPrevStatus(transaction_id);
+		let SP1 = `
+		SELECT
+			CASE
+			WHEN delivery_date IS NULL THEN 2
+			ELSE 3
+			END AS result
+		FROM
+			transaction
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+		let code;
+		try {
+			console.log(SP1);
+			code = await db.any(SP1);
+			code = code[0].result;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
 		//change transaction status to prev code before pengajuan pengembalian
 		code = await this.changeStatus(transaction_id, code);
@@ -820,9 +837,16 @@ module.exports = class Transaction {
 		//delete delivery date
 		let SP_deldate = `
             UPDATE transaction
-            SET delivery_date = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'
+            SET delivery_date = null
             WHERE transaction_id = '${transaction_id}'
         `;
+		try {
+			console.log(SP_deldate);
+			let result = await db.any(SP_deldate);
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
+
 
 		//create deadline extension (3 hari)
 		let date = new Date(await this.getDeadline(transaction_id));
@@ -1107,8 +1131,29 @@ module.exports = class Transaction {
 		//apus response deadline yang pas pengajuan pengembalian
 		result = await activityInstance.updateResponseDeadline(transaction_id);
 
-		//get old transaction_code
-		let code = await this.getPrevStatus(transaction_id);
+		//get transaction deliverydate
+		//if null return 2
+		//if exists return 3
+
+		let SP1 = `
+		SELECT
+			CASE
+			WHEN delivery_date IS NULL THEN 2
+			ELSE 3
+			END AS result
+		FROM
+			transaction
+            WHERE transaction_id = '${transaction_id}'
+        `;
+
+		let code;
+		try {
+			console.log(SP1);
+			code = await db.any(SP1);
+			code = code[0].result;
+		} catch (error) {
+			throw new Error("Gagal Mendapatkan Data.");
+		}
 
 		//change transaction status to prev code before pengajuan pengembalian
 		code = await this.changeStatus(transaction_id, code);
