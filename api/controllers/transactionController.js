@@ -52,7 +52,7 @@ app.getTransactionInvoice = async (req, res) => {
 			var additional_data = "";
 			var project_type = await transactionDetail.project_type;
 
-			if (project_type == "Service") {
+			if (project_type == "SERVICE") {
 				projectResult = await serviceInstance.getAllServiceDetail(
 					transactionDetail.project_id
 				);

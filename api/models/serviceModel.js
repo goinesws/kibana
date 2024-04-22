@@ -15,17 +15,17 @@ class Service {
 	async getAllServiceDetail(service_id) {
 		try {
 			var SP = `select service_id,
-	    subcategory_id,
-	    freelancer_id,
-	    name,
-	    description,
-	    tags, price, working_time,
-	    images,
-	    revision_count,
-	    is_active,
-	    TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
+				subcategory_id,
+				freelancer_id,
+				name,
+				description,
+				tags, price, working_time,
+				images,
+				revision_count,
+				is_active,
+				TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
+				console.log(SP)
 			const result = await db.any(SP);
-      console.log(result)
 			return result[0];
 		} catch (error) {
       console.log(error)
