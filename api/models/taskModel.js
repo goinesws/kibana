@@ -477,9 +477,9 @@ module.exports = class Task {
     CASE 
       WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) = '1' 
       OR (select status from public.transaction where project_id = t.task_id LIMIT 1) = '6'
+			OR (select count(*) from public.transaction where project_id = t.task_id) = 0
       THEN
-      (select count(*) from public.task_enrollment where task_id in (select task_id from public.task 
-      where client_id = t.client_id))
+      (select count(*) from public.task_enrollment pr where pr.task_id = t.task_id)
       ELSE null
     END registered_freelancer_amount,
     CASE 
