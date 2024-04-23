@@ -213,8 +213,6 @@ app.getFreelancerProjectHistory = async (req, res) => {
 		if (projects.project_amount < 1) {
 			projects.average_rating = 0;
 			projects.project_list = null;
-		} else if ((projects.project_list = {})) {
-			projects.project_list = null;
 		}
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = projects;

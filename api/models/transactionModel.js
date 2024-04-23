@@ -42,10 +42,14 @@ module.exports = class Transaction {
         `;
 
 		try {
+			console.log(SP);
 			let result = await db.any(SP);
 			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
+				return null;
 			}
+
+			// console.log(result);
+
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -697,8 +701,6 @@ module.exports = class Transaction {
 		//terima permintaan pengembalian
 		result = await activityInstance.createButton(id, transaction_id, 2);
 
-
-
 		try {
 			console.log(SP1);
 			let result = await db.any(SP1);
@@ -846,7 +848,6 @@ module.exports = class Transaction {
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-
 
 		//create deadline extension (3 hari)
 		let date = new Date(await this.getDeadline(transaction_id));

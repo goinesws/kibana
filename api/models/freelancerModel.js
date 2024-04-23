@@ -116,8 +116,6 @@ module.exports = class Freelancer extends User {
 		`;
 
 		try {
-			
-
 			let result = await db.any(SPGetService);
 
 			let resultFreelancer = await db.any(SPGetFreelancer);
@@ -166,6 +164,15 @@ module.exports = class Freelancer extends User {
 				public.service
 				where
 				freelancer_id = '${userId}'
+				or
+				freelancer_id = (
+					select 
+					freelancer_id 
+					from
+					public.freelancer f
+					where
+					f.user_id = '${userId}'
+				)
 			)
 			`;
 
@@ -190,6 +197,15 @@ module.exports = class Freelancer extends User {
 				public.service
 				where
 				freelancer_id = '${userId}'
+				or
+				freelancer_id = (
+					select 
+					freelancer_id 
+					from
+					public.freelancer f
+					where
+					f.user_id = '${userId}'
+				)
 			)
 			`;
 
@@ -198,9 +214,13 @@ module.exports = class Freelancer extends User {
 			let project_result =
 				await transactionInstance.getFreelancerProjectByUserId(userId);
 
+			// console.log(project_result);
+
 			result.average_rating = sp1_result[0].round;
 			result.project_amount = sp2_result[0].count;
 			result.project_list = project_result;
+
+			console.log(result);
 
 			return result;
 		} catch (error) {
