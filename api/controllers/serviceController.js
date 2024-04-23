@@ -83,7 +83,9 @@ app.getServiceList = async (req, res) => {
 	let total_amount = serviceListResult.length;
 	let has_next_page = true;
 
-	if (req.body.last_id !== "") {
+	if (req.body.last_id !== "" && req.body.last_id) {
+		console.log("1 MASUK SINI")
+		console.log(req.body)
 		if (serviceListResult && serviceListResult.length >= 1) {
 			const indexOfTarget = serviceListResult.findIndex(
 				(obj) => obj.id == req.body.last_id
@@ -100,6 +102,8 @@ app.getServiceList = async (req, res) => {
 			else has_next_page = false;
 		}
 	} else {
+		console.log("2 MASUK SINI")
+		console.log(serviceListResult)
 		serviceListResult = serviceListResult.slice(0, 12);
 		if (total_amount > 8) has_next_page = true;
 		else has_next_page = false;

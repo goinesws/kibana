@@ -175,16 +175,11 @@ class Service {
         `;
 
 		if (searchText !== "" && searchText) {
-			SP += ` WHERE (service.name || service.description ILIKE '%${searchText}%'
+			SP += ` AND (service.name || service.description ILIKE '%${searchText}%'
           OR '${searchText}' ILIKE ANY (service.tags))`;
 		}
 		if (subcategory !== "" && subcategory && subcategory.length >= 1) {
-			if (searchText !== "" && searchText) {
-				SP += ` AND `;
-			} else {
-				SP += ` WHERE `;
-			}
-
+			SP += ` AND `;
 			SP += "(";
 
 			subcategory.map((curr, i) => {
@@ -199,14 +194,7 @@ class Service {
 		}
 
 		if (budget !== "" && budget && budget.length >= 1) {
-			if (
-				(searchText !== "" && searchText) ||
-				(subcategory !== "" && subcategory)
-			) {
-				SP += ` AND `;
-			} else {
-				SP += ` WHERE `;
-			}
+			SP += ` AND `;
 
 			SP += "(";
 
@@ -230,15 +218,7 @@ class Service {
 		}
 
 		if (workingTime !== "" && workingTime && workingTime.length >= 1) {
-			if (
-				(searchText !== "" && searchText) ||
-				(budget !== "" && budget) ||
-				(subcategory !== "" && subcategory)
-			) {
 				SP += ` AND `;
-			} else {
-				SP += ` WHERE `;
-			}
 
 			SP += "(";
 
