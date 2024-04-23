@@ -15,31 +15,31 @@ module.exports = class Activity {
 	// Inquiry Activity Pesanan Client
 	async getClientActivity(transaction_id, client_id) {
 		let SP = `
-		select
-								TO_CHAR(a.date, 'DD Mon YYYY HH24:MI:SS') as timestamp,
-                a.code as code,
-                CASE
-                        WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
-                        THEN CONCAT('Kamu ', a.title)
-                        WHEN a.code not in ('15', '16', '18')
-                        THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
-                        ELSE a.title
-                END title,
-                a.content as description,
-                a.attachment as files,
-                TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS') as response_deadline,
-								TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
-                CASE
-                        WHEN (select count(*) from public.button where activity_id = a.activity_id) >= 1
-                        THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id) buttons)
-                        ELSE null
-                END buttons
-                from
-                public.activity a
-                where
-                transaction_id = '${transaction_id}'
-                order by
-                date asc
+		SELECT
+			TO_CHAR(a.date, 'DD Mon YYYY HH24:MI:SS') as timestamp,
+			a.code as code,
+			CASE
+				WHEN a.client_id = '${client_id}' AND a.code not in ('15', '16', '18')
+				THEN CONCAT('Kamu ', a.title)
+				WHEN a.code not in ('15', '16', '18')
+				THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
+				ELSE a.title
+			END title,
+			a.content as description,
+			a.attachment as files,
+			TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS') as response_deadline,
+			TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
+			CASE
+				WHEN (select count(*) from public.button where activity_id = a.activity_id AND code IN ('1', '2', '5', '6', '7', CASE WHEN a.code = '8' THEN '9' END)) >= 1
+				THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id AND code IN ('1', '2', '5', '6', '7', CASE WHEN a.code = '8' THEN '9' END)) buttons)
+				ELSE null
+			END buttons
+		FROM
+			public.activity a
+		WHERE
+			transaction_id = '${transaction_id}'
+		ORDER BY
+			date asc
     `;
 
 		try {
@@ -56,31 +56,32 @@ module.exports = class Activity {
 	// Inquiry Activity Pesanan Freelancer
 	async getFreelancerActivity(transaction_id, freelancer_id) {
 		let SP = `
-			select 
-			TO_CHAR(a.date, 'DD Mon YYYY HH24:MI:SS') as timestamp,
-			a.code as code,
-			CASE 
-				WHEN a.client_id = '${freelancer_id}' AND a.code not in ('15', '16', '18')
-				THEN CONCAT('Kamu ', a.title)
-				WHEN a.code not in ('15', '16', '18')
-				THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
-				ELSE a.title
-			END title,
-			a.content as description,
-			a.attachment as files,
-			TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS') as response_deadline,
-			TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
-			CASE
-				WHEN (select count(*) from public.button where activity_id = a.activity_id) >= 1
-				THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id) buttons)
+			SELECT
+				TO_CHAR(a.date, 'DD Mon YYYY HH24:MI:SS') as timestamp,
+				a.code as code,
+				CASE
+					WHEN a.client_id = '${freelancer_id}' AND a.code not in ('15', '16', '18')
+					THEN CONCAT('Kamu ', a.title)
+					WHEN a.code not in ('15', '16', '18')
+					THEN CONCAT((select name from public.client where client_id = a.client_id or client_id = (select user_id from public.freelancer where freelancer_id = a.client_id)), ' ',  a.title)
+					ELSE a.title
+				END title,
+				a.content as description,
+				a.attachment as files,
+				TO_CHAR(a.response_deadline, 'DD Mon YYYY HH24:MI:SS') as response_deadline,
+				TO_CHAR(a.deadline_extension, 'DD Mon YYYY HH24:MI:SS') as deadline_extension,
+				CASE
+					WHEN (select count(*) from public.button where activity_id = a.activity_id AND code IN ('8', '3', '4', CASE WHEN a.code = '12' THEN '9' END)) >= 1
+					THEN (select json_agg(buttons) from (select code, name from public.button where activity_id = a.activity_id AND code IN ('8', '3', '4', CASE WHEN a.code = '12' THEN '9' END)) buttons)
 				ELSE null
-			END buttons
-			from 
-			public.activity a
-			where
-			transaction_id = '${transaction_id}'
-			order by 
-			date asc
+				END buttons
+			FROM
+				public.activity a
+			WHERE
+				transaction_id = '${transaction_id}'
+			ORDER BY
+				date asc
+
       `;
 
 		try {
