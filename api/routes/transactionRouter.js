@@ -27,7 +27,7 @@ router.get(
 //inquiry invoice transaksi freelancer
 router.get(
 	"/invoice/:transactionId/completed",
-	transactionController.getTransactionInvoice
+	transactionController.getFreelancerTransactionInvoice
 );
 
 //inquiry detail pesanan tugas client

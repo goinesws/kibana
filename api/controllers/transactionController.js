@@ -14,6 +14,7 @@ const {
 } = require("../utils/googleUtil.js");
 
 const errorMessages = require("../messages/errorMessages");
+const BankInformation = require("../models/bankInformationModel.js");
 
 app.getTransactionInvoice = async (req, res) => {
 	let result = {};
@@ -96,6 +97,112 @@ app.getTransactionInvoice = async (req, res) => {
 				result.output_schema.total_price =
 					parseFloat(projectResult.price) + parseFloat(fee);
 				result.output_schema.project.additional_data = additional_data;
+			}
+		} else {
+			result.error_schema = {
+				error_code: "403",
+				error_message: errorMessages.NOT_PROJECT_OWNER,
+			};
+			result.output_schema = null;
+		}
+	} else {
+		result.error_schema = {
+			error_code: "403",
+			error_message: errorMessages.NOT_LOGGED_IN,
+		};
+		result.output_schema = null;
+	}
+	res.send(result);
+};
+
+app.getFreelancerTransactionInvoice = async (req, res) => {
+	let result = {};
+
+	let x_token = req.get("X-Token");
+	let UserInstance = new User();
+	let curr_session = await UserInstance.getUserSessionData(x_token);
+
+	if (curr_session.session_id == x_token) {
+		const transaction_id = req.params.transactionId;
+
+		result.error_schema = {};
+		result.output_schema = {};
+		result.output_schema.project = {};
+		result.output_schema.fee = {};
+
+		// console.log(JSON.stringify(result))
+		var transactionInstance = new Transaction();
+		var serviceInstance = new Service();
+		var taskInstance = new Task();
+		var bankInformationInstance = new BankInformation();
+		var transactionClient = await transactionInstance.getTransactionClient(
+			transaction_id
+		);
+
+		//get freelancers client id for bank information
+		let freelancer_client_id = curr_session.session_data.client_id;
+		var bank_detail = await bankInformationInstance.getBankDetails(freelancer_client_id);
+
+		var transactionFreelancer =
+			await transactionInstance.getTransactionFreelancer(transaction_id);
+
+		if (
+			transactionClient.username == curr_session.session_data.username ||
+			transactionFreelancer.username == curr_session.session_data.username
+		) {
+			var projectResult;
+			var transactionDetail = await transactionInstance.getAllTransactionDetail(
+				transaction_id
+			);
+			// console.log(JSON.stringify(transactionDetail) + "transactionDetail")
+			var additional_data = "";
+			var project_type = await transactionDetail.project_type;
+
+			if (project_type == "SERVICE") {
+				projectResult = await serviceInstance.getAllServiceDetail(
+					transactionDetail.project_id
+				);
+				// console.log(JSON.stringify(projectResult) + "PROJECT RESULT")
+				additional_data = await serviceInstance.getAdditionalData(
+					transactionDetail.project_id
+				);
+				result.output_schema.project.duration = projectResult.working_time;
+				result.output_schema.project.revision_count =
+					projectResult.revision_count;
+				result.output_schema.project.additional_data = additional_data;
+			} else {
+				projectResult = await taskInstance.getAllTaskDetail(
+					transactionDetail.project_id
+				);
+				additional_data = null;
+			}
+
+			var fee = projectResult.price * 0.01;
+			//console.log(JSON.stringify(projectResult) + "PROJECT RESULT");
+
+			if (projectResult instanceof Error) {
+				result.error_schema = {
+					error_code: "903",
+					error_message: errorMessages.ERROR,
+				};
+				result.output_schema = null;
+			} else {
+				result.error_schema = {
+					error_code: "200",
+					error_message: errorMessages.QUERY_SUCCESSFUL,
+				};
+				result.output_schema.ref_no = transaction_id;
+				result.output_schema.client_name = transactionClient.name;
+				result.output_schema.freelancer_name = transactionFreelancer.name;
+				result.output_schema.payment_date = transactionDetail.payment_date;
+				result.output_schema.project.name = projectResult.name;
+				result.output_schema.project.price = projectResult.price;
+				result.output_schema.fee.amount = fee;
+				result.output_schema.fee.percentage = 1;
+				result.output_schema.total_price =
+					parseFloat(projectResult.price) + parseFloat(fee);
+				result.output_schema.project.additional_data = additional_data;
+				result.output_schema.bank_detail= bank_detail;
 			}
 		} else {
 			result.error_schema = {
