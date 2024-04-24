@@ -171,7 +171,7 @@ module.exports = class Task {
 				where
 				trx.project_id = task_id
 				) = 0
-			);`;
+			)`;
 		} else {
 			// SP Masih Polos
 			SP += ` WHERE (
@@ -183,6 +183,8 @@ module.exports = class Task {
 				) = 0
 			)`;
 		}
+
+		SP += " ORDER BY deadline ASC";
 
 		try {
 			console.log("Get Task List SP : " + SP);
@@ -537,7 +539,8 @@ module.exports = class Task {
       c.client_id = f.user_id
       where
       f.freelancer_id = '${userId}'
-    );
+    )
+		ORDER BY t.deadline ASC
     `;
 
 		try {

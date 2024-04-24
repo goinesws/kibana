@@ -473,7 +473,7 @@ module.exports = class Transaction {
                 s.service_id as id,
                 s.name as name,
                 s.tags as tags,
-                tr.deadline as due_date,
+                to_char(tr.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
                 s.price as price
                 from
                 public.transaction tr
@@ -486,7 +486,7 @@ module.exports = class Transaction {
             ) t
         ) service_detail,
         status as status,
-        delivery_date as delivery_date,
+        to_char(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         (
             select row_to_json(t)
             from
