@@ -557,39 +557,43 @@ class Service {
 	async getOwnedServiceOrders(service_id) {
 		try {
 			var SP = `SELECT 
-      transaction.transaction_id as id,
-      transaction.status as status,
-      TO_CHAR(transaction.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
-      TO_CHAR(transaction.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
-      jsonb_build_object(
-        'id', client.client_id,
-        'name', client.name,
-        'profile_image_url', client.profile_image
-      ) as client,
-      CASE 
-        WHEN transaction.status IN ('Selesai', 'Dibatalkan') THEN
-          EXISTS (
-            SELECT 1
-            FROM review
-            WHERE review.transaction_id = transaction.transaction_id
-          )
-        ELSE
-          NULL
-      END as is_reviewed,
-      CASE 
-        WHEN transaction.status IN ('Selesai', 'Dibatalkan') AND
-             EXISTS (
-               SELECT 1
-               FROM review
-               WHERE review.transaction_id = transaction.transaction_id
-             ) THEN
-          (SELECT rating FROM review WHERE transaction_id = transaction.transaction_id)
-        ELSE
-          NULL
-      END as review
-    FROM transaction
-    JOIN client ON transaction.client_id = client.client_id
-    WHERE transaction.project_id = '${service_id}';`;
+			transaction.transaction_id as id,
+			transaction.status as status,
+			TO_CHAR(transaction.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+			TO_CHAR(transaction.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
+			jsonb_build_object(
+			  'id', client.client_id,
+			  'name', client.name,
+			  'profile_image_url', client.profile_image
+			) as client,
+			CASE
+			  WHEN transaction.status IN ('4') THEN
+				EXISTS (
+				  SELECT 1
+				  FROM review
+				  WHERE review.transaction_id = transaction.transaction_id
+				  AND review.destination_id = transaction.client_id
+				)
+			  ELSE
+				NULL
+			END as is_reviewed,
+			 CASE
+					  WHEN transaction.status IN ('4') AND
+					  EXISTS (
+						  SELECT 1
+						  FROM review
+						  WHERE review.transaction_id = transaction.transaction_id
+						  AND review.destination_id = transaction.client_id
+					  ) THEN
+					  jsonb_build_object('amount', (SELECT rating FROM review WHERE review.transaction_id = transaction.transaction_id
+						  AND review.destination_id = transaction.client_id))
+					  ELSE
+					  NULL
+				  END as review
+		  FROM transaction
+		  JOIN client ON transaction.client_id = client.client_id
+		  WHERE transaction.project_id = '${service_id}';`;
+			console.log(SP)
 			const result = await db.any(SP);
 			return result;
 		} catch (error) {
@@ -664,52 +668,56 @@ class Service {
 	async getClientServiceHistory(client_id) {
 		try {
 			var SP = `SELECT 
-      service.service_id as id,
-      service.name as name,
-      service.is_active,
-      service.tags,
-      service.price,
-      transaction.status as status,
-      TO_CHAR(transaction.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
-      TO_CHAR(transaction.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
-      jsonb_build_object(
-          'id', freelancer.freelancer_id,
-          'name', client.name,
-          'profile_image_url', client.profile_image
-      ) as freelancer,
-      COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
-      (SELECT COUNT(rating)
-      FROM 
-      review
-      WHERE 
-      destination_id = service.service_id) as rating_amount,
-      transaction.transaction_id as transaction_id,
-      CASE 
-          WHEN transaction.status IN ('Selesai', 'Dibatalkan') THEN
-          EXISTS (
-              SELECT 1
-              FROM review
-              WHERE review.transaction_id = transaction.transaction_id
-          )
-          ELSE
-          NULL
-      END as is_reviewed,
-      CASE 
-          WHEN transaction.status IN ('Selesai', 'Dibatalkan') AND
-          EXISTS (
-              SELECT 1
-              FROM review
-              WHERE review.transaction_id = transaction.transaction_id
-          ) THEN
-          jsonb_build_object('amount', (SELECT rating FROM review WHERE transaction_id = transaction.transaction_id))
-          ELSE
-          NULL
-      END as review
-  FROM transaction
-  JOIN service ON service.service_id = transaction.project_id
-  JOIN freelancer ON service.freelancer_id = freelancer.freelancer_id
-  JOIN client ON freelancer.user_id = client.client_id 
-  WHERE transaction.client_id = '${client_id}';`;
+			service.service_id as id,
+			service.name as name,
+			service.is_active,
+			service.tags,
+			service.price,
+			transaction.status as status,
+			TO_CHAR(transaction.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+			TO_CHAR(transaction.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
+			jsonb_build_object(
+				'id', freelancer.freelancer_id,
+				'name', client.name,
+				'profile_image_url', client.profile_image
+			) as freelancer,
+			COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = service.service_id), 1), 0) as average_rating,
+			(SELECT COUNT(rating)
+			FROM
+			review
+			WHERE
+			destination_id = service.service_id) as rating_amount,
+			transaction.transaction_id as transaction_id,
+			CASE
+				WHEN transaction.status IN ('4') THEN
+				EXISTS (
+					SELECT 1
+					FROM review
+					WHERE review.transaction_id = transaction.transaction_id
+					AND review.destination_id = transaction.project_id
+				)
+				ELSE
+				NULL
+			END as is_reviewed,
+			CASE
+				WHEN transaction.status IN ('4') AND
+				EXISTS (
+					SELECT 1
+					FROM review
+					WHERE review.transaction_id = transaction.transaction_id
+					AND review.destination_id = transaction.project_id
+				) THEN
+				jsonb_build_object('amount', (SELECT rating FROM review WHERE review.transaction_id = transaction.transaction_id
+					AND review.destination_id = transaction.project_id))
+				ELSE
+				NULL
+			END as review
+		FROM transaction
+		JOIN service ON service.service_id = transaction.project_id
+		JOIN freelancer ON service.freelancer_id = freelancer.freelancer_id
+		JOIN client ON freelancer.user_id = client.client_id
+		WHERE transaction.client_id = '${client_id}';`;
+			console.log(SP);
 			const result = await db.any(SP);
 			return result;
 		} catch (error) {

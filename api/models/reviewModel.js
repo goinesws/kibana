@@ -116,7 +116,7 @@ module.exports = class Review {
     (select client_id from public.transaction where transaction_id = '${data.transaction_id}'),
     ${data.star},
     '${data.description}',
-    '${datetime}',
+    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'),
     '${data.transaction_id}'
     )
     `;
@@ -147,7 +147,7 @@ module.exports = class Review {
     (select freelancer_id from public.transaction where transaction_id = '${data.transaction_id}'),
     ${data.star},
     '${data.description}',
-    '${datetime}',
+    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'),
     '${data.transaction_id}'
     )
     `;
@@ -178,7 +178,7 @@ module.exports = class Review {
     (select project_id from public.transaction where transaction_id = '${data.transaction_id}'),
     ${data.star},
     '${data.description}',
-    '${datetime}',
+    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'),
     '${data.transaction_id}'
     )
     `;

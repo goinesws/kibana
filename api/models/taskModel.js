@@ -462,82 +462,81 @@ module.exports = class Task {
 	// Inquiry Tugas Saya
 	async getOwnedTask(userId) {
 		let SP = `
-    select 
-    t.task_id as id,
-    t.name as name,
-    t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
-    t.price as price,
-   	CASE
-			WHEN tr.status IS NULL
-			THEN '1'
-			ELSE tr.status 
-		END status,
-    TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
-    CASE 
-      WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) = '1' 
-      OR (select status from public.transaction where project_id = t.task_id LIMIT 1) = '6'
-			OR (select count(*) from public.transaction where project_id = t.task_id) = 0
-      THEN
-      (select count(*) from public.task_enrollment pr where pr.task_id = t.task_id)
-      ELSE null
-    END registered_freelancer_amount,
-    CASE 
-      WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) != '1' 
-      OR (select status from public.transaction where project_id = t.task_id LIMIT 1) != '6'
-      THEN
-      (select row_to_json(t)
-      from 
-      (
-      select f.freelancer_id as id, c.name, c.profile_image as profile_image_url 
-      from public.freelancer f join public.client c on f.user_id = c.client_id
-      where f.freelancer_id = t.freelancer_id
-      ) 
-      t)
-      ELSE null
-    END chosen_freelancer,
-    tr.transaction_id as transaction_id,
-    CASE 
-      WHEN (select count(*) from public.review where destination_id = t.task_id) >= 1 THEN true
-      ELSE false
-    END is_reviewed,
-    CASE 
-      WHEN (select count(*) from public.review where destination_id = t.task_id) >= 1 
-      THEN 
-      (select row_to_json(t)
-      from 
-      (
-      select count(*) as amount
-      from 
-      public.review
-      where
-      destination_id = t.task_id
-      ) 
-      t)
-      ELSE null
-    END review
-    from 
-    public.task t
-    left join
-    public.transaction tr
-    on
-    tr.project_id = t.task_id
-    where
-    t.client_id = '${userId}'
-    or
-    t.client_id = 
-    (
-      select 
-      client_id 
-      from
-      public.client c
-      join
-      public.freelancer f
-      on
-      c.client_id = f.user_id
-      where
-      f.freelancer_id = '${userId}'
-    );
+		select
+		t.task_id as id,
+		t.name as name,
+		t.tags as tags,
+		TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+		t.price as price,
+			CASE
+							WHEN tr.status IS NULL
+							THEN '1'
+							ELSE tr.status
+					END status,
+		TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
+		CASE
+		  WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) = '1'
+		  OR (select status from public.transaction where project_id = t.task_id LIMIT 1) = '6'
+							OR (select count(*) from public.transaction where project_id = t.task_id) = 0
+		  THEN
+		  (select count(*) from public.task_enrollment pr where pr.task_id = t.task_id)
+		  ELSE null
+		END registered_freelancer_amount,
+		CASE
+		  WHEN (select status from public.transaction where project_id = t.task_id LIMIT 1) != '1'
+		  OR (select status from public.transaction where project_id = t.task_id LIMIT 1) != '6'
+		  THEN
+		  (select row_to_json(t)
+		  from
+		  (
+		  select f.freelancer_id as id, c.name, c.profile_image as profile_image_url
+		  from public.freelancer f join public.client c on f.user_id = c.client_id
+		  where f.freelancer_id = t.freelancer_id
+		  )
+		  t)
+		  ELSE null
+		END chosen_freelancer,
+		tr.transaction_id as transaction_id,
+		CASE
+		  WHEN (select count(*) from public.review where destination_id = tr.freelancer_id and transaction_id = tr.transaction_id) >= 1 THEN true
+		  ELSE false
+		END is_reviewed,
+		CASE
+		  WHEN (select count(*) from public.review where destination_id = tr.freelancer_id and transaction_id = tr.transaction_id) >= 1
+		  THEN
+		  (select row_to_json(t)
+		  from
+		  (
+		  select rating as amount
+		  from
+		  public.review
+		  where destination_id = tr.freelancer_id and transaction_id = tr.transaction_id
+		  )
+		  t)
+		  ELSE null
+		END review
+		from
+		public.task t
+		left join
+		public.transaction tr
+		on
+		tr.project_id = t.task_id
+		where
+		t.client_id = '${userId}'
+		or
+		t.client_id =
+		(
+		  select
+		  client_id
+		  from
+		  public.client c
+		  join
+		  public.freelancer f
+		  on
+		  c.client_id = f.user_id
+		  where
+		  f.freelancer_id = '${userId}'
+		);
     `;
 
 		try {
@@ -689,64 +688,60 @@ module.exports = class Task {
 	// Inquiry Riwayat Tugas
 	async getTaskHistory(userId) {
 		let SP = `
-    select 
-    t.task_id as id,
-    t.name as name,
-    t.tags as tags,
-    TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
-    t.difficulty as difficulty,
-    t.price as price,
-    tr.status as status, 
-    TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
-    CASE 
-      WHEN tr.status = '1' or tr.status = '10'
-      THEN (select count(*) from public.task_enrollment where task_id = t.task_id)
-    END registered_freelancer_amount,
-    (
-      select to_json(t)
-      from 
-      (
-        select client_id as id, name, profile_image as profile_image_url
-        from 
-        public.client
-        where 
-        client_id = t.client_id
-      )t
-    ) client,
-    CASE
-      WHEN tr.status != '1' or tr.status != '10'
-      THEN tr.transaction_id 
-      ELSE null
-    END transaction_id, 
-    CASE
-      WHEN tr.status = '4' AND (select count(*) from public.review where destination_id = t.task_id) >= 1
-      THEN true
-      ELSE false
-    END is_reviewed,
-    CASE 
-      WHEN tr.status = '4' AND (select count(*) from public.review where destination_id = t.task_id) >= 1
-      THEN 
-      (
-        select to_json(t)
-        from 
-        (
-          select count(*) as amount
-          from
-          public.review 
-          where 
-          destination_id = t.task_id
-        )t
-      )
-      ELSE null
-    END review
-    from  
-    public.task t
-    join
-    public.transaction tr
-    on 
-    t.task_id = tr.project_id
-    where 
-    t.freelancer_id = '${userId}'`;
+		select
+		t.task_id as id,
+		t.name as name,
+		t.tags as tags,
+		TO_CHAR(t.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+		t.difficulty as difficulty,
+		t.price as price,
+		tr.status as status,
+		TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
+		CASE
+		  WHEN tr.status = '1' or tr.status = '10'
+		  THEN (select count(*) from public.task_enrollment where task_id = t.task_id)
+		END registered_freelancer_amount,
+		(
+		  select to_json(t)
+		  from
+		  (
+			select client_id as id, name, profile_image as profile_image_url
+			from
+			public.client
+			where
+			client_id = t.client_id
+		  )t
+		) client,
+		CASE
+		  WHEN tr.status != '1' or tr.status != '10'
+		  THEN tr.transaction_id
+		  ELSE null
+		END transaction_id,
+		CASE
+		  WHEN tr.status = '4' AND (select count(*) from public.review where destination_id = t.client_id and review.transaction_id = tr.transaction_id) >= 1
+		  THEN true
+		  ELSE false
+		END is_reviewed,
+		CASE
+		  WHEN tr.status = '4' AND (select count(*) from public.review where destination_id = t.client_id and review.transaction_id = tr.transaction_id) >= 1
+		  THEN
+		  (
+			select to_json(t)
+			from
+			(
+			  select rating as amount from public.review where destination_id = t.client_id and review.transaction_id = tr.transaction_id
+			)t
+		  )
+		  ELSE null
+		END review
+		from
+		public.task t
+		join
+		public.transaction tr
+		on
+		t.task_id = tr.project_id
+		where
+		t.freelancer_id = '${userId}'`;
 
 		try {
 			let result = await db.any(SP);

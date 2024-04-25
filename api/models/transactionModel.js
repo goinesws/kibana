@@ -137,98 +137,105 @@ module.exports = class Transaction {
 	// Inquiry Detail Pesanan Tugas Client
 	async getTransactionDetailsTaskClient(transaction_id) {
 		let SP = `
-        select 
-        transaction_id as id,
-        (
-            select row_to_json(t)
-            from
-            (
-                select 
-                task_id as id,
-                name as name,
-                tags as tags,
-								TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
-                difficulty as difficulty,
-                price as price
-                from
-                public.task t
-                where
-                t.task_id = tr.project_id
-                limit 1
-            ) t
-        ) as task_detail,
-        status as status,
-        TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
-        CASE
-            when can_return = false 
-            then true
-            else false
-        END has_returned,
-        (
-            select 
-            row_to_json(t)
-            from
-            (
-                select 
-                    f.freelancer_id as id,
-                    c.name as name,
-                    c.profile_image as profile_image_url,
-                    f.description as description
-                from 
-                public.freelancer f
-                join
-                public.client c
-                on 
-                c.client_id = f.user_id
-                where 
-                f.freelancer_id = tr.freelancer_id
-            ) t
-        ) chosen_freelancer,
-        CASE
-            when 
-            (
-                select count(*)
-                from
-                public.review
-                where
-                transaction_id = tr.transaction_id
-            ) = 1
-            then true
-            else false
-        END is_reviewed,
-        CASE
-            when 
-            (
-                select count(*)
-                from
-                public.review
-                where
-                transaction_id = tr.transaction_id
-            ) = 1
-            then 
-            (
-                select 
-                row_to_json (t)
-                from
-                (
-                    select 
-                        rating as amount,
-                        content as description
-                    from 
-                        public.review
-                    where
-                    transaction_id = tr.transaction_id
-                ) t
-            )
-            else null
-        END review
-        from
-        public.transaction tr
-        where
-        transaction_id = '${transaction_id}'
+        SELECT
+			transaction_id as id,
+			(
+				SELECT row_to_json(t)
+				FROM
+				(
+					SELECT
+					task_id as id,
+					name as name,
+					tags as tags,
+					TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
+					difficulty as difficulty,
+					price as price
+					FROM
+					public.task t
+					WHERE
+					t.task_id = tr.project_id
+					LIMIT 1
+				) t
+			) as task_detail,
+			status as status,
+			TO_CHAR(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
+			CASE
+				WHEN can_return = false
+				THEN true
+				ELSE false
+			END has_returned,
+			(
+				SELECT
+				row_to_json(t)
+				FROM
+				(
+					SELECT
+						f.freelancer_id as id,
+						c.name as name,
+						c.profile_image as profile_image_url,
+						f.description as description
+					FROM
+					public.freelancer f
+					JOIN
+					public.client c
+					ON
+					c.client_id = f.user_id
+					WHERE
+					f.freelancer_id = tr.freelancer_id
+				) t
+			) chosen_freelancer,
+			CASE
+				WHEN
+				(
+					SELECT count(*)
+					FROM
+					public.review
+					WHERE
+					transaction_id = tr.transaction_id
+					AND
+					destination_id = tr.freelancer_id
+				) >= 1
+				THEN true
+				ELSE false
+			END is_reviewed,
+			CASE
+				WHEN
+				(
+					SELECT count(*)
+					FROM
+					public.review
+					WHERE
+					transaction_id = tr.transaction_id
+					AND
+					destination_id = tr.freelancer_id
+				)>= 1
+				THEN
+				(
+					SELECT
+					row_to_json (t)
+					FROM
+					(
+						SELECT
+							rating as amount,
+							content as description
+						FROM
+							public.review
+					WHERE
+							transaction_id = tr.transaction_id
+						AND
+							destination_id = tr.freelancer_id
+					) t
+				)
+				ELSE null
+			END review
+		FROM
+			public.transaction tr
+		WHERE
+			transaction_id = '${transaction_id}'
         `;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			if (result.length == 0) {
@@ -244,13 +251,13 @@ module.exports = class Transaction {
 	// Inquiry Detail Pesanan Tugas Freelancer
 	async getTransactionDetailsTaskFreelancer(transaction_id) {
 		let SP = `
-        select 
+        select
         transaction_id as id,
         (
             select row_to_json(t)
             from
             (
-                select 
+                select
                 task_id as id,
                 name as name,
                 tags as tags,
@@ -272,7 +279,7 @@ module.exports = class Transaction {
             else false
         END has_cancelled,
         (
-            select 
+            select
             row_to_json(t)
             from
             (
@@ -287,39 +294,45 @@ module.exports = class Transaction {
             ) t
         ) client,
         CASE
-            when 
+            when
             (
                 select count(*)
                 from
                 public.review
                 where
                 transaction_id = tr.transaction_id
-            ) = 1
+				and
+				destination_id = tr.client_id
+            ) >= 1
             then true
             else false
         END is_reviewed,
         CASE
-            when 
+            when
             (
                 select count(*)
                 from
                 public.review
                 where
                 transaction_id = tr.transaction_id
+				and
+				destination_id = tr.client_id
             ) = 1
-            then 
+            then
             (
-                select 
+                select
                 row_to_json (t)
                 from
                 (
-                    select 
+                    select
                         rating as amount,
                         content as description
-                    from 
+                    from
                         public.review
                     where
-                    transaction_id = tr.transaction_id
+                transaction_id = tr.transaction_id
+				and
+				destination_id = tr.client_id
                     limit 1
                 ) t
             )
@@ -333,6 +346,7 @@ module.exports = class Transaction {
         `;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			if (result.length == 0) {
@@ -350,14 +364,14 @@ module.exports = class Transaction {
 
 	// Inquiry Detail Pesanan Layanan Client
 	async getTransactionDetailsServiceClient(transaction_id) {
-		let SP = `
-        select
+		let SP = `			
+		select
         transaction_id as id,
         (
             select row_to_json(t)
             from
             (
-                select 
+                select
                 s.service_id as id,
                 s.name as name,
                 s.tags as tags,
@@ -366,8 +380,8 @@ module.exports = class Transaction {
                 from
                 public.transaction tr
                 join
-                public.service s 
-                on 
+                public.service s
+                on
                 tr.project_id = s.service_id
                 where
                 tr.transaction_id = trx.transaction_id
@@ -394,56 +408,51 @@ module.exports = class Transaction {
                 f.freelancer_id = trx.freelancer_id
             ) t
         ) freelancer,
-        (
-            select AVG(rating)
-            from 
-            public.review
-            where
-            destination_id = trx.transaction_id
-        ) average_rating,
-        (
-            select AVG(rating)
-            from 
-            public.review
-            where
-            destination_id = trx.transaction_id
-        ) rating_amount,
-        CASE 
-            when
-            (
-                select count(*) 
-                from 
-                public.review
-                where 
-                destination_id = trx.transaction_id
-            ) > 0
-            then true
-            else false
-        END is_reviewed,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review WHERE destination_id = trx.project_id), 1), 0) as average_rating,
+			(SELECT COUNT(rating)
+			FROM
+			review
+			WHERE
+			destination_id = trx.project_id) as rating_amount,
         CASE
-            when
-            (
-                select count(*) 
-                from 
-                public.review
-                where 
-                destination_id = trx.transaction_id
-            ) > 0
-            then true
-            else null
-        END review,
+				WHEN trx.status IN ('4') THEN
+				EXISTS (
+					SELECT 1
+					FROM review
+					WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.project_id
+				)
+				ELSE
+				NULL
+			END as is_reviewed,
+        CASE
+				WHEN trx.status IN ('4') AND
+				EXISTS (
+					SELECT 1
+					FROM review
+					WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.project_id
+				) THEN
+				jsonb_build_object('amount', (SELECT rating FROM review WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.project_id),
+								  'description', (SELECT content FROM review WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.project_id))
+				ELSE
+				NULL
+			END as review,
         CASE
             when can_return = false
             then true
             else false
         END has_returned
-        from 
+        from
         public.transaction trx
         where
         transaction_id = '${transaction_id}'
         `;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			if (result.length < 1) {
@@ -459,13 +468,13 @@ module.exports = class Transaction {
 	// Inquiry Detail Pesanan Layanan Freelancer
 	async getTransactionDetailsServiceFreelancer(transaction_id) {
 		let SP = `
-        select
+		select
         transaction_id as id,
         (
             select row_to_json(t)
             from
             (
-                select 
+                select
                 s.service_id as id,
                 s.name as name,
                 s.tags as tags,
@@ -474,8 +483,8 @@ module.exports = class Transaction {
                 from
                 public.transaction tr
                 join
-                public.service s 
-                on 
+                public.service s
+                on
                 tr.project_id = s.service_id
                 where
                 tr.transaction_id = trx.transaction_id
@@ -487,52 +496,60 @@ module.exports = class Transaction {
             select row_to_json(t)
             from
             (
-                select 
-                client_id as id, 
+                select
+                client_id as id,
                 name as name,
                 profile_image as profile_image_url
                 from
                 public.client
                 where
-                client_id = trx.client_id 
+                client_id = trx.client_id
             ) t
         ) client,
-        CASE 
+        CASE
             when
             (
-                select count(*) 
-                from 
+                select count(*)
+                from
                 public.review
-                where 
-                destination_id = trx.transaction_id
+                where
+                destination_id = trx.client_id
+				and
+				transaction_id = trx.transaction_id
             ) > 0
             then true
             else false
         END is_reviewed,
         CASE
-            when
-            (
-                select count(*) 
-                from 
-                public.review
-                where 
-                destination_id = trx.transaction_id
-            ) > 0
-            then true
-            else null
-        END review,
+				WHEN trx.status IN ('4') AND
+				EXISTS (
+					SELECT 1
+					FROM review
+					where
+					destination_id = trx.client_id
+					and
+					transaction_id = trx.transaction_id
+				) THEN
+				jsonb_build_object('amount', (SELECT rating FROM review WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.project_id),
+								  'description', (SELECT content FROM review WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.project_id))
+				ELSE
+				NULL
+			END as review,
         CASE
             when can_cancel = false
             then true
             else false
         END has_cancelled
-        from 
+        from
         public.transaction trx
         where
         transaction_id = '${transaction_id}'
         `;
 
 		try {
+			console.log(SP)
 			let result = await db.any(SP);
 
 			if (result.length < 1) {
