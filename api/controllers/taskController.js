@@ -549,8 +549,8 @@ app.getRequestToken = async (req, res) => {
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
-				error_code: "999",
-				error_message: errorMessages.ERROR,
+				error_code: 999,
+				error_message: task_result.message,
 			};
 			result.output_schema = null;
 			res.status(400).send(result);
@@ -600,8 +600,8 @@ app.registerForTask = async (req, res) => {
 	let task_result = await taskInstance.registerForTask(taskId, freelancerId);
 
 	if (task_result instanceof Error) {
-		result.error_schema.error_code = 403;
-		result.error_schema.error_message = errorMessages.ERROR;
+		result.error_schema.error_code = 903;
+		result.error_schema.error_message = task_result.message;
 
 		res.status(400).send(result);
 	} else {

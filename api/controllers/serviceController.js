@@ -84,8 +84,8 @@ app.getServiceList = async (req, res) => {
 	let has_next_page = true;
 
 	if (req.body.last_id !== "" && req.body.last_id) {
-		console.log("1 MASUK SINI")
-		console.log(req.body)
+		console.log("1 MASUK SINI");
+		console.log(req.body);
 		if (serviceListResult && serviceListResult.length >= 1) {
 			const indexOfTarget = serviceListResult.findIndex(
 				(obj) => obj.id == req.body.last_id
@@ -102,8 +102,8 @@ app.getServiceList = async (req, res) => {
 			else has_next_page = false;
 		}
 	} else {
-		console.log("2 MASUK SINI")
-		console.log(serviceListResult)
+		console.log("2 MASUK SINI");
+		console.log(serviceListResult);
 		serviceListResult = serviceListResult.slice(0, 12);
 		if (total_amount > 8) has_next_page = true;
 		else has_next_page = false;
@@ -210,7 +210,7 @@ app.createNewService = async (req, res) => {
 		if (newServiceId instanceof Error) {
 			result.error_schema = {
 				error_code: "999",
-				error_message: errorMessages.ERROR,
+				error_message: newServiceId.message,
 			};
 			result.output_schema = null;
 
@@ -638,7 +638,7 @@ app.getRequestToken = async (req, res) => {
 
 		if (service_result instanceof Error) {
 			result.error_schema = {
-				error_code: "400",
+				error_code: 999,
 				error_message: service_result.message,
 			};
 

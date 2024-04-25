@@ -795,6 +795,31 @@ module.exports = class Task {
 	// Request Task Token
 	async getTaskToken(taskId, freelancerId) {
 		try {
+			// cek udah daftar bank belum
+			let SPCB = `
+			 	select 
+				count(*)
+				from
+				public.bank_information bi
+				join
+				public.task t
+				on 
+				bi.user_id = t.client_id
+				where
+				t.task_id = '${taskId}'
+			`;
+
+			console.log(SPCB);
+
+			let bank_count = await db.any(SPCB);
+
+			console.log("Bank count:");
+			console.log(bank_count);
+
+			if (bank_count[0].count != 1) {
+				return new Error("Anda Belum Mendaftarkan Akun Bank.");
+			}
+
 			// cek apakah freelancerId dipilih sudah terdaftar
 			let SPC = `
 			select
@@ -899,6 +924,32 @@ module.exports = class Task {
 		try {
 			// console.log("TASK ID: " + taskId + " FREELANCER ID: " + freelancerId);
 			let te_uuid = uuid.v4();
+
+			let SPCB = `
+				select
+				count(*)
+				from
+				public.bank_information
+				where
+				user_id = '${freelancerId}'
+				or 
+				user_id = (
+					select 
+					user_id
+					from
+					public.freelancer
+					where
+					freelancer_id = '${freelancerId}'
+				)
+			`;
+
+			console.log(SPCB);
+
+			let bank_check_result = await db.any(SPCB);
+
+			if (bank_check_result[0].count != 1) {
+				return new Error("Anda Belum Mendaftarkan Data Bank.");
+			}
 
 			let SPC = `
 				select 

@@ -24,11 +24,11 @@ class Service {
 				revision_count,
 				is_active,
 				TO_CHAR(created_date, 'DD Mon YYYY') from service where service_id = '${service_id}'`;
-				console.log(SP)
+			console.log(SP);
 			const result = await db.any(SP);
 			return result[0];
 		} catch (error) {
-      console.log(error)
+			console.log(error);
 			throw new Error("Failed to fetch service");
 		}
 	}
@@ -218,7 +218,7 @@ class Service {
 		}
 
 		if (workingTime !== "" && workingTime && workingTime.length >= 1) {
-				SP += ` AND `;
+			SP += ` AND `;
 
 			SP += "(";
 
@@ -358,6 +358,29 @@ class Service {
 		console.log(data_incoming);
 		console.log("MASUK KE MODE CREATE SERVICE");
 		try {
+			// check apakah clientId sudah ada bank information apa belum
+			let SPCB = `
+				select count(*)
+				from
+				public.bank_information
+				where
+				user_id = '${clientId}'
+				or 
+				user_id = (
+				select user_id
+				from
+				public.freelancer
+				where
+				freelancer_id = '${clientId}'	
+				)
+			`;
+
+			let bank_check_result = await db.any(SPCB);
+
+			if (bank_check_result[0].count != 1) {
+				return new Error("Anda Belum Mendaftarkan Akun Bank.");
+			}
+
 			const serviceId = uuidv4();
 			const data = data_incoming;
 			const name = data.name;
@@ -720,6 +743,30 @@ class Service {
 	// Request Token Service
 	async getServiceToken(service_id, client_id) {
 		try {
+			let SPCB = `
+				select 
+				count(*)
+				from
+				public.bank_information
+				where
+				user_id = '${client_id}'
+				or 
+				user_id = (
+					select 
+					user_id
+					from
+					public.freelancer
+					where
+					freelancer_id = '${client_id}'
+				)
+			`;
+
+			let bank_check_result = await db.any(SPCB);
+
+			if (bank_check_result[0].count != 1) {
+				return new Error("Anda Belum Mendaftarkan Akun Bank.");
+			}
+
 			// get service details
 			let SP1 = `
         select 
