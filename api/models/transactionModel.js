@@ -42,10 +42,14 @@ module.exports = class Transaction {
         `;
 
 		try {
+			console.log(SP);
 			let result = await db.any(SP);
 			if (result.length < 1) {
-				return new Error("Gagal Mendapatkan Data.");
+				return null;
 			}
+
+			// console.log(result);
+
 			return result;
 		} catch (error) {
 			return new Error("Gagal Mendapatkan Data.");
@@ -478,7 +482,7 @@ module.exports = class Transaction {
                 s.service_id as id,
                 s.name as name,
                 s.tags as tags,
-                tr.deadline as due_date,
+                to_char(tr.deadline, 'DD Mon YYYY HH24:MI:SS') as due_date,
                 s.price as price
                 from
                 public.transaction tr
@@ -491,7 +495,7 @@ module.exports = class Transaction {
             ) t
         ) service_detail,
         status as status,
-        delivery_date as delivery_date,
+        to_char(delivery_date, 'DD Mon YYYY HH24:MI:SS') as delivery_date,
         (
             select row_to_json(t)
             from
@@ -714,8 +718,6 @@ module.exports = class Transaction {
 		//terima permintaan pengembalian
 		result = await activityInstance.createButton(id, transaction_id, 2);
 
-
-
 		try {
 			console.log(SP1);
 			let result = await db.any(SP1);
@@ -863,7 +865,6 @@ module.exports = class Transaction {
 		} catch (error) {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
-
 
 		//create deadline extension (3 hari)
 		let date = new Date(await this.getDeadline(transaction_id));
