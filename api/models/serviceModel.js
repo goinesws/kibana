@@ -296,7 +296,7 @@ class Service {
 			//TODO ganti freelancer_id -> clientid
 
 			let SP1 = `
-      select public.freelancer.freelancer_id as id, public.client.profile_image as profile_image_url, public.client.name, freelancer.description
+      select public.freelancer.user_id as id, public.client.profile_image as profile_image_url, public.client.name, freelancer.description
       from 
       public.client
       join 
@@ -308,7 +308,7 @@ class Service {
       where
       service.service_id = '${service_id}';
       `;
-
+			
 			let fl_result = await db.any(SP1);
 
 			let SP2 = `

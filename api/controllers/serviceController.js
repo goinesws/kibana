@@ -162,6 +162,7 @@ app.getServiceDetail = async (req, res) => {
 		res.status(400).send(result);
 		return;
 	} else {
+		console.log(serviceResult);
 		result.error_schema = { error_code: "200", error_message: "Sukses" };
 		result.output_schema = serviceResult;
 	}
