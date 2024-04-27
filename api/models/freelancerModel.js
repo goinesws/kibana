@@ -174,6 +174,15 @@ module.exports = class Freelancer extends User {
 					f.user_id = '${userId}'
 				)
 			)
+			or 
+			destination_id =
+			(
+				select freelancer_id 
+				from
+				public.freelancer
+				where
+				user_id = '${userId}'
+			)
 			`;
 
 			let sp1_result = await db.any(SP1);
@@ -206,6 +215,15 @@ module.exports = class Freelancer extends User {
 					where
 					f.user_id = '${userId}'
 				)
+			)
+			or 
+			destination_id =
+			(
+				select freelancer_id 
+				from
+				public.freelancer
+				where
+				user_id = '${userId}'
 			)
 			`;
 

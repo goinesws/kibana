@@ -16,29 +16,62 @@ module.exports = class Transaction {
 	// Utilities
 	async getFreelancerProjectByUserId(userId) {
 		let SP = `
-        select distinct
-        s.name as project_name,
-        r.rating as star,
-        s.description as description,
-        TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as timestamp
-        from 
-        public.transaction tr
-        join
-        public.freelancer f
-        on
-        f.freelancer_id = tr.freelancer_id
-        join
-        public.service s
-        on
-        s.service_id = tr.project_id
-        join
-        public.review r
-        on
-        r.transaction_id = tr.transaction_id
-        where
-        f.user_id = '${userId}'
-        or
-        f.freelancer_id = '${userId}'
+				select distinct
+				CASE 
+					WHEN s.name IS NULL
+					THEN t.name
+					ELSE s.name
+				END project_name,
+				r.rating as star,
+				r.content as description,
+				TO_CHAR(tr.delivery_date, 'DD Mon YYYY HH24:MI:SS') as timestamp
+				from
+				public.transaction tr
+				join
+				public.freelancer f
+				on
+				f.freelancer_id = tr.freelancer_id
+				left join
+				public.service s
+				on
+				s.service_id = tr.project_id
+				join
+				public.review r
+				on
+				r.transaction_id = tr.transaction_id
+				left join
+				public.task t
+				on
+				t.task_id = tr.project_id
+				where
+				r.destination_id = '${userId}'
+				or
+				r.destination_id = (
+					select 
+					freelancer_id 
+					from
+					public.freelancer
+					where
+					user_id = '${userId}'
+				)
+				or 
+				r.destination_id = (
+					select 
+					service_id
+					from
+					public.service
+					where
+					freelancer_id = '${userId}'
+					or 
+					freelancer_id = (
+						select 
+						freelancer_id 
+						from
+						public.freelancer
+						where
+						user_id = '${userId}'
+					)
+				)		
         `;
 
 		try {
@@ -239,7 +272,7 @@ module.exports = class Transaction {
         `;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			if (result.length == 0) {
@@ -350,7 +383,7 @@ module.exports = class Transaction {
         `;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			if (result.length == 0) {
@@ -456,7 +489,7 @@ module.exports = class Transaction {
         `;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			if (result.length < 1) {
@@ -553,7 +586,7 @@ module.exports = class Transaction {
         `;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			if (result.length < 1) {
