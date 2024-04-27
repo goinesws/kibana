@@ -569,6 +569,7 @@ class Service {
   LEFT JOIN client on client.client_id = review.writer_id
   WHERE service.service_id = '${service_id}'
   GROUP BY service.service_id`;
+  console.log(SP)
 			const result = await db.any(SP);
 			return result[0];
 		} catch (error) {

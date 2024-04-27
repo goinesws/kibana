@@ -568,9 +568,9 @@ module.exports = class Transaction {
 					transaction_id = trx.transaction_id
 				) THEN
 				jsonb_build_object('amount', (SELECT rating FROM review WHERE review.transaction_id = trx.transaction_id
-					AND review.destination_id = trx.project_id),
-								  'description', (SELECT content FROM review WHERE review.transaction_id = trx.transaction_id
-					AND review.destination_id = trx.project_id))
+					AND review.destination_id = trx.client_id),
+											  'description', (SELECT content FROM review WHERE review.transaction_id = trx.transaction_id
+					AND review.destination_id = trx.client_id))
 				ELSE
 				NULL
 			END as review,
