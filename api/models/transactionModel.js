@@ -55,7 +55,7 @@ module.exports = class Transaction {
 					user_id = '${userId}'
 				)
 				or 
-				r.destination_id = (
+				r.destination_id in (
 					select 
 					service_id
 					from
