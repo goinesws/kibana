@@ -207,11 +207,13 @@ module.exports = class User {
 
 	// Edit My Profile
 	async editMyprofile(clientId, data, image_url) {
+		if(image_url == undefined) image_url = null;
+		else image_url = `'${image_url}'`;
 		let SP = `
 		update 
 		public.client
 		set 
-		profile_image = '${image_url}',
+		profile_image = ${image_url},
 		email = '${data.email}',
 		name = '${data.name}',
 		username = '${data.username}',
@@ -219,7 +221,7 @@ module.exports = class User {
 		where client_id = '${clientId}'
 		`;
 
-		// console.log(SP);
+		console.log(SP);
 
 		try {
 			let result = await db.any(SP);
