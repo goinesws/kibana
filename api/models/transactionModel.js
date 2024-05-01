@@ -1283,16 +1283,12 @@ module.exports = class Transaction {
 			// update di payment
 			console.log("Transaction Model ");
 
-			let date = new Date();
-
-			console.log("DATE : " + date.toISOString());
-
 			// update di transac
 			let SPU = `
 			update
 			public.transaction
 			set
-			payment_date = '${date.toISOString()}'
+			payment_date = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'
 			where
 			transaction_id 
 			in
@@ -1400,7 +1396,7 @@ module.exports = class Transaction {
                     false,
                     true,
                     true,
-                    CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta',
+                    null,
                     '${freelancer_id}',
                     '${project_type}'
                 )
@@ -1479,7 +1475,7 @@ module.exports = class Transaction {
                     false,
                     true,
                     true,
-                    CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta',
+                    null,
                     '${freelancer_id}',
                     'SERVICE'
                 )
