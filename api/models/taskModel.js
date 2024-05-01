@@ -742,12 +742,17 @@ module.exports = class Task {
 		END review
 		from
 		public.task t
-		join
+		left join
 		public.transaction tr
 		on
 		t.task_id = tr.project_id
+		join
+		public.task_enrollment te
+		on
+		t.task_id = te.task_id
 		where
-		t.freelancer_id = '${userId}'`;
+		te.freelancer_id = '${userId}'
+		`;
 
 		try {
 			let result = await db.any(SP);
