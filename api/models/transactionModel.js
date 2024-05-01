@@ -1400,7 +1400,7 @@ module.exports = class Transaction {
                     false,
                     true,
                     true,
-                    null,
+                    CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta',
                     '${freelancer_id}',
                     '${project_type}'
                 )
@@ -1463,7 +1463,7 @@ module.exports = class Transaction {
                     is_need_admin,
                     can_cancel,
                     can_return,
-                    payment_date,
+                    CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta',
                     freelancer_id,
                     project_type
                 )
