@@ -12,6 +12,15 @@ const {
 } = require("../utils/googleUtil.js");
 
 module.exports = class Activity {
+	// Setter Getter
+	async setTransactionId(transaction_id) {
+		this.transaction_id = transaction_id;
+	}
+
+	async getTransactionId() {
+		return this.transaction_id;
+	}
+
 	// Inquiry Activity Pesanan Client
 	async getClientActivity(transaction_id, client_id) {
 		let SP = `
@@ -278,13 +287,13 @@ module.exports = class Activity {
 		let name;
 		let revision_count;
 		let project_type;
- 
+
 		let SP1 = `
 			SELECT project_type
 			FROM transaction
 			WHERE transaction_id = '${transaction_id}';
 		`;
-	
+
 		try {
 			project_type = await db.any(SP1);
 			project_type = project_type[0].project_type;
@@ -292,7 +301,7 @@ module.exports = class Activity {
 			throw new Error("Gagal Mendapatkan Data.");
 		}
 
-		if(code == 1 && project_type=="TASK") {
+		if (code == 1 && project_type == "TASK") {
 			name = "Minta Revisi";
 		} else {
 			if (code == 1) {
@@ -302,7 +311,7 @@ module.exports = class Activity {
 					FROM transaction
 					WHERE transaction_id = '${transaction_id}';
 				`;
-	
+
 				try {
 					let result = await db.any(SP);
 					revision_count = result[0].remaining_revision;
@@ -313,7 +322,7 @@ module.exports = class Activity {
 					throw new Error("Gagal Mendapatkan Data.");
 				}
 			}
-	
+
 			switch (code) {
 				case 1:
 					name = `Minta Revisi (${revision_count})`;
@@ -346,7 +355,7 @@ module.exports = class Activity {
 					name = "Invalid action code";
 			}
 		}
-		
+
 		//create button for activity
 		let SP = `
 			INSERT INTO public.button(

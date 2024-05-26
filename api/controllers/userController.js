@@ -16,8 +16,11 @@ app.login = async (req, res) => {
 
 	result = {};
 
-	console.log(login_info)
-	if(login_info instanceof Error && login_info.message == errorMessages.WRONG_LOGIN_CREDENTIAL) {
+	console.log(login_info);
+	if (
+		login_info instanceof Error &&
+		login_info.message == errorMessages.WRONG_LOGIN_CREDENTIAL
+	) {
 		result.error_schema = {
 			error_code: "406",
 			error_message: login_info.message,
@@ -161,7 +164,7 @@ app.logout = async (req, res) => {
 	if (curr_session.session_id == x_token) {
 		req.session.destroy();
 
-		let set_result = await userInstance.setId(
+		let set_result = await userInstance.setUserId(
 			curr_session.session_data.client_id
 		);
 
@@ -202,7 +205,8 @@ app.getOtherProfile = async (req, res) => {
 	result.output_schema = {};
 
 	const userInstance = new User();
-	let clientDetails = await userInstance.getOtherProfile(userId);
+	let setResult = await userInstance.setUserId(userId);
+	let clientDetails = await userInstance.getOtherProfile();
 
 	if (clientDetails instanceof Error) {
 		result.error_schema = {
@@ -239,7 +243,10 @@ app.getMyProfile = async (req, res) => {
 	// console.log("==================");
 
 	if (x_token == curr_session.session_id) {
-		me = await userInstance.getMyProfile(curr_session.session_data.client_id);
+		let setResult = await userInstance.setUserId(
+			curr_session.session_data.client_id
+		);
+		me = await userInstance.getMyProfile();
 		if (me instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
@@ -278,9 +285,10 @@ app.getMyBankDetails = async (req, res) => {
 	let curr_session = await userInstance.getUserSessionData(x_token);
 
 	if (x_token == curr_session.session_id) {
-		bank = await userInstance.getBankDetails(
+		let setResult = await userInstance.setUserId(
 			curr_session.session_data.client_id
 		);
+		bank = await userInstance.getBankDetails();
 		if (bank instanceof Error) {
 			result.error_schema = {
 				error_code: "903",
@@ -348,7 +356,8 @@ app.editMyProfile = async (req, res) => {
 			return;
 		}
 
-		let user_edit = await userInstance.editMyprofile(userId, data, images[0]);
+		let set_result = await userInstance.setUserId(userId);
+		let user_edit = await userInstance.editMyprofile(data, images[0]);
 
 		if (user_edit instanceof Error) {
 			result.error_schema = {
@@ -386,10 +395,10 @@ app.editBankDetails = async (req, res) => {
 	let curr_session = await userInstance.getUserSessionData(x_token);
 	if (curr_session.session_id == x_token) {
 		try {
-			let change = await userInstance.editBankDetails(
-				curr_session.session_data.client_id,
-				req.body
+			let set_result = await userInstance.setUserId(
+				curr_session.session_data.client_id
 			);
+			let change = await userInstance.editBankDetails(req.body);
 			result.error_schema = { error_code: "200", error_message: "Success." };
 			result.output_schema = {};
 		} catch (error) {

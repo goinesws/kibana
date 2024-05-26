@@ -5,8 +5,13 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class BankInformation {
+	// Setter Getter
+	async setClientId(clientId) {
+		this.client_id = clientId;
+	}
+
 	// Inquiry Bank Details
-	async getBankDetails(clientId) {
+	async getBankDetails() {
 		let SP = `
     select 
     bank_name,
@@ -15,7 +20,7 @@ module.exports = class BankInformation {
     from 
     public.bank_information
     where
-    user_id = '${clientId}';
+    user_id = '${this.client_id}';
     `;
 
 		try {
@@ -28,34 +33,32 @@ module.exports = class BankInformation {
 	}
 
 	// Edit Bank Details
-	async editBankDetails(clientId, body) {
+	async editBankDetails(body) {
 		let bi_uuid = uuid.v4();
 		let SP_delete = `
 			DELETE
 			FROM bank_information
-			WHERE user_id = '${clientId}'
+			WHERE user_id = '${this.client_id}'
     	`;
 		try {
-			console.log(SP_delete)
+			console.log(SP_delete);
 			let res = await db.any(SP_delete);
 		} catch (error) {
 			return new Error("Gagal Mengubah Data.");
 		}
 
-		console.log(body)
-		let SP = 
-		`
+		console.log(body);
+		let SP = `
 			INSERT INTO public.bank_information(
 			bank_information_id, user_id, bank_name, beneficiary_name, account_number)
-			VALUES ('${bi_uuid}', '${clientId}', '${body.bank_name}', '${body.beneficiary_name}', '${body.account_number}')
+			VALUES ('${bi_uuid}', '${this.client_id}', '${body.bank_name}', '${body.beneficiary_name}', '${body.account_number}')
     	`;
-		console.log(SP)
-		console.log("MASUK 2")
-		
+		console.log(SP);
+		console.log("MASUK 2");
 
 		try {
-			console.log("masuk ga")
-			console.log(SP)
+			console.log("masuk ga");
+			console.log(SP);
 			let res = await db.any(SP);
 
 			return res;

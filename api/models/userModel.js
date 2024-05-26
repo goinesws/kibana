@@ -9,9 +9,13 @@ const errorMessages = require("../messages/errorMessages");
 module.exports = class User {
 	constructor() {}
 
-	// Utilities
-	async setId(uuid) {
-		this.id = uuid;
+	// Setter
+	async setUserId(uuid) {
+		this.user_id = uuid;
+	}
+
+	async getUserId() {
+		return this.user_id;
 	}
 
 	// Login
@@ -52,7 +56,7 @@ module.exports = class User {
 		password = '${password}';`;
 
 		try {
-			console.log(SP)
+			console.log(SP);
 			let result = await db.any(SP);
 
 			if (result.length < 1) {
@@ -82,8 +86,8 @@ module.exports = class User {
 			console.log(SP_insert);
 			let insert_result = await db.any(SP_insert);
 		} catch (error) {
-			if(error.code == '23505') {
-				return new Error(errorMessages.USERNAME_PASSWORD_ALREADY_USED)
+			if (error.code == "23505") {
+				return new Error(errorMessages.USERNAME_PASSWORD_ALREADY_USED);
 			} else {
 				return new Error("Gagal membuat user. Coba lagi dalam sesaat.");
 			}
@@ -118,7 +122,7 @@ module.exports = class User {
 			session_id = null,
 			session_data = null
 			where
-			client_id = '${this.id}'
+			client_id = '${this.user_id}'
 		`;
 
 		try {
@@ -131,7 +135,7 @@ module.exports = class User {
 	}
 
 	// Inquiry My Profile
-	async getMyProfile(clientId) {
+	async getMyProfile() {
 		let SP = `
 		select 
 		client_id as id, 
@@ -141,7 +145,7 @@ module.exports = class User {
 		username, 
 		phone_number 
 		from public.client 
-		where client_id = '${clientId}';`;
+		where client_id = '${this.user_id}';`;
 
 		try {
 			let result = await db.any(SP);
@@ -153,11 +157,12 @@ module.exports = class User {
 	}
 
 	// Inquiry Bank Details
-	async getBankDetails(clientId) {
+	async getBankDetails() {
 		let BankInstance = new BankInformation();
 
 		try {
-			let bank_result = await BankInstance.getBankDetails(clientId);
+			let set_result = await BankInstance.setClientId(this.user_id);
+			let bank_result = await BankInstance.getBankDetails();
 
 			return bank_result;
 		} catch (error) {
@@ -166,7 +171,7 @@ module.exports = class User {
 	}
 
 	// Inquiry Other PRofile
-	async getOtherProfile(clientId) {
+	async getOtherProfile() {
 		let SPGetClientDetails = `
 		select 
 		c.client_id as id, 
@@ -178,8 +183,8 @@ module.exports = class User {
 				select 
 				count(*) 
 				from public.freelancer 
-				where user_id = '${clientId}' 
-				or freelancer_id = '${clientId}' 
+				where user_id = '${this.user_id}' 
+				or freelancer_id = '${this.user_id}' 
 				) = 1
 			THEN true
 			ELSE false
@@ -187,14 +192,14 @@ module.exports = class User {
 		from 
 		public.client c
     where 
-		c.client_id = '${clientId}'
+		c.client_id = '${this.user_id}'
 		or c.client_id = (
 			select 
 			user_id
 			from
 			public.freelancer f
 			where
-			f.freelancer_id = '${clientId}'
+			f.freelancer_id = '${this.user_id}'
 		);`;
 
 		try {
@@ -206,9 +211,38 @@ module.exports = class User {
 	}
 
 	// Edit My Profile
-	async editMyprofile(clientId, data, image_url) {
-		if(image_url == undefined) image_url = null;
+	async editMyprofile(data, image_url) {
+		console.log("Edit My Profile Image URL : ");
+		console.log(image_url);
+
+		if (image_url == undefined) image_url = null;
 		else image_url = `'${image_url}'`;
+
+		let SPImage = `
+		select  
+		profile_image
+		from
+		public.client
+		where client_id = '${this.user_id}'
+		`;
+
+		try {
+			let check_image = await db.any(SPImage);
+
+			console.log(check_image[0].profile_image);
+
+			if (
+				image_url == null &&
+				check_image[0].profile_image != null &&
+				check_image[0].profile_image.length > 0
+			) {
+				console.log("Check Image isn't Null");
+				image_url = `'${check_image[0].profile_image}'`;
+			}
+		} catch (error) {
+			return new Error("Gagal Edit.");
+		}
+
 		let SP = `
 		update 
 		public.client
@@ -218,12 +252,12 @@ module.exports = class User {
 		name = '${data.name}',
 		username = '${data.username}',
 		phone_number = '${data.phone_number}'
-		where client_id = '${clientId}'
+		where client_id = '${this.user_id}'
 		`;
 
-		console.log(SP);
-
 		try {
+			console.log(SP);
+
 			let result = await db.any(SP);
 
 			return result;
@@ -233,12 +267,13 @@ module.exports = class User {
 	}
 
 	// Edit Bank Details
-	async editBankDetails(clientId, body) {
+	async editBankDetails(body) {
 		let BankInstance = new BankInformation();
 
 		try {
-			let bank_result = await BankInstance.editBankDetails(clientId, body);
-			console.log("keluar, inid di user cass")
+			let set_result = await BankInstance.setClientId(this.user_id);
+			let bank_result = await BankInstance.editBankDetails(body);
+			console.log("keluar, inid di user cass");
 			return bank_result;
 		} catch (error) {
 			return new Error("Gagal Mengubah Data.");

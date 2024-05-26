@@ -13,6 +13,15 @@ const {
 const Payment = require("./paymentModel.js");
 
 module.exports = class Transaction {
+	// Setter Getters
+	async setTransactionId(transaction_id) {
+		this.transaction_id = transaction_id;
+	}
+
+	async getTransactionId() {
+		return this.transaction_id;
+	}
+
 	// Utilities
 	async getFreelancerProjectByUserId(userId) {
 		let SP = `
