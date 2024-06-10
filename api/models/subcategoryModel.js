@@ -4,6 +4,15 @@ const AdditionalInfo = require("./additionalInfoModel");
 
 module.exports = class Subcategory {
 	// Inquiry Task Baru
+
+	async setSubcategoryId(subcategoryId) {
+		this.subcategoryId = subcategoryId;
+	}
+
+	async getSubcategoryId() {
+		return this.subcategoryId;
+	}
+
 	async getListSubcatByCategoryID(categoryId) {
 		let SPGetSubcat = `select subcategory_id from public.subcategory where category_id = '${categoryId}';`;
 
@@ -46,12 +55,12 @@ module.exports = class Subcategory {
 	}
 
 	// Inquiry Additional Info
-	async getadditionalInfoBySubcategoryId(subcategoryId) {
+	async getadditionalInfoBySubcategoryId() {
 		try {
 			const AdditionalInfoInstance = new AdditionalInfo();
 
 			let additionalInfo_result =
-				await AdditionalInfoInstance.getAdditionalInfo(subcategoryId);
+				await AdditionalInfoInstance.getAdditionalInfo(this.subcategoryId);
 
 			return additionalInfo_result;
 		} catch (error) {

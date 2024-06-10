@@ -7,11 +7,21 @@ const User = require("./userModel");
 
 module.exports = class Client extends User {
 	// Inquiry Client Review
-	async getClientReview(userId) {
+	async setUserId(userId) {
+		this.userId = userId;
+	}
+
+	async getUserId() {
+		return this.userId;
+	}
+
+	async getClient() {}
+
+	async getClientReview() {
 		let reviewInstance = new Review();
 
 		try {
-			let review = await reviewInstance.getClientReviewByUserId(userId);
+			let review = await reviewInstance.getClientReview(this.userId);
 
 			console.log("Review : ");
 			console.log(review);
@@ -23,10 +33,14 @@ module.exports = class Client extends User {
 	}
 
 	// Inquiry Owned Task
-	async getClientTask(userId) {
+	async getClientTask() {
 		let taskInstance = new Task();
+
 		try {
-			let result = await taskInstance.getTaskByClientId(userId);
+			let result = await taskInstance.getTaskByClientId(this.userId);
+
+			console.log("Client's Tasks : ");
+			console.log(result);
 
 			return result;
 		} catch (error) {

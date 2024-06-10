@@ -13,6 +13,21 @@ const {
 const Payment = require("./paymentModel.js");
 
 module.exports = class Transaction {
+	transaction_id;
+	project_id;
+	freelancer_id;
+	client_id;
+	status;
+	status_temp;
+	deadline;
+	delivery_date;
+	remaining_revision;
+	is_need_admin;
+	can_cancel;
+	can_return;
+	payment_date;
+	project_type;
+
 	// Setter Getters
 	async setTransactionId(transaction_id) {
 		this.transaction_id = transaction_id;
@@ -20,6 +35,22 @@ module.exports = class Transaction {
 
 	async getTransactionId() {
 		return this.transaction_id;
+	}
+
+	async setClientId(client_id) {
+		this.client_id = client_id;
+	}
+
+	async getClientId() {
+		return this.client_id;
+	}
+
+	async setFreelancerId(freelancer_id) {
+		this.freelancer_id = freelancer_id;
+	}
+
+	async getFreelancerId() {
+		return this.freelancer_id;
 	}
 
 	// Utilities
@@ -99,7 +130,7 @@ module.exports = class Transaction {
 	}
 
 	// Inquiry Invoice
-	async getAllTransactionDetail(transaction_id) {
+	async getAllTransactionDetail() {
 		// SP buat get Client Details
 		let SP = `SELECT 
                 transaction_id,
@@ -118,7 +149,7 @@ module.exports = class Transaction {
             FROM
                 transaction
             WHERE
-                transaction_id = '${transaction_id}'`;
+                transaction_id = '${this.transaction_id}'`;
 		let result = await db.any(SP);
 
 		return result[0];
@@ -141,7 +172,7 @@ module.exports = class Transaction {
 	}
 
 	// Utilities
-	async getTransactionClient(transaction_id) {
+	async getTransactionClient() {
 		// SP buat get Client Details
 		let SP = `SELECT 
                 *
@@ -152,14 +183,14 @@ module.exports = class Transaction {
             ON 
                 client.client_id = transaction.client_id
             WHERE
-                transaction_id = '${transaction_id}'`;
+                transaction_id = '${this.transaction_id}'`;
 		let result = await db.any(SP);
 
 		return result[0];
 	}
 
 	// Utilities
-	async getTransactionFreelancer(transaction_id) {
+	async getTransactionFreelancer() {
 		// SP buat get Client Details
 		let SP = `SELECT 
                 *
@@ -174,14 +205,14 @@ module.exports = class Transaction {
             ON
                 freelancer.user_id = client.client_id
             WHERE
-                transaction_id = '${transaction_id}'`;
+                transaction_id = '${this.transaction_id}'`;
 		let result = await db.any(SP);
 
 		return result[0];
 	}
 
 	// Inquiry Detail Pesanan Tugas Client
-	async getTransactionDetailsTaskClient(transaction_id) {
+	async getTransactionDetailsTaskClient() {
 		let SP = `
         SELECT
 			transaction_id as id,
@@ -277,7 +308,7 @@ module.exports = class Transaction {
 		FROM
 			public.transaction tr
 		WHERE
-			transaction_id = '${transaction_id}'
+			transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -295,7 +326,7 @@ module.exports = class Transaction {
 	}
 
 	// Inquiry Detail Pesanan Tugas Freelancer
-	async getTransactionDetailsTaskFreelancer(transaction_id) {
+	async getTransactionDetailsTaskFreelancer() {
 		let SP = `
         select
         transaction_id as id,
@@ -387,7 +418,7 @@ module.exports = class Transaction {
         from
         public.transaction tr
         where
-        transaction_id = '${transaction_id}'
+        transaction_id = '${this.transaction_id}'
         limit 1
         `;
 
@@ -407,9 +438,8 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Inquiry Activity Pesanan Client
-
 	// Inquiry Detail Pesanan Layanan Client
-	async getTransactionDetailsServiceClient(transaction_id) {
+	async getTransactionDetailsServiceClient() {
 		let SP = `			
 		select
         transaction_id as id,
@@ -494,7 +524,7 @@ module.exports = class Transaction {
         from
         public.transaction trx
         where
-        transaction_id = '${transaction_id}'
+        transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -512,7 +542,7 @@ module.exports = class Transaction {
 	}
 
 	// Inquiry Detail Pesanan Layanan Freelancer
-	async getTransactionDetailsServiceFreelancer(transaction_id) {
+	async getTransactionDetailsServiceFreelancer() {
 		let SP = `
 		select
         transaction_id as id,
@@ -591,7 +621,7 @@ module.exports = class Transaction {
         from
         public.transaction trx
         where
-        transaction_id = '${transaction_id}'
+        transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -610,7 +640,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Inquiry Activity Pesanan Freelancer
-	async getTransactionActivityFreelancer(transaction_id, freelancer_id) {
+	async getTransactionActivityFreelancer() {
 		// getFreelancerActivity(transaction_id) activitymodel
 		//if code 15 then dont add author di depan title
 		//if code 18 then dont add author di depan title
@@ -618,9 +648,12 @@ module.exports = class Transaction {
 		try {
 			let activityInstance = new Activity();
 
+			let set_result = await activityInstance.setTransactionId(
+				this.transaction_id
+			);
+
 			let result = await activityInstance.getFreelancerActivity(
-				transaction_id,
-				freelancer_id
+				this.freelancer_id
 			);
 
 			return result;
@@ -629,15 +662,16 @@ module.exports = class Transaction {
 		}
 	}
 
-	async getTransactionActivityClient(transaction_id, client_id) {
+	// masuk activity
+	// Inquiry Activity Pesanan Client
+	async getTransactionActivityClient() {
 		// getClientActivity(transaction_id) di activity model
 		try {
 			let activityInstance = new Activity();
-
-			let result = await activityInstance.getClientActivity(
-				transaction_id,
-				client_id
+			let set_result = await activityInstance.setTransactionId(
+				this.transaction_id
 			);
+			let result = await activityInstance.getClientActivity(this.client_id);
 
 			// Map Files dari Result
 
@@ -649,14 +683,14 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Requirement
-	async sendRequirement(transaction_id, file, description, x_token) {
+	async sendRequirement(file, description, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 		//date ambil dari query sql
 		let title = "menambahkan file pendukung dan deskripsi";
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.content = description;
@@ -665,7 +699,7 @@ module.exports = class Transaction {
 
 		//response deadline is the same as the transaction deadline
 		activity.response_deadline = new Date(
-			await this.getDeadline(transaction_id)
+			await this.getDeadline(this.transaction_id)
 		);
 		console.log(activity.response_deadline);
 
@@ -677,7 +711,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Message
-	async sendMessage(transaction_id, message, x_token) {
+	async sendMessage(message, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -685,7 +719,7 @@ module.exports = class Transaction {
 		let file = null;
 
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.content = message;
@@ -699,17 +733,17 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Additional File
-	async sendAdditionalFile(transaction_id, additionalFile, x_token) {
+	async sendAdditionalFile(file, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 		//date ambil dari query sql
 		let title = "menambahkan file pendukung";
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
-		activity.file = additionalFile;
+		activity.file = file;
 		activity.code = "3";
 
 		let activityInstance = new Activity();
@@ -720,10 +754,12 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Send Result
-	async sendResult(transaction_id, files, description, x_token) {
+	async sendResult(files, description, x_token) {
 		//apus previous response deadline
 		let activityInstance = new Activity();
-		let update = await activityInstance.updateResponseDeadline(transaction_id);
+		let update = await activityInstance.updateResponseDeadline(
+			this.transaction_id
+		);
 
 		//create activity
 		let UserInstance = new User();
@@ -735,7 +771,7 @@ module.exports = class Transaction {
 		let activity = {};
 		let id = uuid.v4();
 		activity.activity_id = id;
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.file = files;
@@ -750,15 +786,15 @@ module.exports = class Transaction {
 		let SP1 = `
             UPDATE transaction
             SET delivery_date = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta'
-            WHERE transaction_id = '${transaction_id}'
+            WHERE transaction_id = '${this.transaction_id}'
         `;
 
 		//add buttons
 		//tolak permintaan pengembalian
-		result = await activityInstance.createButton(id, transaction_id, 1);
+		result = await activityInstance.createButton(id, this.transaction_id, 1);
 
 		//terima permintaan pengembalian
-		result = await activityInstance.createButton(id, transaction_id, 2);
+		result = await activityInstance.createButton(id, this.transaction_id, 2);
 
 		try {
 			console.log(SP1);
@@ -768,14 +804,14 @@ module.exports = class Transaction {
 		}
 
 		//change transaction status
-		this.changeStatus(transaction_id, 3);
+		this.changeStatus(this.transaction_id, 3);
 
 		return result;
 	}
 
 	// masuk activity
 	// Ask Return
-	async askReturn(transaction_id, message, x_token) {
+	async askReturn(message, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -784,14 +820,14 @@ module.exports = class Transaction {
 		let id = uuid.v4();
 		let activity = {};
 		activity.activity_id = id;
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.content = message;
 		activity.code = "6";
 
 		//change transaction to be has returned;
-		this.changeReturnStatus(transaction_id);
+		this.changeReturnStatus(this.transaction_id);
 
 		//create response deadline
 		activity.response_deadline =
@@ -801,40 +837,42 @@ module.exports = class Transaction {
 		let activityInstance = new Activity();
 
 		//apus response deadline sebelumnya
-		let result = await activityInstance.updateResponseDeadline(transaction_id);
+		let result = await activityInstance.updateResponseDeadline(
+			this.transaction_id
+		);
 
 		//change transaction status to 7
-		this.changeStatus(transaction_id, 7);
+		this.changeStatus(this.transaction_id, 7);
 
 		//create activity
 		result = await activityInstance.createActivity(activity);
 
 		//delete all previous buttons
-		result = await activityInstance.deleteButton(transaction_id);
+		result = await activityInstance.deleteButton(this.transaction_id);
 
 		//add buttons
 		//tolak permintaan pengembalian
-		result = await activityInstance.createButton(id, transaction_id, 3);
+		result = await activityInstance.createButton(id, this.transaction_id, 3);
 
 		//terima permintaan pengembalian
-		result = await activityInstance.createButton(id, transaction_id, 4);
+		result = await activityInstance.createButton(id, this.transaction_id, 4);
 
 		//batalkan ajuan pengembalian
-		result = await activityInstance.createButton(id, transaction_id, 5);
+		result = await activityInstance.createButton(id, this.transaction_id, 5);
 
 		return result;
 	}
 
 	// masuk activity
 	// Cancel Return
-	async cancelReturn(transaction_id, x_token) {
+	async cancelReturn(x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 		let title = "membatalkan permintaan pengembalian dana.";
 
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.code = "7";
@@ -844,10 +882,10 @@ module.exports = class Transaction {
 		let activityInstance = new Activity();
 
 		//delete all previous buttons + no new buttons
-		let result = await activityInstance.deleteButton(transaction_id);
+		let result = await activityInstance.deleteButton(this.transaction_id);
 
 		//apus response deadline yang pas pengajuan pengembalian
-		result = await activityInstance.updateResponseDeadline(transaction_id);
+		result = await activityInstance.updateResponseDeadline(this.transaction_id);
 
 		let SP1 = `
 		SELECT
@@ -857,7 +895,7 @@ module.exports = class Transaction {
 			END AS result
 		FROM
 			transaction
-            WHERE transaction_id = '${transaction_id}'
+            WHERE transaction_id = '${this.transaction_id}'
         `;
 
 		let code;
@@ -870,7 +908,7 @@ module.exports = class Transaction {
 		}
 
 		//change transaction status to prev code before pengajuan pengembalian
-		code = await this.changeStatus(transaction_id, code);
+		code = await this.changeStatus(this.transaction_id, code);
 
 		//create activity
 		result = await activityInstance.createActivity(activity);
@@ -880,7 +918,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Ask Revision
-	async askRevision(transaction_id, message, x_token) {
+	async askRevision(message, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -889,7 +927,7 @@ module.exports = class Transaction {
 		let id = uuid.v4();
 		let activity = {};
 		activity.activity_id = id;
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.content = message;
@@ -899,7 +937,7 @@ module.exports = class Transaction {
 		let SP_deldate = `
             UPDATE transaction
             SET delivery_date = null
-            WHERE transaction_id = '${transaction_id}'
+            WHERE transaction_id = '${this.transaction_id}'
         `;
 		try {
 			console.log(SP_deldate);
@@ -909,13 +947,15 @@ module.exports = class Transaction {
 		}
 
 		//create deadline extension (3 hari)
-		let date = new Date(await this.getDeadline(transaction_id));
+		let date = new Date(await this.getDeadline(this.transaction_id));
 		activity.deadline_extension = date.setDate(date.getDate() + 3);
 
 		let activityInstance = new Activity();
 
 		//apus response deadline sebelumnya
-		let result = await activityInstance.updateResponseDeadline(transaction_id);
+		let result = await activityInstance.updateResponseDeadline(
+			this.transaction_id
+		);
 
 		console.log(activity);
 
@@ -923,7 +963,7 @@ module.exports = class Transaction {
 		let SP1 = `
             UPDATE transaction
             SET remaining_revision = remaining_revision-1
-            WHERE transaction_id = '${transaction_id}'
+            WHERE transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -981,7 +1021,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Complete Transaction
-	async completeTransaction(transaction_id, x_token) {
+	async completeTransaction(x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -989,7 +1029,7 @@ module.exports = class Transaction {
 			"Pesanan berhasil diselesaikan dan dana berhasil diteruskan kepada freelancer.";
 
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.code = "15";
@@ -999,29 +1039,29 @@ module.exports = class Transaction {
 		let activityInstance = new Activity();
 
 		//delete all previous buttons + no new buttons
-		let result = await activityInstance.deleteButton(transaction_id);
+		let result = await activityInstance.deleteButton(this.transaction_id);
 
 		//apus response deadline yang pas pengajuan pengembalian
-		result = await activityInstance.updateResponseDeadline(transaction_id);
+		result = await activityInstance.updateResponseDeadline(this.transaction_id);
 
 		//get old transaction_code
-		let code = await this.getPrevStatus(transaction_id);
+		let code = await this.getPrevStatus(this.transaction_id);
 
 		//change transaction status to prev code before pengajuan pengembalian
-		code = await this.changeStatus(transaction_id, code);
+		code = await this.changeStatus(this.transaction_id, code);
 
 		//create activity
 		result = await activityInstance.createActivity(activity);
 
 		//change transaction status to 4
-		this.changeStatus(transaction_id, 4);
+		this.changeStatus(this.transaction_id, 4);
 
 		return result;
 	}
 
 	// masuk activity
 	// Ask Cancellation
-	async askCancellation(transaction_id, message, x_token) {
+	async askCancellation(message, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -1030,14 +1070,14 @@ module.exports = class Transaction {
 		let id = uuid.v4();
 		let activity = {};
 		activity.activity_id = id;
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.content = message;
 		activity.code = "10";
 
 		//update can_cancel
-		this.changeCancelStatus(transaction_id);
+		this.changeCancelStatus(this.transaction_id);
 
 		//create response deadline
 		activity.response_deadline =
@@ -1047,33 +1087,35 @@ module.exports = class Transaction {
 		let activityInstance = new Activity();
 
 		//apus response deadline sebelumnya
-		let result = await activityInstance.updateResponseDeadline(transaction_id);
+		let result = await activityInstance.updateResponseDeadline(
+			this.transaction_id
+		);
 
 		//change transaction status to 7
-		this.changeStatus(transaction_id, 7);
+		this.changeStatus(this.transaction_id, 7);
 
 		//create activity
 		result = await activityInstance.createActivity(activity);
 
 		//delete all previous buttons
-		result = await activityInstance.deleteButton(transaction_id);
+		result = await activityInstance.deleteButton(this.transaction_id);
 
 		//add buttons
 		//tolak permintaan pembatalan
-		result = await activityInstance.createButton(id, transaction_id, 6);
+		result = await activityInstance.createButton(id, this.transaction_id, 6);
 
 		//terima permintaan pembatalan
-		result = await activityInstance.createButton(id, transaction_id, 7);
+		result = await activityInstance.createButton(id, this.transaction_id, 7);
 
 		//batalkan ajuan pembatalan
-		result = await activityInstance.createButton(id, transaction_id, 8);
+		result = await activityInstance.createButton(id, this.transaction_id, 8);
 
 		return result;
 	}
 
 	// masuk activity
 	// Manage Cancellation
-	async manageCancellation(transaction_id, type, x_token) {
+	async manageCancellation(type, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -1081,33 +1123,33 @@ module.exports = class Transaction {
 		let id = uuid.v4();
 		let activity = {};
 		activity.activity_id = id;
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 
 		console.log(activity);
 		let activityInstance = new Activity();
 
 		//delete all prev button
-		let result = await activityInstance.deleteButton(transaction_id);
+		let result = await activityInstance.deleteButton(this.transaction_id);
 
 		//delete all prev response deadline
-		result = await activityInstance.updateResponseDeadline(transaction_id);
+		result = await activityInstance.updateResponseDeadline(this.transaction_id);
 
 		if (type == "REJECT") {
 			activity.code = "12";
 			activity.title = "menolak permintaan pembatalan.";
 			//add button for hubungi admin
-			result = await activityInstance.createButton(id, transaction_id, 9);
+			result = await activityInstance.createButton(id, this.transaction_id, 9);
 
 			//button for batalkan ajuan pembatalan
-			result = await activityInstance.createButton(id, transaction_id, 8);
+			result = await activityInstance.createButton(id, this.transaction_id, 8);
 
 			//response deadline 2 hari
 			activity.response_deadline =
 				"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
 			//change status to 7
-			this.changeStatus(transaction_id, 7);
+			this.changeStatus(this.transaction_id, 7);
 
 			//create activity
 			result = await activityInstance.createActivity(activity);
@@ -1117,14 +1159,14 @@ module.exports = class Transaction {
 			activity.title = "menerima permintaan pembatalan";
 
 			//change status to 5
-			this.changeStatus(transaction_id, 5);
+			this.changeStatus(this.transaction_id, 5);
 
 			//create activity
 			result = await activityInstance.createActivity(activity);
 
 			//create activity satu lagi for pembatalan
 			let newActivity = {};
-			newActivity.transaction_id = transaction_id;
+			newActivity.transaction_id = this.transaction_id;
 			newActivity.client_id = client_id;
 			newActivity.title =
 				"Pesanan dibatalkan dan dana berhasil dikembalikan kepada klien.";
@@ -1137,14 +1179,14 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Call Admin
-	async callAdmin(transaction_id, x_token) {
+	async callAdmin(x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 		let title = "Admin berhasil dihubungi dan investigasi sedang dilakukan";
 
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.code = "16";
@@ -1153,30 +1195,32 @@ module.exports = class Transaction {
 		let activityInstance = new Activity();
 
 		//apus response deadline sebelumnya
-		let result = await activityInstance.updateResponseDeadline(transaction_id);
+		let result = await activityInstance.updateResponseDeadline(
+			this.transaction_id
+		);
 
 		//change status to 9
-		this.changeStatus(transaction_id, 9);
+		this.changeStatus(this.transaction_id, 9);
 
 		//create activity
 		result = await activityInstance.createActivity(activity);
 
 		//delete all previous buttons
-		result = await activityInstance.deleteButton(transaction_id);
+		result = await activityInstance.deleteButton(this.transaction_id);
 
 		return result;
 	}
 
 	// masuk activity
 	// Cancel Cancellation
-	async cancelCancellation(transaction_id, x_token) {
+	async cancelCancellation(x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
 		let title = "membatalkan permintaan pembatalan.";
 
 		let activity = {};
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 		activity.title = title;
 		activity.code = "11";
@@ -1186,10 +1230,10 @@ module.exports = class Transaction {
 		let activityInstance = new Activity();
 
 		//delete all previous buttons + no new buttons
-		let result = await activityInstance.deleteButton(transaction_id);
+		let result = await activityInstance.deleteButton(this.transaction_id);
 
 		//apus response deadline yang pas pengajuan pengembalian
-		result = await activityInstance.updateResponseDeadline(transaction_id);
+		result = await activityInstance.updateResponseDeadline(this.transaction_id);
 
 		//get transaction deliverydate
 		//if null return 2
@@ -1203,7 +1247,7 @@ module.exports = class Transaction {
 			END AS result
 		FROM
 			transaction
-            WHERE transaction_id = '${transaction_id}'
+            WHERE transaction_id = '${this.transaction_id}'
         `;
 
 		let code;
@@ -1216,7 +1260,7 @@ module.exports = class Transaction {
 		}
 
 		//change transaction status to prev code before pengajuan pengembalian
-		code = await this.changeStatus(transaction_id, code);
+		code = await this.changeStatus(this.transaction_id, code);
 
 		//create activity
 		result = await activityInstance.createActivity(activity);
@@ -1226,7 +1270,7 @@ module.exports = class Transaction {
 
 	// masuk activity
 	// Manage Return
-	async manageReturn(transaction_id, type, x_token) {
+	async manageReturn(type, x_token) {
 		let UserInstance = new User();
 		let curr_session = await UserInstance.getUserSessionData(x_token);
 		let client_id = curr_session.session_data.client_id;
@@ -1234,33 +1278,33 @@ module.exports = class Transaction {
 		let id = uuid.v4();
 		let activity = {};
 		activity.activity_id = id;
-		activity.transaction_id = transaction_id;
+		activity.transaction_id = this.transaction_id;
 		activity.client_id = client_id;
 
 		console.log(activity);
 		let activityInstance = new Activity();
 
 		//delete all prev button
-		let result = await activityInstance.deleteButton(transaction_id);
+		let result = await activityInstance.deleteButton(this.transaction_id);
 
 		//delete all prev response deadline
-		result = await activityInstance.updateResponseDeadline(transaction_id);
+		result = await activityInstance.updateResponseDeadline(this.transaction_id);
 
 		if (type == "REJECT") {
 			activity.code = "8";
 			activity.title = "menolak permintaan pengembalian dana.";
 			//add button for hubungi admin
-			result = await activityInstance.createButton(id, transaction_id, 9);
+			result = await activityInstance.createButton(id, this.transaction_id, 9);
 
 			//button for batalkan ajuan pengembalian
-			result = await activityInstance.createButton(id, transaction_id, 5);
+			result = await activityInstance.createButton(id, this.transaction_id, 5);
 
 			//response deadline 2 hari
 			activity.response_deadline =
 				"(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta') + INTERVAL '2 days'";
 
 			//change status to 7
-			this.changeStatus(transaction_id, 7);
+			this.changeStatus(this.transaction_id, 7);
 
 			//create activity
 			result = await activityInstance.createActivity(activity);
@@ -1270,14 +1314,14 @@ module.exports = class Transaction {
 			activity.title = "menerima permintaan pengembalian dana.";
 
 			//change status to 5
-			this.changeStatus(transaction_id, 5);
+			this.changeStatus(this.transaction_id, 5);
 
 			//create activity
 			result = await activityInstance.createActivity(activity);
 
 			//create activity satu lagi for pembatalan
 			let newActivity = {};
-			newActivity.transaction_id = transaction_id;
+			newActivity.transaction_id = this.transaction_id;
 			newActivity.client_id = client_id;
 			newActivity.title =
 				"Pesanan dibatalkan dan dana berhasil dikembalikan kepada klien.";
@@ -1347,7 +1391,7 @@ module.exports = class Transaction {
 	}
 
 	// Create Transac Buat Payment
-	async createTransaction(project_id, client_id, freelancer_id, project_type) {
+	async createTransaction(projectId, clientId, freelancerId, type) {
 		try {
 			let trx_uuid = uuid.v4();
 			let project;
@@ -1355,9 +1399,9 @@ module.exports = class Transaction {
 
 			console.log(project_type);
 
-			if (project_type == "TASK") {
+			if (type == "TASK") {
 				console.log("PROJECT ID:");
-				console.log(project_id);
+				console.log(projectId);
 
 				let SPP = `
                 select
@@ -1365,14 +1409,11 @@ module.exports = class Transaction {
                 from
                 public.task
                 where
-                task_id = '${project_id}'
+                task_id = '${projectId}'
                 `;
 
 				project = await db.any(SPP);
 				project = project[0];
-
-				// console.log("PROJECT : ");
-				// console.log(project);
 
 				SP = `
                 INSERT
@@ -1396,8 +1437,8 @@ module.exports = class Transaction {
                 VALUES
                 (
                     '${trx_uuid}',
-                    '${project_id}',
-                    '${client_id}',
+                    '${projectId}',
+                    '${clientId}',
                     '2',
                     '${project.deadline.toLocaleString()}',
                     null,
@@ -1406,21 +1447,21 @@ module.exports = class Transaction {
                     true,
                     true,
                     null,
-                    '${freelancer_id}',
-                    '${project_type}'
+                    '${freelancerId}',
+                    '${type}'
                 )
                 `;
 
 				// console.log("SP");
 				// console.log(SP);
-			} else if (project_type == "SERVICE") {
+			} else if (type == "SERVICE") {
 				let SPP = `
                 select
                 *
                 from
                 public.service
                 where
-                service_id = '${project_id}'
+                service_id = '${projectId}'
                 `;
 
 				// console.log("SPP : ");
@@ -1475,8 +1516,8 @@ module.exports = class Transaction {
                 VALUES
                 (
                     '${trx_uuid}',
-                    '${project_id}',
-                    '${client_id}',
+                    '${projectId}',
+                    '${clientId}',
                     '2',
                     '${deadline.toLocaleString()}',
                     null,
@@ -1485,7 +1526,7 @@ module.exports = class Transaction {
                     true,
                     true,
                     null,
-                    '${freelancer_id}',
+                    '${freelancerId}',
                     'SERVICE'
                 )
                 `;

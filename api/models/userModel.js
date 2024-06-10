@@ -161,8 +161,7 @@ module.exports = class User {
 		let BankInstance = new BankInformation();
 
 		try {
-			let set_result = await BankInstance.setClientId(this.user_id);
-			let bank_result = await BankInstance.getBankDetails();
+			let bank_result = await BankInstance.getBankDetails(this.user_id);
 
 			return bank_result;
 		} catch (error) {
@@ -271,7 +270,7 @@ module.exports = class User {
 		let BankInstance = new BankInformation();
 
 		try {
-			let set_result = await BankInstance.setClientId(this.user_id);
+			let set_result = await BankInstance.setUserId(this.user_id);
 			let bank_result = await BankInstance.editBankDetails(body);
 			console.log("keluar, inid di user cass");
 			return bank_result;

@@ -48,9 +48,8 @@ app.getadditionalInfoBySubcategoryId = async (req, res) => {
 
 	if (curr_session.session_id == x_token) {
 		const subcatInstance = new Subcategory();
-		subcatResult = await subcatInstance.getadditionalInfoBySubcategoryId(
-			subcategory_id
-		);
+		var set_result = await subcatInstance.setSubcategoryId(subcategory_id);
+		subcatResult = await subcatInstance.getadditionalInfoBySubcategoryId();
 		if (subcatResult instanceof Error) {
 			result.error_schema = {
 				error_code: "903",

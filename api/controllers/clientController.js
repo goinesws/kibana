@@ -16,7 +16,8 @@ app.getClientReview = async (req, res) => {
 	result.output_schema = {};
 
 	const clientInstance = new Client();
-	let client_review = await clientInstance.getClientReview(userId);
+	let set_result = clientInstance.setUserId(userId);
+	let client_review = await clientInstance.getClientReview();
 
 	if (client_review instanceof Error) {
 		result.error_schema = {
@@ -47,7 +48,8 @@ app.getClientTask = async (req, res) => {
 	result.output_schema = {};
 
 	const clientInstance = new Client();
-	let task = await clientInstance.getClientTask(userId);
+	let set_result = clientInstance.setUserId(userId);
+	let task = await clientInstance.getClientTask();
 
 	if (task instanceof Error) {
 		result.error_schema = {

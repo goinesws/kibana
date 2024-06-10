@@ -21,7 +21,7 @@ app.insertReviewClient = async (req, res) => {
 		let freelancerId = curr_session.session_data.freelancer_id;
 		let data = req.body;
 		let reviewInstance = new Review();
-		let review_insert_result = await reviewInstance.insertClientReview(
+		let review_insert_result = await reviewInstance.insertReviewClient(
 			freelancerId,
 			data
 		);
@@ -70,7 +70,7 @@ app.insertReviewFreelancer = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 		let data = req.body;
 		let reviewInstance = new Review();
-		let review_insert_result = await reviewInstance.insertFreelancerReview(
+		let review_insert_result = await reviewInstance.insertReviewFreelancer(
 			userId,
 			data
 		);
@@ -119,7 +119,7 @@ app.insertReviewService = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 		let data = req.body;
 		let reviewInstance = new Review();
-		let review_insert_result = await reviewInstance.insertServiceReview(
+		let review_insert_result = await reviewInstance.insertReviewService(
 			userId,
 			data
 		);

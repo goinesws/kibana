@@ -5,13 +5,23 @@ const FormData = require("form-data");
 const uuid = require("uuid");
 
 module.exports = class BankInformation {
+	bank_information_id;
+	user_id;
+	bank_name;
+	beneficiary_name;
+	account_number;
+
 	// Setter Getter
-	async setClientId(clientId) {
-		this.client_id = clientId;
+	async setUserId(userId) {
+		this.user_id = userId;
+	}
+
+	async getUserId() {
+		return this.user_id;
 	}
 
 	// Inquiry Bank Details
-	async getBankDetails() {
+	async getBankDetails(userId) {
 		let SP = `
     select 
     bank_name,
@@ -20,7 +30,7 @@ module.exports = class BankInformation {
     from 
     public.bank_information
     where
-    user_id = '${this.client_id}';
+    user_id = '${userId}';
     `;
 
 		try {
@@ -38,7 +48,7 @@ module.exports = class BankInformation {
 		let SP_delete = `
 			DELETE
 			FROM bank_information
-			WHERE user_id = '${this.client_id}'
+			WHERE user_id = '${this.user_id}'
     	`;
 		try {
 			console.log(SP_delete);
@@ -51,7 +61,7 @@ module.exports = class BankInformation {
 		let SP = `
 			INSERT INTO public.bank_information(
 			bank_information_id, user_id, bank_name, beneficiary_name, account_number)
-			VALUES ('${bi_uuid}', '${this.client_id}', '${body.bank_name}', '${body.beneficiary_name}', '${body.account_number}')
+			VALUES ('${bi_uuid}', '${this.user_id}', '${body.bank_name}', '${body.beneficiary_name}', '${body.account_number}')
     	`;
 		console.log(SP);
 		console.log("MASUK 2");
