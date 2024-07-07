@@ -15,7 +15,9 @@ module.exports = class Client extends User {
 		return this.userId;
 	}
 
-	async getClient() {}
+	async getClient() {
+		return this;
+	}
 
 	async getClientReview() {
 		let reviewInstance = new Review();

@@ -19,7 +19,9 @@ module.exports = class Freelancer extends User {
 		return this.userId;
 	}
 
-	async getFreelancer() {}
+	async getFreelancer() {
+		return this;
+	}
 
 	// Inquiry Freelancer Description
 	async getDescription() {
