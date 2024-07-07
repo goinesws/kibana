@@ -31,24 +31,22 @@ app.getTransactionInvoice = async (req, res) => {
 		result.output_schema.project = {};
 		result.output_schema.fee = {};
 
-		// console.log(JSON.stringify(result))
 		var transactionInstance = new Transaction();
 		var serviceInstance = new Service();
 		var taskInstance = new Task();
-		var transactionClient = await transactionInstance.getTransactionClient(
-			transaction_id
-		);
+
+		var set_result = await transactionInstance.setTransactionId(transaction_id);
+		var transactionClient = await transactionInstance.getTransactionClient();
 		var transactionFreelancer =
-			await transactionInstance.getTransactionFreelancer(transaction_id);
+			await transactionInstance.getTransactionFreelancer();
 
 		if (
 			transactionClient.username == curr_session.session_data.username ||
 			transactionFreelancer.username == curr_session.session_data.username
 		) {
 			var projectResult;
-			var transactionDetail = await transactionInstance.getAllTransactionDetail(
-				transaction_id
-			);
+			var transactionDetail =
+				await transactionInstance.getAllTransactionDetail();
 			// console.log(JSON.stringify(transactionDetail) + "transactionDetail")
 			var additional_data = "";
 			var project_type = await transactionDetail.project_type;
@@ -135,25 +133,27 @@ app.getFreelancerTransactionInvoice = async (req, res) => {
 		var serviceInstance = new Service();
 		var taskInstance = new Task();
 		var bankInformationInstance = new BankInformation();
-		var transactionClient = await transactionInstance.getTransactionClient(
-			transaction_id
-		);
+
+		var set_result = await transactionInstance.setTransactionId(transaction_id);
+
+		var transactionClient = await transactionInstance.getTransactionClient();
 
 		//get freelancers client id for bank information
 		let freelancer_client_id = curr_session.session_data.client_id;
-		var bank_detail = await bankInformationInstance.getBankDetails(freelancer_client_id);
+		var bank_detail = await bankInformationInstance.getBankDetails(
+			freelancer_client_id
+		);
 
 		var transactionFreelancer =
-			await transactionInstance.getTransactionFreelancer(transaction_id);
+			await transactionInstance.getTransactionFreelancer();
 
 		if (
 			transactionClient.username == curr_session.session_data.username ||
 			transactionFreelancer.username == curr_session.session_data.username
 		) {
 			var projectResult;
-			var transactionDetail = await transactionInstance.getAllTransactionDetail(
-				transaction_id
-			);
+			var transactionDetail =
+				await transactionInstance.getAllTransactionDetail();
 			// console.log(JSON.stringify(transactionDetail) + "transactionDetail")
 			var additional_data = "";
 			var project_type = await transactionDetail.project_type;
@@ -202,7 +202,7 @@ app.getFreelancerTransactionInvoice = async (req, res) => {
 				result.output_schema.total_price =
 					parseFloat(projectResult.price) + parseFloat(fee);
 				result.output_schema.project.additional_data = additional_data;
-				result.output_schema.bank_detail= bank_detail;
+				result.output_schema.bank_detail = bank_detail;
 			}
 		} else {
 			result.error_schema = {
@@ -236,18 +236,16 @@ app.getTransactionDetailsClientTask = async (req, res) => {
 
 		let transactionInstance = new Transaction();
 
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+
 		// get client dari transaction tersebut
-		let transaction_client = await transactionInstance.getTransactionClient(
-			transaction_id
-		);
+		let transaction_client = await transactionInstance.getTransactionClient();
 
 		console.log(transaction_client);
 
 		if (transaction_client.username == curr_session.session_data.username) {
 			let transaction_result =
-				await transactionInstance.getTransactionDetailsTaskClient(
-					transaction_id
-				);
+				await transactionInstance.getTransactionDetailsTaskClient();
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
@@ -295,15 +293,15 @@ app.getTransactionDetailsFreelancerTask = async (req, res) => {
 
 		let transactionInstance = new Transaction();
 
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+
 		// get freelancer dari transaction tersebut
 		let transaction_freelancer =
-			await transactionInstance.getTransactionFreelancer(transaction_id);
+			await transactionInstance.getTransactionFreelancer();
 
 		if (transaction_freelancer.username == curr_session.session_data.username) {
 			let transaction_result =
-				await transactionInstance.getTransactionDetailsTaskFreelancer(
-					transaction_id
-				);
+				await transactionInstance.getTransactionDetailsTaskFreelancer();
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
@@ -348,20 +346,15 @@ app.getClientTransactionActivity = async (req, res) => {
 
 	if (curr_session.session_id == x_token && x_token) {
 		let transaction_id = req.params.transactionId;
-		console.log(curr_session);
 		let transactionInstance = new Transaction();
-		let transaction_client = await transactionInstance.getTransactionClient(
-			transaction_id
-		);
-
+		let transaction_client = await transactionInstance.getTransactionClient();
 		if (transaction_client.username == curr_session.session_data.username) {
 			let client_id = curr_session.session_data.client_id;
 
+			let set_result_client = await transactionInstance.setClientId(client_id);
+
 			let transaction_result =
-				await transactionInstance.getTransactionActivityClient(
-					transaction_id,
-					client_id
-				);
+				await transactionInstance.getTransactionActivityClient();
 
 			if (transaction_result instanceof Error) {
 				console.log(transaction_result);
@@ -437,15 +430,12 @@ app.getTransactionDetailsClientService = async (req, res) => {
 		let transaction_id = req.params.transactionId;
 
 		let transactionInstance = new Transaction();
-		let transaction_client = await transactionInstance.getTransactionClient(
-			transaction_id
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let transaction_client = await transactionInstance.getTransactionClient();
 
 		if (transaction_client.username == curr_session.session_data.username) {
 			let transaction_result =
-				await transactionInstance.getTransactionDetailsServiceClient(
-					transaction_id
-				);
+				await transactionInstance.getTransactionDetailsServiceClient();
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
@@ -501,16 +491,16 @@ app.getTransactionDetailsFreelancerService = async (req, res) => {
 
 		let transactionInstance = new Transaction();
 
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+
 		let transaction_freelancer =
-			await transactionInstance.getTransactionFreelancer(transaction_id);
+			await transactionInstance.getTransactionFreelancer();
 
 		// console.log(transaction_freelancer);
 
 		if (curr_session.session_data.username == transaction_freelancer.username) {
 			let transaction_result =
-				await transactionInstance.getTransactionDetailsServiceFreelancer(
-					transaction_id
-				);
+				await transactionInstance.getTransactionDetailsServiceFreelancer();
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
@@ -558,27 +548,24 @@ app.getFreelancerTransactionActivity = async (req, res) => {
 	let curr_session = await UserInstance.getUserSessionData(x_token);
 
 	if (curr_session.session_id == x_token && x_token) {
-		// console.log("Current Session : ");
-		// console.log(curr_session);
 		let transaction_id = req.params.transactionId;
 
 		let transactionInstance = new Transaction();
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
 		let transaction_freelancer =
-			await transactionInstance.getTransactionFreelancer(transaction_id);
-
-		// console.log("Transaction Freelancer : ");
-		// console.log(transaction_freelancer);
+			await transactionInstance.getTransactionFreelancer();
 
 		if (transaction_freelancer.username == curr_session.session_data.username) {
 			let freelancer_id = curr_session.session_data.freelancer_id;
 
 			console.log("Freelancer ID : " + freelancer_id);
 
+			let set_freelancer_result = await transactionInstance.setFreelancerId(
+				freelancer_id
+			);
+
 			let transaction_result =
-				await transactionInstance.getTransactionActivityFreelancer(
-					transaction_id,
-					freelancer_id
-				);
+				await transactionInstance.getTransactionActivityFreelancer();
 
 			if (transaction_result instanceof Error) {
 				result.error_schema = {
@@ -677,9 +664,9 @@ app.sendRequirement = async (req, res) => {
 		const description = data.description;
 
 		let transactionInstance = new Transaction();
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
 		console.log(file + "CONTROLLER");
 		let insert = await transactionInstance.sendRequirement(
-			transaction_id,
 			file,
 			description,
 			x_token
@@ -722,11 +709,8 @@ app.sendMessage = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.sendMessage(
-			transaction_id,
-			message,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.sendMessage(message, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -784,11 +768,8 @@ app.sendAdditionalFile = async (req, res) => {
 		const transaction_id = data.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.sendAdditionalFile(
-			transaction_id,
-			file,
-			x_token
-		);
+		let set_result = transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.sendAdditionalFile(file, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -856,8 +837,8 @@ app.sendResult = async (req, res) => {
 		const description = data.description;
 
 		let transactionInstance = new Transaction();
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
 		let insert = await transactionInstance.sendResult(
-			transaction_id,
 			file,
 			description,
 			x_token
@@ -900,11 +881,8 @@ app.askReturn = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.askReturn(
-			transaction_id,
-			message,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.askReturn(message, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -942,10 +920,8 @@ app.cancelReturn = async (req, res) => {
 		const transaction_id = req.body.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.cancelReturn(
-			transaction_id,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.cancelReturn(x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -984,11 +960,8 @@ app.askRevision = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.askRevision(
-			transaction_id,
-			message,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.askRevision(message, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -1026,10 +999,8 @@ app.completeTransaction = async (req, res) => {
 		const transaction_id = req.body.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.completeTransaction(
-			transaction_id,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.completeTransaction(x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -1068,11 +1039,8 @@ app.askCancellation = async (req, res) => {
 		const message = req.body.message;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.askCancellation(
-			transaction_id,
-			message,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.askCancellation(message, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -1111,11 +1079,8 @@ app.manageCancellation = async (req, res) => {
 		const type = req.body.type;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.manageCancellation(
-			transaction_id,
-			type,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.manageCancellation(type, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -1153,7 +1118,8 @@ app.callAdmin = async (req, res) => {
 		const transaction_id = req.body.transaction_id;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.callAdmin(transaction_id, x_token);
+		let set_result = transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.callAdmin(x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {
@@ -1191,6 +1157,7 @@ app.cancelCancellation = async (req, res) => {
 		const transaction_id = req.body.transaction_id;
 
 		let transactionInstance = new Transaction();
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
 		let insert = await transactionInstance.cancelCancellation(
 			transaction_id,
 			x_token
@@ -1233,11 +1200,8 @@ app.manageReturn = async (req, res) => {
 		const type = req.body.type;
 
 		let transactionInstance = new Transaction();
-		let insert = await transactionInstance.manageReturn(
-			transaction_id,
-			type,
-			x_token
-		);
+		let set_result = await transactionInstance.setTransactionId(transaction_id);
+		let insert = await transactionInstance.manageReturn(type, x_token);
 
 		if (insert instanceof Error) {
 			result.error_schema = {

@@ -14,7 +14,8 @@ app.getFreelancerDescription = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let desc = await freelancerInstance.getDescription(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let desc = await freelancerInstance.getDescription();
 
 	if (desc instanceof Error) {
 		result.error_schema = {
@@ -42,7 +43,8 @@ app.getFreelancerEducationHistory = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let edu = await freelancerInstance.getFreelancerEducation(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let edu = await freelancerInstance.getEducation();
 
 	if (edu instanceof Error) {
 		result.error_schema = {
@@ -72,7 +74,8 @@ app.getFreelancerSkill = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let skills = await freelancerInstance.getSkill(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let skills = await freelancerInstance.getSkill();
 
 	if (skills instanceof Error) {
 		result.error_schema = {
@@ -99,7 +102,8 @@ app.getFreelancerCV = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let CV = await freelancerInstance.getCV(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let CV = await freelancerInstance.getCV();
 
 	if (CV instanceof Error) {
 		result.error_schema = {
@@ -126,7 +130,8 @@ app.getPortfolio = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let portfolio = await freelancerInstance.getPortfolio(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let portfolio = await freelancerInstance.getPortfolio();
 
 	if (portfolio instanceof Error) {
 		result.error_schema = {
@@ -153,7 +158,8 @@ app.getOwnedService = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let owned_service = await freelancerInstance.getOwnedService(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let owned_service = await freelancerInstance.getFreelancerService();
 
 	if (owned_service instanceof Error) {
 		result.error_schema = {
@@ -198,7 +204,8 @@ app.getFreelancerProjectHistory = async (req, res) => {
 	result.output_schema = {};
 
 	let freelancerInstance = new Freelancer();
-	let projects = await freelancerInstance.getProjectHistory(userId);
+	let set_result = await freelancerInstance.setUserId(userId);
+	let projects = await freelancerInstance.getProjectHistory();
 
 	if (projects instanceof Error) {
 		result.error_schema = {
@@ -238,10 +245,8 @@ app.editFreelancerDescription = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 		let description = req.body.description;
 		let freelancerInstance = new Freelancer();
-		let edit_result = await freelancerInstance.editDescription(
-			userId,
-			description
-		);
+		let set_result = await freelancerInstance.setUserId(userId);
+		let edit_result = await freelancerInstance.editDescription(description);
 
 		if (edit_result == null) {
 			result.error_schema = {
@@ -290,10 +295,8 @@ app.editFreelancerSkills = async (req, res) => {
 		skills = skills.replace("[", "{");
 		skills = skills.replace("]", "}");
 		let freelancerInstance = new Freelancer();
-		let edit_result = await freelancerInstance.editFreelancerSkills(
-			userId,
-			skills
-		);
+		let set_result = await freelancerInstance.setUserId(userId);
+		let edit_result = await freelancerInstance.editSkill(skills);
 
 		if (edit_result == null) {
 			result.error_schema = {
@@ -322,7 +325,6 @@ app.editFreelancerSkills = async (req, res) => {
 };
 
 app.editFreelancerEducation = async (req, res) => {
-	console.log("MASUK KE EDIT");
 	let result = {};
 
 	result.error_schema = {};
@@ -340,14 +342,12 @@ app.editFreelancerEducation = async (req, res) => {
 	) {
 		let userId = curr_session.session_data.client_id;
 		let freelancerInstance = new Freelancer();
-		await freelancerInstance.removeEducation(userId);
+		let set_result = await freelancerInstance.setUserId(userId);
+		await freelancerInstance.removeEducation();
 
 		await Promise.all(
 			education.map(async (education) => {
-				let ed_result = await freelancerInstance.editFreelancerEducation(
-					userId,
-					education
-				);
+				let ed_result = await freelancerInstance.editEducation(education);
 
 				if (ed_result == null) {
 					result.error_schema = {
@@ -393,6 +393,7 @@ app.editFreelancerCV = async (req, res) => {
 	) {
 		let userId = curr_session.session_data.client_id;
 		let freelancerInstance = new Freelancer();
+		let set_result = await freelancerInstance.setUserId(userId);
 		const id = await authorize()
 			.then((auth) => {
 				if (req.files && req.files["cv"]) {
@@ -410,7 +411,7 @@ app.editFreelancerCV = async (req, res) => {
 				console.error("Error:", err);
 			});
 
-		let cv_result = await freelancerInstance.editFreelancerCV(userId, id);
+		let cv_result = await freelancerInstance.editCV(id);
 
 		if (cv_result instanceof Error) {
 			result.error_schema = {
@@ -453,6 +454,7 @@ app.editFreelancerPortfolio = async (req, res) => {
 	) {
 		let userId = curr_session.session_data.client_id;
 		let freelancerInstance = new Freelancer();
+		let set_result = await freelancerInstance.setUserId(userId);
 		const id = await authorize()
 			.then((auth) => {
 				if (req.files && req.files["portfolio"]) {
@@ -470,10 +472,7 @@ app.editFreelancerPortfolio = async (req, res) => {
 				console.error("Error:", err);
 			});
 
-		let port_result = await freelancerInstance.editFreelancerPortfolio(
-			userId,
-			id
-		);
+		let port_result = await freelancerInstance.editPortfolio(id);
 
 		if (port_result instanceof Error) {
 			result.error_schema = {
@@ -566,12 +565,8 @@ app.register = async (req, res) => {
 		const userID = curr_session.session_data.client_id;
 
 		let freelancerInstance = new Freelancer();
-		let reg_result = await freelancerInstance.register(
-			data,
-			cv_id,
-			port_id,
-			userID
-		);
+		let set_result = await freelancerInstance.setUserId(userID);
+		let reg_result = await freelancerInstance.register(data, cv_id, port_id);
 
 		if (reg_result instanceof Error) {
 			result.error_schema = {

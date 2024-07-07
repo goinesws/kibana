@@ -6,7 +6,7 @@ module.exports = class Review {
 	constructor() {}
 
 	// Inquiry Client Review (3 bisa dijadiin satu)
-	async getClientReviewByUserId(userId) {
+	async getClientReview(clientId) {
 		try {
 			let result = {};
 			let SP1 = `select 
@@ -24,7 +24,7 @@ module.exports = class Review {
       on
       f.user_id = c.client_id
       where 
-      destination_id = '${userId}'
+      destination_id = '${clientId}'
       or 
       destination_id = (
         select 
@@ -32,7 +32,7 @@ module.exports = class Review {
         from
         public.freelancer
         where
-        freelancer_id = '${userId}'
+        freelancer_id = '${clientId}'
       );`;
 
 			let review_list = await db.any(SP1);
@@ -49,7 +49,7 @@ module.exports = class Review {
       on
       f.user_id = c.client_id
       where 
-      destination_id = '${userId}'
+      destination_id = '${clientId}'
       or
       destination_id = (
         select 
@@ -57,7 +57,7 @@ module.exports = class Review {
         from
         public.freelancer
         where
-        freelancer_id = '${userId}'
+        freelancer_id = '${clientId}'
       );`;
 
 			let average_rating = await db.any(SP2);
@@ -75,7 +75,7 @@ module.exports = class Review {
       on
       f.user_id = c.client_id
       where 
-      destination_id = '${userId}'
+      destination_id = '${clientId}'
       or
       destination_id = (
         select 
@@ -83,7 +83,7 @@ module.exports = class Review {
         from
         public.freelancer
         where
-        freelancer_id = '${userId}'
+        freelancer_id = '${clientId}'
       );`;
 
 			let rating_amount = await db.any(SP3);
@@ -99,7 +99,7 @@ module.exports = class Review {
 	}
 
 	// Review Client
-	async insertClientReview(freelancerId, data) {
+	async insertReviewClient(freelancerId, data) {
 		// init date
 		var datetime = new Date();
 		datetime = datetime.toISOString().slice(0, 10);
@@ -131,7 +131,7 @@ module.exports = class Review {
 	}
 
 	// Review Freelancer
-	async insertFreelancerReview(userId, data) {
+	async insertReviewFreelancer(userId, data) {
 		var datetime = new Date();
 		datetime = datetime.toISOString().slice(0, 10);
 
@@ -162,7 +162,7 @@ module.exports = class Review {
 	}
 
 	// Review Service
-	async insertServiceReview(userId, data) {
+	async insertReviewService(userId, data) {
 		var datetime = new Date();
 		datetime = datetime.toISOString().slice(0, 10);
 

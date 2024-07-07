@@ -12,6 +12,18 @@ const {
 } = require("../utils/googleUtil.js");
 
 module.exports = class Activity {
+	activity_id;
+	transaction_id;
+	client_id;
+	date;
+	title;
+	content;
+	attachment;
+	code;
+	code_temp;
+	response_deadline;
+	deadline_extension;
+
 	// Setter Getter
 	async setTransactionId(transaction_id) {
 		this.transaction_id = transaction_id;

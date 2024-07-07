@@ -77,8 +77,11 @@ app.getTaskDetails = async (req, res) => {
 	result.error_schema = {};
 	result.output_schema = {};
 
+	let taskId = req.params.taskId;
+
 	const taskInstance = new Task();
-	let taskDetailResult = await taskInstance.getTaskDetails(req.params.taskId);
+	let set_result = await taskInstance.setTaskId(taskId);
+	let taskDetailResult = await taskInstance.getTaskDetails();
 
 	// console.log(taskDetailResult);
 
@@ -191,7 +194,7 @@ app.createTask = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 
 		let taskInstance = new Task();
-		let create_task_result = await taskInstance.createTask(data, userId);
+		let create_task_result = await taskInstance.createTask(userId, data);
 
 		//console.log(create_task_result);
 
@@ -238,9 +241,8 @@ app.getOwnedTask = async (req, res) => {
 	if (curr_session.session_id == x_token) {
 		let taskInstance = new Task();
 
-		let task_result = await taskInstance.getOwnedTask(
-			curr_session.session_data.client_id
-		);
+		let userId = curr_session.session_data.client_id;
+		let task_result = await taskInstance.getOwnedTask(userId);
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
@@ -285,7 +287,8 @@ app.getOwnedTaskDetails = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 
 		let taskInstance = new Task();
-		let task_result = await taskInstance.getOwnedTaskDetails(taskId, userId);
+		let set_result = taskInstance.setTaskId(taskId);
+		let task_result = await taskInstance.getOwnedTaskDetails(userId);
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
@@ -331,7 +334,8 @@ app.getRegisteredFreelancer = async (req, res) => {
 		let taskId = req.params.taskId;
 
 		let taskInstance = new Task();
-		let task_result = await taskInstance.getRegisteredFreelancer(taskId);
+		let set_result = await taskInstance.setTaskId(taskId);
+		let task_result = await taskInstance.getRegisteredFreelancer();
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
@@ -394,7 +398,8 @@ app.deleteTask = async (req, res) => {
 		let userId = curr_session.session_data.client_id;
 
 		let taskInstance = new Task();
-		let task_result = taskInstance.deleteTask(taskId, userId);
+		let set_result = await taskInstance.setTaskId(taskId);
+		let task_result = taskInstance.deleteTask();
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
@@ -440,11 +445,9 @@ app.getTaskHistory = async (req, res) => {
 		curr_session.session_id == x_token &&
 		curr_session.session_data.is_freelancer
 	) {
-		let userId = curr_session.session_data.freelancer_id;
-		//console.log(userId);
-
+		let freelancerId = curr_session.session_data.freelancer_id;
 		let taskInstance = new Task();
-		let task_result = await taskInstance.getTaskHistory(userId);
+		let task_result = await taskInstance.getTaskHistory(freelancerId);
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
@@ -491,10 +494,11 @@ app.getTaskHistoryDetails = async (req, res) => {
 		curr_session.session_data.is_freelancer
 	) {
 		let taskId = req.params.taskId;
-		let userId = curr_session.session_data.freelancer_id;
+		let freelancerId = curr_session.session_data.freelancer_id;
 
 		let taskInstance = new Task();
-		let task_result = await taskInstance.getTaskHistoryDetails(taskId, userId);
+		let set_result = await taskInstance.setTaskId(taskId);
+		let task_result = await taskInstance.getTaskHistoryDetails(freelancerId);
 
 		if (task_result instanceof Error) {
 			result.error_schema = {
@@ -542,7 +546,8 @@ app.getRequestToken = async (req, res) => {
 		let freelancerId = req.body.freelancer_id;
 
 		let taskInstance = new Task();
-		let task_result = await taskInstance.getTaskToken(taskId, freelancerId);
+		let set_result = await taskInstance.setTaskId(taskId);
+		let task_result = await taskInstance.getTaskToken(freelancerId);
 
 		console.log("TASK RESULT:");
 		console.log(task_result);
@@ -597,7 +602,8 @@ app.registerForTask = async (req, res) => {
 	let freelancerId = curr_session.session_data.freelancer_id;
 
 	let taskInstance = new Task();
-	let task_result = await taskInstance.registerForTask(taskId, freelancerId);
+	let set_result = await taskInstance.setTaskId(taskId);
+	let task_result = await taskInstance.registerForTask(freelancerId);
 
 	if (task_result instanceof Error) {
 		result.error_schema.error_code = 903;

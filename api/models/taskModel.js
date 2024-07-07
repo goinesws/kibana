@@ -5,6 +5,33 @@ const Subcategory = require("../models/subcategoryModel");
 const Payment = require("../models/paymentModel");
 
 module.exports = class Task {
+	// Data
+	task_id;
+	subcategory_id;
+	client_id;
+	freelancer_id;
+	name;
+	description;
+	tags;
+	deadline;
+	difficulty;
+	price;
+	status;
+
+	// Set Task ID
+	async setTaskId(taskId) {
+		this.task_id = taskId;
+	}
+	// Get Task ID
+	async getTaskId() {
+		return this.task_id;
+	}
+
+	// Get Task
+	async getTask() {
+		return this;
+	}
+
 	// Inquiry Tugas Baru
 	async getNewTask() {
 		let SP = `
@@ -39,38 +66,13 @@ module.exports = class Task {
 		}
 	}
 
-	// Inquiry Invoice
-	async getAllTaskDetail(task_id) {
-		let SP = `select 
-      task_id,
-      sub_category_id,
-      client_id,
-      freelancer_id,
-      name,
-      description,
-      price,
-      difficulty,
-      tags,
-      TO_CHAR(created_date, 'DD Mon YYYY HH24:MI:SS') from task where task_id = '${task_id}'`;
-
-		try {
-			let result = await db.any(SP);
-
-			return result[0];
-		} catch (error) {
-			return new Error("Gagal Mendapatkan Data");
-		}
-	}
-
 	// Inquiry List Tugas
-	async getTaskList(body) {
-		// console.log(body);
-
-		const searchText = body["search_text"];
-		const subcategory = body["sub_category"];
-		const budget = body["budget"];
-		const difficulty = body["difficulty"];
-		const lastId = body["last_id"];
+	async getTaskList(filter) {
+		const searchText = filter["search_text"];
+		const subcategory = filter["sub_category"];
+		const budget = filter["budget"];
+		const difficulty = filter["difficulty"];
+		const lastId = filter["last_id"];
 
 		let SP = `SELECT task_id as id, name, description, tags, TO_CHAR(deadline, 'DD Mon YYYY HH24:MI:SS') as due_date, difficulty, price FROM public.task`;
 
@@ -197,7 +199,7 @@ module.exports = class Task {
 		}
 	}
 
-	// Inquiry Tuga Baru
+	// Inquiry Tugas Baru
 	async getNewTaskByCategory(categoryId) {
 		// get list of SUBCAT BY CATEGORY ID
 		const subcatInstance = new Subcategory();
@@ -232,7 +234,7 @@ module.exports = class Task {
 	}
 
 	// Inquiry Detail Tugas
-	async getTaskDetails(taskId) {
+	async getTaskDetails() {
 		try {
 			let result = {};
 
@@ -250,7 +252,7 @@ module.exports = class Task {
 		  from
 		  public.task
 		  where
-		  task_id = '${taskId}'
+		  task_id = '${this.task_id}'
 		  `;
 				task_details = await db.any(SP);
 			} catch (error) {
@@ -271,7 +273,7 @@ module.exports = class Task {
 		  on
 		  t.client_id = c.client_id
 		  where
-		  task_id = '${taskId}';
+		  task_id = '${this.task_id}';
 		  `;
 
 				client_details = await db.any(SP);
@@ -301,7 +303,7 @@ module.exports = class Task {
 		  on
 		  f.user_id = c.client_id
 		  where
-		  t.task_id = '${taskId}';
+		  t.task_id = '${this.task_id}';
 		  `;
 
 				reg_freelancer_details = await db.any(SP);
@@ -339,15 +341,15 @@ module.exports = class Task {
 						on
 						f.user_id = c.client_id
 						where
-						destination_id = (select client_id from public.task where task_id = '${taskId}')
+						destination_id = (select client_id from public.task where task_id = '${this.task_id}')
 					) t
 				) as review_list
 				from
 				public.review
 				where
-				destination_id = (select client_id from public.task where task_id = '${taskId}')
+				destination_id = (select client_id from public.task where task_id = '${this.task_id}')
 				or
-				destination_id = '${taskId}'
+				destination_id = '${this.task_id}'
 		  `;
 
 				review_details = await db.any(SP);
@@ -373,7 +375,7 @@ module.exports = class Task {
 	}
 
 	// Inquiry Owned Task
-	async getTaskByClientId(userId) {
+	async getTaskByClientId(clientId) {
 		let SP = `
     select 
     t.task_id as id,
@@ -391,7 +393,7 @@ module.exports = class Task {
 		t.task_id = trx.project_id
     where
 		(
-			t.client_id = '${userId}'
+			t.client_id = '${clientId}'
 			or
 			t.client_id = 
 			(
@@ -404,7 +406,7 @@ module.exports = class Task {
 				on
 				c.client_id = f.user_id
 				where
-				f.freelancer_id = '${userId}'
+				f.freelancer_id = '${clientId}'
 			)
 		)
 		and
@@ -422,7 +424,7 @@ module.exports = class Task {
 	}
 
 	// Create Tugas
-	async createTask(data, userId) {
+	async createTask(userId, data) {
 		let task_uuid = uuid.v4();
 		let subcat = data.sub_category;
 		let name = data.name;
@@ -556,7 +558,7 @@ module.exports = class Task {
 	}
 
 	// Inquiry Details Tugas Saya
-	async getOwnedTaskDetails(taskId, userId) {
+	async getOwnedTaskDetails(userId) {
 		let SP = `
     select 
     t.task_id as id,
@@ -577,7 +579,7 @@ module.exports = class Task {
     on
     t.task_id = tr.project_id
     where
-    t.task_id = '${taskId}'
+    t.task_id = '${this.task_id}'
     and
     (
       t.client_id = '${userId}'
@@ -609,7 +611,7 @@ module.exports = class Task {
 	}
 
 	// Inquiry Pemilihan Freelancer
-	async getRegisteredFreelancer(taskId) {
+	async getRegisteredFreelancer() {
 		let SP = `
     select 
     TO_CHAR(ta.deadline - INTERVAL '3 days', 'DD Mon YYYY HH24:MI:SS') as choose_due_date,
@@ -635,14 +637,14 @@ module.exports = class Task {
         on
         c.client_id = f.user_id
 				where
-				te.task_id = '${taskId}'
+				te.task_id = '${this.task_id}'
         group by id, name, profile_image_url
       ) t
     ) registered_freelancer
     from 
 		public.task ta
 		where
-		ta.task_id = '${taskId}'
+		ta.task_id = '${this.task_id}'
     `;
 
 		try {
@@ -657,28 +659,12 @@ module.exports = class Task {
 	}
 
 	// Delete Tugas
-	async deleteTask(taskId, userId) {
+	async deleteTask() {
 		let SP = `
       delete 
       from 
       public.task
-      where task_id = '${taskId}'
-      and 
-      (client_id = '${userId}'
-      or
-      client_id = 
-      (
-        select 
-        client_id 
-        from
-        public.client c
-        join
-        public.freelancer f
-        on
-        c.client_id = f.user_id
-        where
-        f.freelancer_id = '${userId}'
-      ))
+      where task_id = '${this.task_id}'
       ;	
     `;
 
@@ -692,7 +678,7 @@ module.exports = class Task {
 	}
 
 	// Inquiry Riwayat Tugas
-	async getTaskHistory(userId) {
+	async getTaskHistory(freelancerId) {
 		let SP = `
 		select
 		t.task_id as id,
@@ -751,7 +737,7 @@ module.exports = class Task {
 		on
 		t.task_id = te.task_id
 		where
-		te.freelancer_id = '${userId}'
+		te.freelancer_id = '${freelancerId}'
 		`;
 
 		try {
@@ -764,7 +750,7 @@ module.exports = class Task {
 	}
 
 	// Inquiry Detail Riwayat Tugas
-	async getTaskHistoryDetails(taskId, userId) {
+	async getTaskHistoryDetails(freelancerId) {
 		let SP = `
     select 
     t.task_id as id,
@@ -781,9 +767,9 @@ module.exports = class Task {
     on
     t.task_id = tr.project_id
     where 
-    t.task_id = '${taskId}'
+    t.task_id = '${this.task_id}'
     and
-    t.freelancer_id = '${userId}'
+    t.freelancer_id = '${freelancerId}'
     `;
 
 		try {
@@ -796,7 +782,7 @@ module.exports = class Task {
 	}
 
 	// Request Task Token
-	async getTaskToken(taskId, freelancerId) {
+	async getTaskToken(freelancerId) {
 		try {
 			// cek udah daftar bank belum
 			let SPCB = `
@@ -809,9 +795,10 @@ module.exports = class Task {
 				on 
 				bi.user_id = t.client_id
 				where
-				t.task_id = '${taskId}'
+				t.task_id = '${this.task_id}'
 			`;
 
+			console.log("Check Bank SP : ");
 			console.log(SPCB);
 
 			let bank_count = await db.any(SPCB);
@@ -830,7 +817,7 @@ module.exports = class Task {
 			from 
 			task_enrollment
 			where
-			task_id = '${taskId}'
+			task_id = '${this.task_id}'
 			and
 			freelancer_id = '${freelancerId}'
 			`;
@@ -853,7 +840,7 @@ module.exports = class Task {
 				from
 				public.task
 			where
-				task_id = '${taskId}'
+				task_id = '${this.task_id}'
 			;
 		`;
 
@@ -886,7 +873,7 @@ module.exports = class Task {
 
 			let paymentInstance = new Payment();
 			let result = paymentInstance.createPayment(
-				taskId,
+				this.task_id,
 				"TASK",
 				price,
 				client,
@@ -907,7 +894,7 @@ module.exports = class Task {
 				=
 				'${freelancerId}'
 				WHERE
-				task_id = '${taskId}'
+				task_id = '${this.task_id}'
 			`;
 
 			console.log("SP UPDATE : ");
@@ -922,7 +909,7 @@ module.exports = class Task {
 	}
 
 	// Daftar Untuk Mengerjakan
-	async registerForTask(taskId, freelancerId) {
+	async registerForTask(freelancerId) {
 		// insert task enrollment
 		try {
 			// console.log("TASK ID: " + taskId + " FREELANCER ID: " + freelancerId);
@@ -946,6 +933,7 @@ module.exports = class Task {
 				)
 			`;
 
+			console.log("SP Check Bank For Freelancer : ");
 			console.log(SPCB);
 
 			let bank_check_result = await db.any(SPCB);
@@ -960,11 +948,12 @@ module.exports = class Task {
 				from
 				public.task_enrollment
 				where
-				task_id = '${taskId}'
+				task_id = '${this.task_id}'
 				and
 				freelancer_id = '${freelancerId}'
 			`;
 
+			console.log("SP Check Task Enrollment : ");
 			console.log(SPC);
 
 			let check_result = await db.any(SPC);
@@ -987,7 +976,7 @@ module.exports = class Task {
 				VALUES
 				(
 					'${te_uuid}',
-					'${taskId}',
+					'${this.task_id}',
 					'${freelancerId}'
 				)
 			`;
@@ -997,6 +986,29 @@ module.exports = class Task {
 			return result;
 		} catch (error) {
 			return new Error("Pendaftaran Untuk Tugas Gagal.");
+		}
+	}
+
+	// Utilities Untuk Inquiry Invoice
+	async getAllTaskDetail(task_id) {
+		let SP = `select 
+				task_id,
+				sub_category_id,
+				client_id,
+				freelancer_id,
+				name,
+				description,
+				price,
+				difficulty,
+				tags,
+				TO_CHAR(created_date, 'DD Mon YYYY HH24:MI:SS') from task where task_id = '${task_id}'`;
+
+		try {
+			let result = await db.any(SP);
+
+			return result[0];
+		} catch (error) {
+			return new Error("Gagal Mendapatkan Data");
 		}
 	}
 };

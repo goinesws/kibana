@@ -6,7 +6,15 @@ const uuid = require("uuid");
 
 module.exports = class Education {
 	// Inquiry Freelancer Education History
-	async getEducation(userId) {
+	async setUserId(userId) {
+		this.userId = userId;
+	}
+
+	async getUserId() {
+		return this.userId;
+	}
+
+	async getEducation(freelancerId) {
 		let SP = `
     select degree, major, university, country, year as graduation_year from public.education p
     join
@@ -14,8 +22,8 @@ module.exports = class Education {
     on
     p.freelancer_id = f.freelancer_id
     where
-    f.user_id = '${userId}'
-		or f.freelancer_id = '${userId}'
+    f.user_id = '${freelancerId}'
+		or f.freelancer_id = '${freelancerId}'
 		order by p.year desc
     `;
 
@@ -29,7 +37,7 @@ module.exports = class Education {
 	}
 
 	// Edit Freelancer Education
-	async editEducation(userId, education) {
+	async editEducation(education) {
 		// ini SP buat insert educationHistory
 		let edu_uuid = uuid.v4();
 		let SP_insert = `
@@ -39,7 +47,7 @@ module.exports = class Education {
 		(education_id, freelancer_id, degree, major, university, country, year)
 		values
 		('${edu_uuid}', 
-		(select freelancer_id from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}'), 
+		(select freelancer_id from public.freelancer where user_id = '${this.userId}' or freelancer_id = '${this.userId}'), 
 		'${education.degree}', '${education.major}', '${education.university}', '${education.country}', ${education.graduation_year});`;
 
 		// ini SP buat edit
@@ -53,7 +61,7 @@ module.exports = class Education {
 		country = '${education.country}',
 		year = ${education.year}
 		where 
-		freelancer_id = (select freelancer_id from public.freelancer where userId = '${userId}' or freelancer_id = '${userId}')
+		freelancer_id = (select freelancer_id from public.freelancer where userId = '${this.userId}' or freelancer_id = '${this.userId}')
 		`;
 
 		try {

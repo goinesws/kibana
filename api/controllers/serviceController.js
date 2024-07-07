@@ -24,8 +24,8 @@ app.getNewService = async (req, res) => {
 	const serviceInstance = new Service();
 	var serviceResult;
 	if (category_id)
-		serviceResult = await serviceInstance.getNewService(category_id);
-	else serviceResult = await serviceInstance.getNewServiceNoCat();
+		serviceResult = await serviceInstance.getNewServiceByCategory(category_id);
+	else serviceResult = await serviceInstance.getNewService();
 
 	if (serviceResult instanceof Error) {
 		result.error_schema = {
@@ -150,7 +150,8 @@ app.getServiceDetail = async (req, res) => {
 	const service_id = req.params.serviceId;
 
 	let serviceInstance = new Service();
-	var serviceResult = await serviceInstance.getServiceDetail(service_id);
+	let set_result = await serviceInstance.setServiceId(service_id);
+	var serviceResult = await serviceInstance.getServiceDetail();
 
 	if (serviceResult instanceof Error) {
 		result.error_schema = {
@@ -301,12 +302,11 @@ app.getOwnedServiceDetail = async (req, res) => {
 		const service_id = req.params.serviceId;
 
 		var serviceInstance = new Service();
-		var serviceOwner = await serviceInstance.getServiceOwner(service_id);
+		var set_result = await serviceInstance.setServiceId(service_id);
+		var serviceOwner = await serviceInstance.getServiceOwner();
 
 		if (serviceOwner == freelancer_id) {
-			var serviceResult = await serviceInstance.getOwnedServiceDetail(
-				service_id
-			);
+			var serviceResult = await serviceInstance.getOwnedServiceDetail();
 
 			if (serviceResult instanceof Error) {
 				result.error_schema = {
@@ -364,12 +364,11 @@ app.getOwnedServiceOrders = async (req, res) => {
 		const service_id = req.params.serviceId;
 
 		var serviceInstance = new Service();
-		var serviceOwner = await serviceInstance.getServiceOwner(service_id);
+		var set_result = await serviceInstance.setServiceId(service_id);
+		var serviceOwner = await serviceInstance.getServiceOwner();
 
 		if (serviceOwner == freelancer_id) {
-			var serviceResult = await serviceInstance.getOwnedServiceOrders(
-				service_id
-			);
+			var serviceResult = await serviceInstance.getOwnedServiceOrders();
 
 			if (serviceResult instanceof Error) {
 				result.error_schema = {
@@ -424,10 +423,11 @@ app.deactivateService = async (req, res) => {
 		const service_id = req.params.serviceId;
 
 		var serviceInstance = new Service();
-		var serviceOwner = await serviceInstance.getServiceOwner(service_id);
+		var set_result = await serviceInstance.setServiceId(service_id);
+		var serviceOwner = await serviceInstance.getServiceOwner();
 
 		if (serviceOwner == freelancer_id) {
-			var serviceResult = await serviceInstance.deactivateService(service_id);
+			var serviceResult = await serviceInstance.deactivateService();
 
 			if (serviceResult instanceof Error) {
 				result.error_schema = {
@@ -482,7 +482,8 @@ app.deleteService = async (req, res) => {
 		const service_id = req.params.serviceId;
 
 		var serviceInstance = new Service();
-		var serviceOwner = await serviceInstance.getServiceOwner(service_id);
+		var set_result = await serviceInstance.setServiceId(service_id);
+		var serviceOwner = await serviceInstance.getServiceOwner();
 
 		if (serviceOwner == freelancer_id) {
 			var serviceResult = await serviceInstance.deleteService(service_id);
@@ -540,9 +541,7 @@ app.getServiceHistory = async (req, res) => {
 		var userInstance = new User();
 
 		const client_id = curr_session.session_data.client_id;
-		var serviceResult = await serviceInstance.getClientServiceHistory(
-			client_id
-		);
+		var serviceResult = await serviceInstance.getServiceHistory(client_id);
 
 		if (serviceResult instanceof Error) {
 			result.error_schema = {
@@ -593,7 +592,8 @@ app.activateService = async (req, res) => {
 		let serviceId = req.params.serviceId;
 
 		let serviceInstance = new Service();
-		let service_result = await serviceInstance.activateService(serviceId);
+		let set_result = await serviceInstance.setServiceId(serviceId);
+		let service_result = await serviceInstance.activateService();
 
 		if (service_result instanceof Error) {
 			result.error_schema.error_code = "400";
@@ -632,10 +632,8 @@ app.getRequestToken = async (req, res) => {
 		let client_id = curr_session.session_data.client_id;
 
 		let serviceInstance = new Service();
-		let service_result = await serviceInstance.getServiceToken(
-			serviceId,
-			client_id
-		);
+		let set_result = await serviceInstance.setServiceId(serviceId);
+		let service_result = await serviceInstance.getServiceToken(client_id);
 
 		if (service_result instanceof Error) {
 			result.error_schema = {

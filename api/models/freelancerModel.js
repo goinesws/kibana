@@ -9,11 +9,30 @@ const Google = require("../utils/googleUtil");
 
 module.exports = class Freelancer extends User {
 	// Inquiry Freelancer Description
-	async getDescription(userId) {
-		let SP = `select description from public.freelancer where user_id='${userId}' or freelancer_id = '${userId}';`;
+	async setUserId(userId) {
+		console.log("Set User ID : ");
+		console.log(userId);
+		this.userId = userId;
+	}
+
+	async getUserId() {
+		return this.userId;
+	}
+
+	async getFreelancer() {
+		return this;
+	}
+
+	// Inquiry Freelancer Description
+	async getDescription() {
+		let SP = `select description from public.freelancer where user_id='${this.userId}' or freelancer_id = '${this.userId}';`;
 
 		try {
+			console.log(SP);
 			let result = await db.any(SP);
+
+			console.log("Freelancer Description : ");
+			console.log(result);
 
 			return result[0];
 		} catch (error) {
@@ -22,11 +41,15 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Inquiry Freelancer Education
-	async getFreelancerEducation(userId) {
+	async getEducation() {
 		let EducationInstance = new Education();
+		let set_result = EducationInstance.setUserId(this.userId);
 
 		try {
-			let education_result = await EducationInstance.getEducation(userId);
+			let education_result = await EducationInstance.getEducation(this.userId);
+
+			console.log("Freelancer Education : ");
+			console.log(education_result);
 
 			return education_result;
 		} catch (error) {
@@ -35,11 +58,14 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Inquiry Freelancer SKills
-	async getSkill(userId) {
-		let SP = `select skills from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';`;
+	async getSkill() {
+		let SP = `select skills from public.freelancer where user_id = '${this.userId}' or freelancer_id = '${this.userId}';`;
 
 		try {
 			let result = await db.any(SP);
+
+			console.log("Freelancer Skills : ");
+			console.log(result);
 
 			return result[0].skills;
 		} catch (error) {
@@ -48,15 +74,18 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Inquiry Freelancer CV
-	async getCV(userId) {
+	async getCV() {
 		let SP = `
-    select cv as cv_url from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';
+    select cv as cv_url from public.freelancer where user_id = '${this.userId}' or freelancer_id = '${this.userId}';
     `;
 
 		try {
 			let result = await db.any(SP);
 
 			if (result[0].cv_url.length > 1) {
+				console.log("Freelancer CV : ");
+				console.log(result);
+
 				return Google.getPreviewLink(result[0].cv_url);
 			} else {
 				return null;
@@ -67,15 +96,18 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Inquiry Freelancer Portfolio
-	async getPortfolio(userId) {
+	async getPortfolio() {
 		let SP = `
-    select portfolio as portfolio_url from public.freelancer where user_id = '${userId}' or freelancer_id = '${userId}';
+    select portfolio as portfolio_url from public.freelancer where user_id = '${this.userId}' or freelancer_id = '${this.userId}';
     `;
 
 		try {
 			let result = await db.any(SP);
 
 			if (result[0].portfolio_url.length > 1) {
+				console.log("Freelancer Portofolio : ");
+				console.log(result);
+
 				return Google.getPreviewLink(result[0].portfolio_url);
 			} else {
 				return null;
@@ -87,15 +119,15 @@ module.exports = class Freelancer extends User {
 
 	// Inquiry Freelancer Owned Service
 	// rewrite buat get service dari service model terus di hit dari sini
-	async getOwnedService(userId) {
+	async getFreelancerService() {
 		let SPGetService = `select s.service_id as id, s.images as image_url, s.name, s.tags, s.price, s.working_time from public.service s 
 			join 
 			public.freelancer f 
 			on 
 			f.freelancer_id = s.freelancer_id
 			where 
-			f.user_id = '${userId}'
-			or f.freelancer_id = '${userId}'
+			f.user_id = '${this.userId}'
+			or f.freelancer_id = '${this.userId}'
 			and s.is_active = true; 
 		`;
 
@@ -110,9 +142,9 @@ module.exports = class Freelancer extends User {
 			public.freelancer f
 			on
 			c.client_id = f.user_id
-			where client_id = '${userId}'
+			where client_id = '${this.userId}'
 			or 
-			f.freelancer_id = '${userId}';
+			f.freelancer_id = '${this.userId}';
 		`;
 
 		try {
@@ -139,7 +171,7 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Inquiry Project History
-	async getProjectHistory(userId) {
+	async getProjectHistory() {
 		let result = {};
 
 		let transactionInstance = new Transaction();
@@ -153,7 +185,7 @@ module.exports = class Freelancer extends User {
 			where
 			destination_id 
 			=
-			'${userId}'
+			'${this.userId}'
 			or
 			destination_id
 			in
@@ -163,7 +195,7 @@ module.exports = class Freelancer extends User {
 				from
 				public.service
 				where
-				freelancer_id = '${userId}'
+				freelancer_id = '${this.userId}'
 				or
 				freelancer_id = (
 					select 
@@ -171,7 +203,7 @@ module.exports = class Freelancer extends User {
 					from
 					public.freelancer f
 					where
-					f.user_id = '${userId}'
+					f.user_id = '${this.userId}'
 				)
 			)
 			or 
@@ -181,7 +213,7 @@ module.exports = class Freelancer extends User {
 				from
 				public.freelancer
 				where
-				user_id = '${userId}'
+				user_id = '${this.userId}'
 			)
 			`;
 
@@ -195,7 +227,7 @@ module.exports = class Freelancer extends User {
 			where
 			destination_id 
 			=
-			'${userId}'
+			'${this.userId}'
 			or
 			destination_id
 			in
@@ -205,7 +237,7 @@ module.exports = class Freelancer extends User {
 				from
 				public.service
 				where
-				freelancer_id = '${userId}'
+				freelancer_id = '${this.userId}'
 				or
 				freelancer_id = (
 					select 
@@ -213,7 +245,7 @@ module.exports = class Freelancer extends User {
 					from
 					public.freelancer f
 					where
-					f.user_id = '${userId}'
+					f.user_id = '${this.userId}'
 				)
 			)
 			or 
@@ -223,14 +255,14 @@ module.exports = class Freelancer extends User {
 				from
 				public.freelancer
 				where
-				user_id = '${userId}'
+				user_id = '${this.userId}'
 			)
 			`;
 
 			let sp2_result = await db.any(SP2);
 
 			let project_result =
-				await transactionInstance.getFreelancerProjectByUserId(userId);
+				await transactionInstance.getFreelancerProjectByUserId(this.userId);
 
 			// console.log(project_result);
 
@@ -238,6 +270,7 @@ module.exports = class Freelancer extends User {
 			result.project_amount = sp2_result[0].count;
 			result.project_list = project_result;
 
+			console.log("Freelancer Project History");
 			console.log(result);
 
 			return result;
@@ -247,8 +280,8 @@ module.exports = class Freelancer extends User {
 	}
 
 	//Edit Freelancer Description
-	async editDescription(userId, description) {
-		let SP = `UPDATE public.freelancer set description = '${description}' where user_id = '${userId}' or freelancer_id = '${userId}';`;
+	async editDescription(desc) {
+		let SP = `UPDATE public.freelancer set description = '${desc}' where user_id = '${this.userId}' or freelancer_id = '${this.userId}';`;
 
 		try {
 			let result = await db.any(SP);
@@ -260,15 +293,13 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Edit Freelancer Education
-	async editFreelancerEducation(userId, education) {
+	async editEducation(education) {
 		console.log("edit freelancer education");
 		let EducationInstance = new Education();
+		let set_result = EducationInstance.setUserId(this.userId);
 
 		try {
-			let education_result = await EducationInstance.editEducation(
-				userId,
-				education
-			);
+			let education_result = await EducationInstance.editEducation(education);
 
 			return education_result;
 		} catch (error) {
@@ -277,15 +308,15 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Edit Freelancer Skills
-	async editFreelancerSkills(userId, skill) {
+	async editSkill(skills) {
 		let SP = `
 		UPDATE  
 		public.freelancer 
 		set
-		skills = '${skill}'
+		skills = '${skills}'
 		where
-		user_id = '${userId}'
-		or freelancer_id = '${userId}'
+		user_id = '${this.userId}'
+		or freelancer_id = '${this.userId}'
 		`;
 
 		try {
@@ -298,15 +329,15 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Edit Freelancer CV
-	async editFreelancerCV(userId, cv_url) {
+	async editCV(cvUrl) {
 		let SP = `
 		update 
 		public.freelancer
 		set 
-		cv = '${cv_url}'
+		cv = '${cvUrl}'
 		where
-		user_id = '${userId}'
-		or freelancer_id = '${userId}';`;
+		user_id = '${this.userId}'
+		or freelancer_id = '${this.userId}';`;
 
 		//console.log(SP);
 
@@ -319,15 +350,15 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Edit Freelancer Portfolio
-	async editFreelancerPortfolio(userId, portfolio_url) {
+	async editPortfolio(portUrl) {
 		let SP = `
 		update 
 		public.freelancer
 		set 
-		portfolio = '${portfolio_url}'
+		portfolio = '${portUrl}'
 		where
-		user_id = '${userId}'
-		or freelancer_id = '${userId}';`;
+		user_id = '${this.userId}'
+		or freelancer_id = '${this.userId}';`;
 
 		//console.log(SP);
 
@@ -415,9 +446,9 @@ module.exports = class Freelancer extends User {
 		return link;
 	}
 
-	async removeEducation(userId) {
+	async removeEducation() {
 		console.log("remove old education");
-		let SP = `DELETE FROM public.education WHERE freelancer_id = (select freelancer_id from public.freelancer where user_id = '${userId}') or freelancer_id = '${userId}';`;
+		let SP = `DELETE FROM public.education WHERE freelancer_id = (select freelancer_id from public.freelancer where user_id = '${this.userId}') or freelancer_id = '${this.userId}';`;
 		try {
 			let result = await db.any(SP);
 			return result;
@@ -427,7 +458,7 @@ module.exports = class Freelancer extends User {
 	}
 
 	// Register As Freelancer
-	async register(data, cv_url, port_url, userId) {
+	async register(data, cv_url, port_url) {
 		// manggil freelancer buat create freelancer instance
 
 		let freelancerInstance = new Freelancer();
@@ -436,7 +467,7 @@ module.exports = class Freelancer extends User {
 		let skills = data.skills.toString();
 		// console.log(skills);
 		let create_result = await freelancerInstance.createFreelancer(
-			userId,
+			this.userId,
 			data.description,
 			cv_url,
 			port_url,
@@ -451,7 +482,7 @@ module.exports = class Freelancer extends User {
 		data.education_history.forEach(async (ed) => {
 			//console.log("Insert ED");
 			let education_result = await freelancerInstance.insertFreelancerEducation(
-				userId,
+				this.userId,
 				ed
 			);
 

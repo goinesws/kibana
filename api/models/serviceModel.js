@@ -10,7 +10,30 @@ const Payment = require("../models/paymentModel.js");
 const { v4: uuidv4 } = require("uuid");
 
 class Service {
-	constructor() {}
+	service_id;
+	subcategory_id;
+	freelancer_id;
+	name;
+	description;
+	tags;
+	price;
+	working_time;
+	images;
+	revision_count;
+	is_active;
+	created_date;
+
+	async setServiceId(service_id) {
+		this.service_id = service_id;
+	}
+
+	async getServiceId() {
+		return this.service_id;
+	}
+
+	async getService() {
+		return this;
+	}
 
 	async getAllServiceDetail(service_id) {
 		try {
@@ -54,9 +77,9 @@ class Service {
 	}
 
 	// Utilities
-	async getServiceOwner(service_id) {
+	async getServiceOwner() {
 		try {
-			var SP = `select freelancer_id from service where service_id = '${service_id}'`;
+			var SP = `select freelancer_id from service where service_id = '${this.service_id}'`;
 			const result = await db.any(SP);
 			//console.log(result[0].freelancer_id);
 			return result[0].freelancer_id;
@@ -66,7 +89,7 @@ class Service {
 	}
 
 	// Inquiry Layanan Baru
-	async getNewService(category_id) {
+	async getNewServiceByCategory(categoryId) {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
             jsonb_build_object('profile_image_url', client.profile_image, 'name', client.name) as freelancer,
@@ -88,7 +111,7 @@ class Service {
                             service.freelancer_id = freelancer.freelancer_id
             inner join client on
                             freelancer.user_id = client.client_id
-            where category.category_id = '${category_id}'
+            where category.category_id = '${categoryId}'
             and service.is_active = true
             ORDER BY
             service.created_date DESC
@@ -101,7 +124,7 @@ class Service {
 	}
 
 	// Inquiry Layanan Baru
-	async getNewServiceNoCat(category_id) {
+	async getNewService() {
 		try {
 			var SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
             jsonb_build_object('profile_image_url', client.profile_image, 'name', client.name) as freelancer,
@@ -130,7 +153,7 @@ class Service {
 		}
 	}
 
-	// ?? dipake ato engga
+	// Get Service By Category
 	async getServiceByCategory(category_id) {
 		try {
 			var SP = `select service_id as id, service.name, service.description as desc, images as image_url from service
@@ -145,11 +168,11 @@ class Service {
 	}
 
 	// Inquiry List Layanan
-	async getServiceList(body) {
-		const searchText = body["search_text"];
-		const subcategory = body["sub_category"];
-		const budget = body["budget"];
-		const workingTime = body["working_time"];
+	async getServiceList(filter) {
+		const searchText = filter["search_text"];
+		const subcategory = filter["sub_category"];
+		const budget = filter["budget"];
+		const workingTime = filter["working_time"];
 
 		let SP = `SELECT service_id as id, images as image_url, service.name, service.is_active,
         jsonb_build_object('profile_image_url', client.profile_image, 'name', client.name) as freelancer,
@@ -255,7 +278,7 @@ class Service {
 	}
 
 	// Inquiry Detail Layanan
-	async getServiceDetail(service_id) {
+	async getServiceDetail() {
 		try {
 			let result = {};
 			var SP = `select service.service_id as id,
@@ -278,7 +301,7 @@ class Service {
             JOIN 
               requirement on additionalInfo.additional_info_id = requirement.additional_info_id
             WHERE 
-              requirement.service_id = '${service_id}'
+              requirement.service_id = '${this.service_id}'
             ) AS additional_info,
             service.description
             FROM service
@@ -287,7 +310,7 @@ class Service {
             JOIN
               additionalInfo on requirement.additional_info_id = requirement.additional_info_id
             WHERE
-              service.service_id = '${service_id}'
+              service.service_id = '${this.service_id}'
             GROUP BY 
               service.service_id`;
 			console.log(SP);
@@ -306,9 +329,9 @@ class Service {
       join
       service on service.freelancer_id = freelancer.freelancer_id
       where
-      service.service_id = '${service_id}';
+      service.service_id = '${this.service_id}';
       `;
-			
+
 			let fl_result = await db.any(SP1);
 
 			let SP2 = `
@@ -336,7 +359,7 @@ class Service {
                   review.destination_id = service.service_id
                 ) AS review_list
             FROM service
-        WHERE service_id = '${service_id}'
+        WHERE service_id = '${this.service_id}'
         ORDER BY service.created_date DESC
       `;
 
@@ -526,7 +549,7 @@ class Service {
 	}
 
 	// Inquiry Detail Layanan Saya
-	async getOwnedServiceDetail(service_id) {
+	async getOwnedServiceDetail() {
 		try {
 			var SP = `SELECT
       service.service_id AS id,
@@ -567,9 +590,9 @@ class Service {
   FROM service
   LEFT JOIN review on service.service_id = review.destination_id
   LEFT JOIN client on client.client_id = review.writer_id
-  WHERE service.service_id = '${service_id}'
+  WHERE service.service_id = '${this.service_id}'
   GROUP BY service.service_id`;
-  console.log(SP)
+			console.log(SP);
 			const result = await db.any(SP);
 			return result[0];
 		} catch (error) {
@@ -578,7 +601,7 @@ class Service {
 	}
 
 	// Inquiry Pesanan Saya
-	async getOwnedServiceOrders(service_id) {
+	async getOwnedServiceOrders() {
 		try {
 			var SP = `SELECT 
 			transaction.transaction_id as id,
@@ -616,8 +639,8 @@ class Service {
 				  END as review
 		  FROM transaction
 		  JOIN client ON transaction.client_id = client.client_id
-		  WHERE transaction.project_id = '${service_id}';`;
-			console.log(SP)
+		  WHERE transaction.project_id = '${this.service_id}';`;
+			console.log(SP);
 			const result = await db.any(SP);
 			return result;
 		} catch (error) {
@@ -626,11 +649,11 @@ class Service {
 	}
 
 	// Non-Active Layanan
-	async deactivateService(service_id) {
+	async deactivateService() {
 		try {
 			var SP = `update service
       set is_active = FALSE
-      where service_id = '${service_id}';`;
+      where service_id = '${this.service_id}';`;
 			const result = await db.any(SP);
 			return "Successfully deactivated service";
 		} catch (error) {
@@ -639,7 +662,7 @@ class Service {
 	}
 
 	// Activate Layanan
-	async activateService(service_id) {
+	async activateService() {
 		try {
 			let SPC = `
         select 
@@ -647,7 +670,7 @@ class Service {
         from 
         public.service
         where
-        service_id = '${service_id}'
+        service_id = '${this.service_id}'
       `;
 
 			let check_result = await db.any(SPC);
@@ -665,7 +688,7 @@ class Service {
         SET
         is_active = true
         where
-        service_id = '${service_id}'
+        service_id = '${this.service_id}'
       `;
 
 			let result = await db.any(SP);
@@ -677,10 +700,10 @@ class Service {
 	}
 
 	// Delete Layanan
-	async deleteService(service_id) {
+	async deleteService() {
 		try {
 			var SP = `delete from service
-      where service_id = '${service_id}';`;
+      where service_id = '${this.service_id}';`;
 			const result = await db.any(SP);
 			return "Successfully deleted service";
 		} catch (error) {
@@ -689,7 +712,7 @@ class Service {
 	}
 
 	// Inquiry Riwayat Layanan
-	async getClientServiceHistory(client_id) {
+	async getServiceHistory(client_id) {
 		try {
 			var SP = `SELECT 
 			service.service_id as id,
@@ -750,7 +773,7 @@ class Service {
 	}
 
 	// Request Token Service
-	async getServiceToken(service_id, client_id) {
+	async getServiceToken(client_id) {
 		try {
 			let SPCB = `
 				select 
@@ -784,7 +807,7 @@ class Service {
         from
         public.service
         where
-        service_id = '${service_id}'
+        service_id = '${this.service_id}'
       `;
 
 			let service_result = await db.any(SP1);
@@ -813,7 +836,7 @@ class Service {
 
 			let paymentInstance = new Payment();
 			let result = await paymentInstance.createPayment(
-				service_id,
+				this.service_id,
 				"SERVICE",
 				price,
 				client,
