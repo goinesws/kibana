@@ -347,6 +347,7 @@ app.getClientTransactionActivity = async (req, res) => {
 	if (curr_session.session_id == x_token && x_token) {
 		let transaction_id = req.params.transactionId;
 		let transactionInstance = new Transaction();
+		let set_result = transactionInstance.setTransactionId(transaction_id);
 		let transaction_client = await transactionInstance.getTransactionClient();
 		if (transaction_client.username == curr_session.session_data.username) {
 			let client_id = curr_session.session_data.client_id;
