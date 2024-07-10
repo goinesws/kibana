@@ -308,7 +308,7 @@ module.exports = class Transaction {
 		FROM
 			public.transaction tr
 		WHERE
-			transaction_id = '${this.transaction_id}'
+			tr.transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -418,7 +418,7 @@ module.exports = class Transaction {
         from
         public.transaction tr
         where
-        transaction_id = '${this.transaction_id}'
+        tr.transaction_id = '${this.transaction_id}'
         limit 1
         `;
 
@@ -524,7 +524,7 @@ module.exports = class Transaction {
         from
         public.transaction trx
         where
-        transaction_id = '${this.transaction_id}'
+        trx.transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -621,7 +621,7 @@ module.exports = class Transaction {
         from
         public.transaction trx
         where
-        transaction_id = '${this.transaction_id}'
+        trx.transaction_id = '${this.transaction_id}'
         `;
 
 		try {
@@ -653,6 +653,7 @@ module.exports = class Transaction {
 			);
 
 			let result = await activityInstance.getFreelancerActivity(
+				this.transaction_id,
 				this.freelancer_id
 			);
 
@@ -671,7 +672,10 @@ module.exports = class Transaction {
 			let set_result = await activityInstance.setTransactionId(
 				this.transaction_id
 			);
-			let result = await activityInstance.getClientActivity(this.client_id);
+			let result = await activityInstance.getClientActivity(
+				this.transaction_id,
+				this.client_id
+			);
 
 			// Map Files dari Result
 
